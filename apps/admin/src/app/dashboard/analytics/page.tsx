@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts'
+import type { BarProps } from 'recharts'
 import CrestLoader from '@/components/CrestLoader'
 import { useSearchParams } from 'next/navigation'
 
@@ -325,13 +326,12 @@ export default function AnalyticsPage() {
     return <CrestLoader label="Loading analytics..." />
   }
 
-  const ShieldBar = ({ x = 0, y = 0, width = 0, height = 0, fill = '#c9a227' }: {
-    x?: number
-    y?: number
-    width?: number
-    height?: number
-    fill?: string
-  }) => {
+  const ShieldBar = (props: BarProps) => {
+    const x = typeof props.x === 'number' ? props.x : 0
+    const y = typeof props.y === 'number' ? props.y : 0
+    const width = typeof props.width === 'number' ? props.width : 0
+    const height = typeof props.height === 'number' ? props.height : 0
+    const fill = typeof props.fill === 'string' ? props.fill : '#c9a227'
     const radius = Math.min(10, width / 2)
     const taper = Math.max(6, Math.min(width * 0.22, 14))
     const bottomY = y + height

@@ -27,6 +27,17 @@ body {
   overflow-x: hidden;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #1c2736, #2f4159, #f2b34a);
+  z-index: 3;
+}
+
 .noise {
   position: fixed;
   inset: 0;

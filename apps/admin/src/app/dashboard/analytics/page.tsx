@@ -577,7 +577,12 @@ export default function AnalyticsPage() {
                   tickLine={false}
                 />
                 <YAxis tickFormatter={(v) => v.toLocaleString()} tick={{ fontSize: 11, fill: '#1a1a2e' }} axisLine={false} tickLine={false} />
-                <Tooltip formatter={(value: number) => [value.toLocaleString(), 'Points']} />
+                <Tooltip
+                  formatter={(value) => [
+                    typeof value === 'number' ? value.toLocaleString() : `${value ?? 0}`,
+                    'Points',
+                  ]}
+                />
                 <Bar dataKey="points" shape={ShieldBar}>
                   {houseChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -606,7 +611,12 @@ export default function AnalyticsPage() {
                   tickLine={false}
                 />
                 <YAxis tickFormatter={(v) => v.toLocaleString()} tick={{ fontSize: 11, fill: '#1a1a2e' }} axisLine={false} tickLine={false} />
-                <Tooltip formatter={(value: number) => [value.toLocaleString(), 'Points']} />
+                <Tooltip
+                  formatter={(value) => [
+                    typeof value === 'number' ? value.toLocaleString() : `${value ?? 0}`,
+                    'Points',
+                  ]}
+                />
                 <Bar dataKey="points" shape={ShieldBar}>
                   {categoryChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

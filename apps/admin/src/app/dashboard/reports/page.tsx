@@ -303,8 +303,8 @@ export default function ReportsPage() {
   const generateReport = async (template: ReportTemplate, format: 'CSV' | 'PDF') => {
     setIsGenerating(`${template.id}-${format}`)
     try {
-      const isEntryInMonth = (timestamp: string, monthKey: string) => {
-        const date = new Date(timestamp || '')
+    const isEntryInMonth = (timestamp: string | number | null | undefined, monthKey: string) => {
+      const date = new Date(timestamp ?? '')
         if (!Number.isFinite(date.getTime())) return false
         const entryMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
         return entryMonth === monthKey

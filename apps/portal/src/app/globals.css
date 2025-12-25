@@ -184,7 +184,7 @@ h1, h2, h3 {
 /* Auth page styles */
 .auth-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e, #16162a 45%, #0f0f1a);
+  background: linear-gradient(135deg, #2c3550, #232b42 45%, #1a2033);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -203,7 +203,7 @@ h1, h2, h3 {
   position: absolute;
   width: 360px;
   height: 360px;
-  opacity: 0.06;
+  opacity: 0.04;
   color: var(--gold);
 }
 
@@ -233,13 +233,13 @@ h1, h2, h3 {
 }
 
 .auth-orb-purple {
-  background: #2f0a61;
+  background: #3a4b7a;
   top: 20%;
   left: 20%;
 }
 
 .auth-orb-gold {
-  background: #c9a227;
+  background: #d6b15a;
   bottom: 20%;
   right: 20%;
   opacity: 0.18;
@@ -261,11 +261,11 @@ h1, h2, h3 {
 }
 
 .auth-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
   backdrop-filter: blur(20px);
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.28);
   overflow: hidden;
   padding: 32px 28px 28px;
   color: #fff;

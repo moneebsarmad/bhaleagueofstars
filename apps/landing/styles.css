@@ -1,12 +1,12 @@
 :root {
-  --ink: #0f1a2b;
-  --ink-soft: #2d3d55;
-  --cream: #f6f0e6;
-  --sun: #f4c95d;
-  --sky: #8cc6ff;
-  --coral: #f28c79;
-  --mint: #82d1c9;
-  --shadow: rgba(15, 26, 43, 0.15);
+  --ink: #1f2a3d;
+  --ink-soft: #3b4b63;
+  --cream: #f6efe3;
+  --sun: #f2b34a;
+  --sky: #7fa4c8;
+  --coral: #e7c391;
+  --mint: #d9e5f2;
+  --shadow: rgba(31, 42, 61, 0.15);
 }
 
 * {
@@ -18,9 +18,9 @@ body {
   font-family: "Source Sans 3", "Segoe UI", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, #fff7e1, transparent 55%),
-    radial-gradient(circle at 20% 80%, #e6f3ff, transparent 45%),
-    linear-gradient(160deg, #fef9f2 0%, #f7f1e7 40%, #f5eee4 100%);
+    radial-gradient(circle at top left, #fff2d6, transparent 55%),
+    radial-gradient(circle at 20% 80%, #e7f0f8, transparent 45%),
+    linear-gradient(160deg, #faf4e9 0%, #f6efe3 40%, #f2eadb 100%);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -185,7 +185,7 @@ body {
 }
 
 .apps {
-  background: linear-gradient(120deg, rgba(140, 198, 255, 0.25), rgba(255, 255, 255, 0.5));
+  background: linear-gradient(120deg, rgba(127, 164, 200, 0.2), rgba(242, 179, 74, 0.12));
   border-top: 1px solid rgba(255, 255, 255, 0.8);
   border-bottom: 1px solid rgba(255, 255, 255, 0.8);
 }
@@ -248,7 +248,7 @@ body {
 }
 
 .vision-panel {
-  background: linear-gradient(150deg, #fff, #fdf2e2);
+  background: linear-gradient(150deg, #fff, #fbf1df);
   border-radius: 24px;
   padding: 26px;
   box-shadow: 0 20px 40px rgba(15, 26, 43, 0.12);
@@ -271,14 +271,14 @@ body {
 }
 
 .pill-list span {
-  background: rgba(130, 209, 201, 0.25);
+  background: rgba(242, 179, 74, 0.18);
   padding: 8px 14px;
   border-radius: 999px;
   font-size: 0.9rem;
 }
 
 .team {
-  background: linear-gradient(180deg, rgba(242, 140, 121, 0.12), rgba(255, 255, 255, 0.6));
+  background: linear-gradient(180deg, rgba(242, 179, 74, 0.12), rgba(255, 255, 255, 0.6));
 }
 
 .team-grid {
@@ -307,7 +307,7 @@ body {
 }
 
 .contact-card {
-  background: linear-gradient(120deg, rgba(244, 201, 93, 0.3), rgba(140, 198, 255, 0.2));
+  background: linear-gradient(120deg, rgba(242, 179, 74, 0.3), rgba(127, 164, 200, 0.25));
   border-radius: 28px;
   padding: 32px;
   display: flex;

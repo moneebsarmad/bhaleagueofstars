@@ -3,7 +3,7 @@
   --ink-soft: #3b4b63;
   --cream: #f6efe3;
   --sun: #f2b34a;
-  --sky: #7fa4c8;
+  --sky: #2f4159;
   --coral: #e7c391;
   --mint: #d9e5f2;
   --shadow: rgba(31, 42, 61, 0.15);
@@ -19,7 +19,8 @@ body {
   color: var(--ink);
   background:
     radial-gradient(circle at top left, #fff2d6, transparent 55%),
-    radial-gradient(circle at 20% 80%, #e7f0f8, transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(47, 65, 89, 0.18), transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(47, 65, 89, 0.12), transparent 45%),
     linear-gradient(160deg, #faf4e9 0%, #f6efe3 40%, #f2eadb 100%);
   min-height: 100vh;
   position: relative;
@@ -111,14 +112,14 @@ body {
 }
 
 .btn.primary {
-  background: var(--ink);
+  background: var(--sky);
   color: #fff;
   box-shadow: 0 10px 20px var(--shadow);
 }
 
 .btn.ghost {
-  border-color: var(--ink);
-  color: var(--ink);
+  border-color: var(--sky);
+  color: var(--sky);
   background: rgba(255, 255, 255, 0.6);
 }
 
@@ -185,7 +186,7 @@ body {
 }
 
 .apps {
-  background: linear-gradient(120deg, rgba(127, 164, 200, 0.2), rgba(242, 179, 74, 0.12));
+  background: linear-gradient(120deg, rgba(47, 65, 89, 0.22), rgba(242, 179, 74, 0.14));
   border-top: 1px solid rgba(255, 255, 255, 0.8);
   border-bottom: 1px solid rgba(255, 255, 255, 0.8);
 }
@@ -307,7 +308,7 @@ body {
 }
 
 .contact-card {
-  background: linear-gradient(120deg, rgba(242, 179, 74, 0.3), rgba(127, 164, 200, 0.25));
+  background: linear-gradient(120deg, rgba(242, 179, 74, 0.3), rgba(47, 65, 89, 0.22));
   border-radius: 28px;
   padding: 32px;
   display: flex;

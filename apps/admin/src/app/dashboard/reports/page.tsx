@@ -367,7 +367,7 @@ export default function ReportsPage() {
             houseTotals[house].students.add(`${m.student_name}|${m.grade || ''}|${m.section || ''}`)
           }
           if (m.staff_name) {
-            houseTotals[house].staff.add(m.staff_name)
+            houseTotals[house].staff.add(String(m.staff_name))
           }
         })
 
@@ -596,7 +596,7 @@ export default function ReportsPage() {
             studentSet.add(`${m.student_name}|${m.grade || ''}|${m.section || ''}`)
           }
           if (m.staff_name) {
-            staffSet.add(m.staff_name)
+            staffSet.add(String(m.staff_name))
           }
         })
 

@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+:root {
+  --background: #faf9f7;
+  --foreground: #1a1a2e;
+
+  /* Regal Color Palette */
+  --royal-purple: #2f0a61;
+  --royal-purple-light: #4a1a8a;
+  --gold: #c9a227;
+  --gold-light: #e8d48b;
+  --gold-dark: #9a7b1a;
+  --cream: #faf9f7;
+  --ivory: #f5f3ef;
+  --charcoal: #1a1a2e;
+
+  /* House Colors */
+  --house-abu-bakr: #2f0a61;
+  --house-khadijah: #055437;
+  --house-umar: #000068;
+  --house-aishah: #910000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-cinzel);
+  --font-display: var(--font-playfair);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), 'Cinzel', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Elegant headings */
+h1, h2, h3 {
+  font-family: var(--font-playfair), 'Playfair Display', Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+/* Gold accent underline */
+.gold-underline {
+  position: relative;
+}
+.gold-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
+  border-radius: 2px;
+}
+
+/* Regal card styling */
+.regal-card {
+  background: linear-gradient(180deg, #ffffff 0%, #faf9f7 100%);
+  border: 1px solid rgba(201, 162, 39, 0.15);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.regal-card:hover {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Elegant button */
+.btn-regal {
+  background: linear-gradient(180deg, var(--royal-purple-light) 0%, var(--royal-purple) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.2s ease;
+}
+
+.btn-regal:hover {
+  background: linear-gradient(180deg, var(--royal-purple) 0%, #220747 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Gold accent button */
+.btn-gold {
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Subtle pattern overlay */
+.pattern-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a227' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ivory);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #d4d0c8 0%, #b8b4ac 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #c9a227 0%, #9a7b1a 100%);
+}
+
+/* Table styling */
+.regal-table thead {
+  background: linear-gradient(180deg, #f8f6f2 0%, #f0ede6 100%);
+  border-bottom: 2px solid rgba(201, 162, 39, 0.2);
+}
+
+.regal-table th {
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b6b7b;
+}
+
+.regal-table tbody tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  transition: background 0.15s ease;
+}
+
+.regal-table tbody tr:hover {
+  background: rgba(201, 162, 39, 0.03);
+}
+
+/* Input styling */
+.regal-input {
+  background: white;
+  border: 1px solid #e5e2db;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.regal-input:focus {
+  border-color: var(--gold);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.04),
+    0 0 0 3px rgba(201, 162, 39, 0.1);
+  outline: none;
+}
+
+/* Badge styling */
+.badge-gold {
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+  color: #5c4a0f;
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  font-weight: 600;
+}

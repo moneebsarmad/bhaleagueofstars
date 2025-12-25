@@ -40,6 +40,11 @@ body {
   position: relative;
   padding: 40px 80px 120px;
   z-index: 1;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(242, 179, 74, 0.2), transparent 50%),
+    radial-gradient(circle at 80% 0%, rgba(217, 229, 242, 0.15), transparent 55%),
+    linear-gradient(145deg, #1c2736 0%, #24354b 60%, #2f4159 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nav {
@@ -52,17 +57,18 @@ body {
 .logo {
   font-weight: 600;
   letter-spacing: 0.02em;
+  color: #f7f1e7;
 }
 
 .nav-links a {
-  color: var(--ink-soft);
+  color: rgba(247, 241, 231, 0.8);
   text-decoration: none;
   margin-left: 28px;
   font-weight: 500;
 }
 
 .nav-links a:hover {
-  color: var(--ink);
+  color: #f7f1e7;
 }
 
 .hero-content {
@@ -78,19 +84,20 @@ body {
   font-size: clamp(2.6rem, 4vw, 4.2rem);
   line-height: 1.05;
   margin: 0 0 20px;
+  color: #f7f1e7;
 }
 
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.22em;
   font-size: 0.72rem;
-  color: var(--ink-soft);
+  color: rgba(247, 241, 231, 0.7);
   margin-bottom: 16px;
 }
 
 .lede {
   font-size: 1.1rem;
-  color: var(--ink-soft);
+  color: rgba(247, 241, 231, 0.78);
   line-height: 1.6;
   max-width: 560px;
 }
@@ -119,8 +126,8 @@ body {
 
 .btn.ghost {
   border-color: var(--sky);
-  color: var(--sky);
-  background: rgba(255, 255, 255, 0.6);
+  color: #f7f1e7;
+  background: rgba(28, 39, 54, 0.4);
 }
 
 .btn:hover {
@@ -129,7 +136,7 @@ body {
 }
 
 .hero-card {
-  background: #fff;
+  background: #f8f3ea;
   border-radius: 24px;
   padding: 28px;
   box-shadow: 0 20px 40px rgba(15, 26, 43, 0.12);

@@ -357,11 +357,11 @@ export default function AnalyticsPage() {
     )
   }
 
-  const renderTopLabel = (props: { x?: number | string; y?: number | string; width?: number | string; value?: number }) => {
-    const x = typeof props.x === 'number' ? props.x : 0
-    const y = typeof props.y === 'number' ? props.y : 0
-    const width = typeof props.width === 'number' ? props.width : 0
-    const value = typeof props.value === 'number' ? props.value : 0
+  const renderTopLabel = (props: any) => {
+    const x = typeof props?.x === 'number' ? props.x : 0
+    const y = typeof props?.y === 'number' ? props.y : 0
+    const width = typeof props?.width === 'number' ? props.width : 0
+    const value = typeof props?.value === 'number' ? props.value : 0
     return (
       <text x={x + width / 2} y={y - 8} textAnchor="middle" fill="#8a7a55" fontSize={11} fontWeight={600}>
         {value.toLocaleString()}

@@ -356,7 +356,7 @@ export default function ReportsPage() {
         const houseTotals: Record<string, { points: number; awards: number; students: Set<string>; staff: Set<string> }> = {}
 
         filtered.forEach((m) => {
-          const house = (m.house || '').trim()
+          const house = String(m.house ?? '').trim()
           if (!house) return
           if (!houseTotals[house]) {
             houseTotals[house] = { points: 0, awards: 0, students: new Set(), staff: new Set() }
@@ -532,7 +532,7 @@ export default function ReportsPage() {
           }
           const staff = m.staff_name || ''
           if (staff) staffPoints[staff] = (staffPoints[staff] || 0) + (Number(m.points) || 0)
-          const house = (m.house || '').trim()
+          const house = String(m.house ?? '').trim()
           if (house) housePoints[house] = (housePoints[house] || 0) + (Number(m.points) || 0)
         })
 
@@ -577,7 +577,7 @@ export default function ReportsPage() {
         const staffSet = new Set<string>()
 
         filtered.forEach((m) => {
-          const house = (m.house || '').trim()
+          const house = String(m.house ?? '').trim()
           if (house) houseTotals[house] = (houseTotals[house] || 0) + (Number(m.points) || 0)
           const grade = m.grade || ''
           const section = m.section || ''
@@ -937,7 +937,7 @@ export default function ReportsPage() {
     setIsGenerating(`house-${format}`)
     try {
       const data = await fetchAllMeritEntries()
-      const entries = data.filter((m) => isWithinRange(m.timestamp || '') && (m.house || '').trim() === selectedHouse)
+      const entries = data.filter((m) => isWithinRange(m.timestamp || '') && String(m.house ?? '').trim() === selectedHouse)
       const summary = buildSummary(entries)
       const rows = entries.map((entry) => ([
         entry.timestamp ? new Date(entry.timestamp).toLocaleDateString() : '',

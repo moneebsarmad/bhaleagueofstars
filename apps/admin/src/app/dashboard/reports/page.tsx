@@ -212,8 +212,8 @@ export default function ReportsPage() {
     printWindow.print()
   }
 
-  const getThreeRCategory = (value: string) => {
-    const raw = (value || '').toLowerCase()
+  const getThreeRCategory = (value: string | number | null | undefined) => {
+    const raw = `${value ?? ''}`.toLowerCase()
     if (raw.includes('respect')) return 'Respect'
     if (raw.includes('responsibility')) return 'Responsibility'
     if (raw.includes('righteousness')) return 'Righteousness'

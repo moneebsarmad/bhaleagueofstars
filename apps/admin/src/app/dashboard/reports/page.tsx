@@ -281,9 +281,9 @@ export default function ReportsPage() {
     `
   }
 
-  const isWithinRange = (timestamp: string) => {
+  const isWithinRange = (timestamp: string | number | null | undefined) => {
     if (!startDate && !endDate) return true
-    const date = new Date(timestamp)
+    const date = new Date(timestamp ?? '')
     if (!Number.isFinite(date.getTime())) return false
     if (startDate) {
       const start = new Date(`${startDate}T00:00:00`)

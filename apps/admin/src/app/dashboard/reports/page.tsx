@@ -322,7 +322,7 @@ export default function ReportsPage() {
           const grade = m.grade || ''
           const staff = m.staff_name || ''
           const category = getThreeRCategory(m.r || '')
-          const points = m.points || 0
+          const points = Number(m.points) || 0
           if (house) houseTotals[house] = (houseTotals[house] || 0) + points
           if (grade) gradeTotals[grade] = (gradeTotals[grade] || 0) + points
           if (staff) staffTotals[staff] = (staffTotals[staff] || 0) + points
@@ -361,7 +361,7 @@ export default function ReportsPage() {
           if (!houseTotals[house]) {
             houseTotals[house] = { points: 0, awards: 0, students: new Set(), staff: new Set() }
           }
-          houseTotals[house].points += m.points || 0
+          houseTotals[house].points += Number(m.points) || 0
           houseTotals[house].awards += 1
           if (m.student_name) {
             houseTotals[house].students.add(`${m.student_name}|${m.grade || ''}|${m.section || ''}`)
@@ -410,7 +410,7 @@ export default function ReportsPage() {
           const section = m.section || ''
           if (!grade || !section) return
           const key = `${grade}|${section}`
-          sectionTotals[key] = (sectionTotals[key] || 0) + (m.points || 0)
+          sectionTotals[key] = (sectionTotals[key] || 0) + (Number(m.points) || 0)
         })
 
         const rows = Object.entries(sectionTotals)
@@ -445,8 +445,8 @@ export default function ReportsPage() {
         filtered.forEach((m) => {
           const category = getThreeRCategory(m.r || '')
           const subcategory = m.subcategory || ''
-          if (category) categoryTotals[category] = (categoryTotals[category] || 0) + (m.points || 0)
-          if (subcategory) subcategoryTotals[subcategory] = (subcategoryTotals[subcategory] || 0) + (m.points || 0)
+          if (category) categoryTotals[category] = (categoryTotals[category] || 0) + (Number(m.points) || 0)
+          if (subcategory) subcategoryTotals[subcategory] = (subcategoryTotals[subcategory] || 0) + (Number(m.points) || 0)
         })
 
         const rows = [
@@ -488,7 +488,7 @@ export default function ReportsPage() {
             m.grade || '',
             m.section || '',
             m.house || '',
-            m.points || 0,
+            Number(m.points) || 0,
             m.staff_name || '',
             getThreeRCategory(m.r || ''),
             m.subcategory || '',
@@ -528,12 +528,12 @@ export default function ReportsPage() {
             if (!studentPoints[key]) {
               studentPoints[key] = { name: student, points: 0 }
             }
-            studentPoints[key].points += m.points || 0
+            studentPoints[key].points += Number(m.points) || 0
           }
           const staff = m.staff_name || ''
-          if (staff) staffPoints[staff] = (staffPoints[staff] || 0) + (m.points || 0)
+          if (staff) staffPoints[staff] = (staffPoints[staff] || 0) + (Number(m.points) || 0)
           const house = (m.house || '').trim()
-          if (house) housePoints[house] = (housePoints[house] || 0) + (m.points || 0)
+          if (house) housePoints[house] = (housePoints[house] || 0) + (Number(m.points) || 0)
         })
 
         const topStudents = Object.values(studentPoints).sort((a, b) => b.points - a.points).slice(0, 5)
@@ -578,19 +578,19 @@ export default function ReportsPage() {
 
         filtered.forEach((m) => {
           const house = (m.house || '').trim()
-          if (house) houseTotals[house] = (houseTotals[house] || 0) + (m.points || 0)
+          if (house) houseTotals[house] = (houseTotals[house] || 0) + (Number(m.points) || 0)
           const grade = m.grade || ''
           const section = m.section || ''
           if (grade && section) {
             const key = `Grade ${grade}${section}`
-            sectionTotals[key] = (sectionTotals[key] || 0) + (m.points || 0)
+            sectionTotals[key] = (sectionTotals[key] || 0) + (Number(m.points) || 0)
           }
           const category = getThreeRCategory(m.r || '')
-          if (category) categoryTotals[category] = (categoryTotals[category] || 0) + (m.points || 0)
+          if (category) categoryTotals[category] = (categoryTotals[category] || 0) + (Number(m.points) || 0)
           const date = new Date(m.timestamp || '')
           if (Number.isFinite(date.getTime())) {
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-            monthlyTotals[monthKey] = (monthlyTotals[monthKey] || 0) + (m.points || 0)
+            monthlyTotals[monthKey] = (monthlyTotals[monthKey] || 0) + (Number(m.points) || 0)
           }
           if (m.student_name) {
             studentSet.add(`${m.student_name}|${m.grade || ''}|${m.section || ''}`)
@@ -617,7 +617,7 @@ export default function ReportsPage() {
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([label, value]) => ({ label, value }))
 
-        const totalPoints = filtered.reduce((sum, m) => sum + (m.points || 0), 0)
+        const totalPoints = filtered.reduce((sum, m) => sum + (Number(m.points) || 0), 0)
         const totalAwards = filtered.length
         const uniqueStudents = studentSet.size
         const activeStaff = staffSet.size
@@ -741,7 +741,7 @@ export default function ReportsPage() {
             staffPoints[staff] = 0
             staffWeeks[staff] = new Set()
           }
-          staffPoints[staff] += m.points || 0
+          staffPoints[staff] += Number(m.points) || 0
           staffWeeks[staff].add(weekKey(date))
         })
 

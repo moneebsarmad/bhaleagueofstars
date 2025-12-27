@@ -215,25 +215,37 @@ export default function AddPointsClient() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Add Points</h1>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+          Add Points
+        </h1>
+        <div className="flex items-center gap-3">
+          <div className="h-1 w-16 bg-gradient-to-r from-[#c9a227] to-[#e8d48b] rounded-full"></div>
+          <p className="text-[#1a1a2e]/50 text-sm font-medium">Award merit points to students</p>
+        </div>
+      </div>
 
       {showSuccess && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
-          <span className="text-xl">✓</span>
+        <div className="bg-[#055437]/10 border border-[#055437]/20 text-[#055437] px-5 py-4 rounded-xl mb-6 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-[#055437] flex items-center justify-center">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
           <span className="font-medium">Points awarded successfully!</span>
         </div>
       )}
 
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold">1</span>
-          <h2 className="text-lg font-semibold text-gray-900">Select Student</h2>
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">1</span>
+          <h2 className="text-lg font-semibold text-[#1a1a2e]">Select Student</h2>
         </div>
 
         {selectedStudent ? (
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-4 p-4 bg-[#faf9f7] rounded-xl border border-[#c9a227]/10">
             <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold"
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold"
               style={{
                 backgroundColor: `${houseColors[selectedStudent.house]}20`,
                 color: houseColors[selectedStudent.house],
@@ -242,14 +254,14 @@ export default function AddPointsClient() {
               {getInitials(selectedStudent.name)}
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">{selectedStudent.name}</p>
-              <p className="text-sm text-gray-500">
+              <p className="font-medium text-[#1a1a2e]">{selectedStudent.name}</p>
+              <p className="text-sm text-[#1a1a2e]/50">
                 Grade {selectedStudent.grade}{selectedStudent.section} • {selectedStudent.house}
               </p>
             </div>
             <button
               onClick={() => setSelectedStudent(null)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-[#c9a227] hover:text-[#9a7b1a] font-medium text-sm transition-colors"
             >
               Change
             </button>
@@ -261,21 +273,23 @@ export default function AddPointsClient() {
               placeholder="Search for a student..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none mb-3"
+              className="w-full px-4 py-3 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none mb-3 transition-all"
             />
             {filteredStudents.length > 0 && (
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                {filteredStudents.map((student) => (
+              <div className="border border-[#1a1a2e]/10 rounded-xl overflow-hidden">
+                {filteredStudents.map((student, index) => (
                   <button
                     key={student.id}
                     onClick={() => {
                       setSelectedStudent(student)
                       setSearchText('')
                     }}
-                    className="w-full flex items-center gap-4 p-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                    className={`w-full flex items-center gap-4 p-3.5 hover:bg-[#faf9f7] transition-colors ${
+                      index !== filteredStudents.length - 1 ? 'border-b border-[#1a1a2e]/5' : ''
+                    }`}
                   >
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold"
                       style={{
                         backgroundColor: `${houseColors[student.house]}20`,
                         color: houseColors[student.house],
@@ -284,8 +298,8 @@ export default function AddPointsClient() {
                       {getInitials(student.name)}
                     </div>
                     <div className="text-left">
-                      <p className="font-medium text-gray-900">{student.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-[#1a1a2e]">{student.name}</p>
+                      <p className="text-sm text-[#1a1a2e]/50">
                         Grade {student.grade}{student.section} • {student.house?.replace('House of ', '')}
                       </p>
                     </div>
@@ -297,10 +311,10 @@ export default function AddPointsClient() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold">2</span>
-          <h2 className="text-lg font-semibold text-gray-900">Select Category</h2>
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">2</span>
+          <h2 className="text-lg font-semibold text-[#1a1a2e]">Select Category</h2>
         </div>
 
         <div className="space-y-3">
@@ -311,19 +325,23 @@ export default function AddPointsClient() {
                 setSelectedCategory(category)
                 setSelectedSubcategory(null)
               }}
-              className={`w-full flex items-center gap-4 p-4 rounded-lg border-2 transition-colors ${
+              className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
                 selectedCategory?.id === category.id
-                  ? 'border-green-500 bg-green-50'
-                  : 'border-gray-100 hover:border-gray-200'
+                  ? 'border-[#c9a227] bg-[#c9a227]/5'
+                  : 'border-[#1a1a2e]/10 hover:border-[#c9a227]/30'
               }`}
             >
               <span className="text-2xl">{category.icon}</span>
               <div className="text-left flex-1">
-                <p className="font-medium text-gray-900">{category.name}</p>
-                <p className="text-sm text-gray-500">{category.description}</p>
+                <p className="font-medium text-[#1a1a2e]">{category.name}</p>
+                <p className="text-sm text-[#1a1a2e]/50">{category.description}</p>
               </div>
               {selectedCategory?.id === category.id && (
-                <span className="text-green-500">✓</span>
+                <div className="w-6 h-6 rounded-full bg-[#c9a227] flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
               )}
             </button>
           ))}
@@ -331,10 +349,10 @@ export default function AddPointsClient() {
       </div>
 
       {selectedCategory && (
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold">3</span>
-            <h2 className="text-lg font-semibold text-gray-900">Select Reason</h2>
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">3</span>
+            <h2 className="text-lg font-semibold text-[#1a1a2e]">Select Reason</h2>
           </div>
 
           <div className="space-y-2">
@@ -342,19 +360,23 @@ export default function AddPointsClient() {
               <button
                 key={sub.id}
                 onClick={() => setSelectedSubcategory(sub)}
-                className={`w-full flex items-center gap-4 p-4 rounded-lg border-2 transition-colors ${
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
                   selectedSubcategory?.id === sub.id
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-100 hover:border-gray-200'
+                    ? 'border-[#c9a227] bg-[#c9a227]/5'
+                    : 'border-[#1a1a2e]/10 hover:border-[#c9a227]/30'
                 }`}
               >
                 <div className="text-left flex-1">
-                  <p className="font-medium text-gray-900">{sub.name}</p>
-                  <p className="text-sm text-gray-500">{sub.description}</p>
+                  <p className="font-medium text-[#1a1a2e]">{sub.name}</p>
+                  <p className="text-sm text-[#1a1a2e]/50">{sub.description}</p>
                 </div>
-                <span className="font-bold text-green-600">+{sub.points}</span>
+                <span className="font-bold text-[#055437]">+{sub.points}</span>
                 {selectedSubcategory?.id === sub.id && (
-                  <span className="text-green-500">✓</span>
+                  <div className="w-6 h-6 rounded-full bg-[#c9a227] flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                 )}
               </button>
             ))}
@@ -363,17 +385,17 @@ export default function AddPointsClient() {
       )}
 
       {selectedSubcategory && (
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold">4</span>
-            <h2 className="text-lg font-semibold text-gray-900">Add Notes (Optional)</h2>
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">4</span>
+            <h2 className="text-lg font-semibold text-[#1a1a2e]">Add Notes (Optional)</h2>
           </div>
 
           <textarea
             placeholder="Add any additional notes..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none"
+            className="w-full px-4 py-3 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none resize-none transition-all"
             rows={3}
           />
         </div>
@@ -383,7 +405,7 @@ export default function AddPointsClient() {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-medium hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+          className="w-full bg-gradient-to-r from-[#c9a227] to-[#9a7b1a] text-white py-4 px-6 rounded-xl font-medium hover:from-[#9a7b1a] hover:to-[#7a5f14] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
         >
           {isSubmitting ? (
             <>
@@ -393,7 +415,9 @@ export default function AddPointsClient() {
           ) : (
             <>
               <span>Award {selectedSubcategory.points} points to {selectedStudent.name}</span>
-              <span>→</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </>
           )}
         </button>

@@ -103,6 +103,9 @@ export default function ReportsPage() {
       .on('postgres_changes', { event: '*', schema: 'public', table: Tables.students }, () => {
         fetchStudents()
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.meritLog }, () => {
+        fetchStudents()
+      })
       .subscribe()
 
     return () => {

@@ -35,6 +35,59 @@ interface HallEntry {
   totalPoints: number
 }
 
+interface BadgeLeader {
+  quarter: string
+  category: string
+  gender: string
+  studentName: string
+  grade: number
+  totalPoints: number
+}
+
+interface BadgeWinnerEntry {
+  name: string
+  grade: number
+  categoryPoints: Record<string, number>
+}
+
+interface ApproachingRow {
+  tier: string
+  tier_points: number
+  student_name: string
+  grade: number
+  section: string
+  house: string
+  total_points: number
+  points_needed: number
+}
+
+interface ConsistencyEntry {
+  studentName: string
+  grade: number
+  section: string
+}
+
+interface RisingStarEntry {
+  studentName: string
+  grade: number
+  section: string
+  lastMonthPts: number
+  currentMonthPts: number
+  percentIncrease: number
+}
+
+interface HouseMvpEntry {
+  house: string
+  studentName: string
+  points: number
+}
+
+interface GradeChampionEntry {
+  grade: number
+  section: string
+  points: number
+}
+
 // Hall of Fame tiers
 const hallOfFameTiers = [
   { name: 'Century Club', points: 100, icon: '💯', color: 'from-[#6b4a1a] to-[#b08a2e]', view: 'century_club' },
@@ -49,6 +102,11 @@ const quarterlyBadges = [
   { name: 'The Light Bearer', category: 'Righteousness', icon: '🕯️', description: 'Most points in Righteousness category' },
 ]
 
+const quarterOptions = [
+  { id: 'q1', label: 'Q1 (Jan 6 – Mar 6)' },
+  { id: 'q2', label: 'Q2 (Mar 9 – May 21)' },
+] as const
+
 const houseLogos: Record<string, string> = {
   'House of Abū Bakr': '/houses/abu-bakr.png',
   'House of Khadījah': '/houses/khadijah.png',
@@ -60,21 +118,62 @@ export default function RewardsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [meritEntries, setMeritEntries] = useState<MeritEntry[]>([])
   const [hallOfFameEntries, setHallOfFameEntries] = useState<Record<string, HallEntry[]>>({})
+  const [badgeLeaders, setBadgeLeaders] = useState<BadgeLeader[]>([])
+  const [approachingRows, setApproachingRows] = useState<ApproachingRow[]>([])
+  const [consistencyLeaders, setConsistencyLeaders] = useState<ConsistencyEntry[]>([])
+  const [risingStarLeaders, setRisingStarLeaders] = useState<RisingStarEntry[]>([])
+  const [houseMvpLeaders, setHouseMvpLeaders] = useState<HouseMvpEntry[]>([])
+  const [gradeChampionLeaders, setGradeChampionLeaders] = useState<GradeChampionEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState<'hall-of-fame' | 'badges' | 'monthly' | 'approaching'>('hall-of-fame')
+  const [selectedQuarter, setSelectedQuarter] = useState<'q1' | 'q2'>(() => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const q1Start = new Date(year, 0, 6)
+    const q1End = new Date(year, 2, 6, 23, 59, 59, 999)
+    const q2Start = new Date(year, 2, 9)
+    const q2End = new Date(year, 4, 21, 23, 59, 59, 999)
+    if (today >= q1Start && today <= q1End) return 'q1'
+    if (today >= q2Start && today <= q2End) return 'q2'
+    return 'q2'
+  })
 
   useEffect(() => {
     fetchData()
   }, [])
 
   useEffect(() => {
+    fetchConsistencyCrown()
+    fetchRisingStars()
+    fetchHouseMvps()
+    fetchGradeChampions()
+    fetchApproachingMilestones()
+  }, [])
+
+  useEffect(() => {
+    fetchBadgeLeaders()
+  }, [selectedQuarter])
+
+  useEffect(() => {
     const channel = supabase
       .channel('rewards-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: Tables.students }, () => {
         fetchData()
+        fetchBadgeLeaders()
+        fetchConsistencyCrown()
+        fetchRisingStars()
+        fetchHouseMvps()
+        fetchGradeChampions()
+        fetchApproachingMilestones()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: Tables.meritLog }, () => {
         fetchData()
+        fetchBadgeLeaders()
+        fetchConsistencyCrown()
+        fetchRisingStars()
+        fetchHouseMvps()
+        fetchGradeChampions()
+        fetchApproachingMilestones()
       })
       .subscribe()
 
@@ -234,32 +333,172 @@ export default function RewardsPage() {
     }
   }
 
-  // Helper to get week key (year-week)
-  const getWeekKey = (date: Date): string => {
-    const year = date.getFullYear()
-    const startOfYear = new Date(year, 0, 1)
-    const days = Math.floor((date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
-    const week = Math.ceil((days + startOfYear.getDay() + 1) / 7)
-    return `${year}-W${String(week).padStart(2, '0')}`
+  const fetchBadgeLeaders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('quarterly_badge_leaderboard')
+        .select('*')
+        .eq('quarter', selectedQuarter)
+        .eq('rank', 1)
+
+      if (error) {
+        console.error('Error fetching quarterly badge leaders:', error)
+        setBadgeLeaders([])
+        return
+      }
+
+      const leaders: BadgeLeader[] = (data || []).map((row: Record<string, unknown>) => ({
+        quarter: String(row.quarter ?? ''),
+        category: String(row.category ?? ''),
+        gender: String(row.gender ?? ''),
+        studentName: String(row.student_name ?? row.studentName ?? ''),
+        grade: Number(row.grade ?? 0),
+        totalPoints: Number(row.total_points ?? row.totalPoints ?? 0),
+      }))
+
+      setBadgeLeaders(leaders)
+    } catch (error) {
+      console.error('Error fetching quarterly badge leaders:', error)
+      setBadgeLeaders([])
+    }
   }
 
-  // Get current and previous week keys
-  const getCurrentWeekKeys = () => {
-    const now = new Date()
-    const currentWeek = getWeekKey(now)
-    const lastWeek = getWeekKey(new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000))
-    const twoWeeksAgo = getWeekKey(new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000))
-    return { currentWeek, lastWeek, twoWeeksAgo }
+  const fetchApproachingMilestones = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('approaching_milestones')
+        .select('*')
+
+      if (error) {
+        console.error('Error fetching approaching milestones:', error)
+        setApproachingRows([])
+        return
+      }
+
+      setApproachingRows((data || []) as ApproachingRow[])
+    } catch (error) {
+      console.error('Error fetching approaching milestones:', error)
+      setApproachingRows([])
+    }
   }
 
-  // Get current and previous month keys
-  const getMonthKeys = () => {
+  const getCurrentMonthStart = () => {
     const now = new Date()
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const lastMonthKey = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`
-    return { currentMonth, lastMonthKey }
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
   }
+
+  const fetchConsistencyCrown = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('consistency_crown')
+        .select('*')
+
+      if (error) {
+        console.error('Error fetching consistency crown:', error)
+        setConsistencyLeaders([])
+        return
+      }
+
+      const entries: ConsistencyEntry[] = (data || []).map((row: Record<string, unknown>) => ({
+        studentName: String(row.student_name ?? row.studentName ?? ''),
+        grade: Number(row.grade ?? 0),
+        section: String(row.section ?? ''),
+      }))
+      setConsistencyLeaders(entries)
+    } catch (error) {
+      console.error('Error fetching consistency crown:', error)
+      setConsistencyLeaders([])
+    }
+  }
+
+  const fetchRisingStars = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('rising_star')
+        .select('*')
+
+      if (error) {
+        console.error('Error fetching rising stars:', error)
+        setRisingStarLeaders([])
+        return
+      }
+
+      const entries: RisingStarEntry[] = (data || []).map((row: Record<string, unknown>) => ({
+        studentName: String(row.student_name ?? row.studentName ?? ''),
+        grade: Number(row.grade ?? 0),
+        section: String(row.section ?? ''),
+        lastMonthPts: Number(row.last_points ?? row.lastMonthPts ?? 0),
+        currentMonthPts: Number(row.current_points ?? row.currentMonthPts ?? 0),
+        percentIncrease: Number(row.percent_increase ?? row.percentIncrease ?? 0),
+      }))
+      setRisingStarLeaders(entries)
+    } catch (error) {
+      console.error('Error fetching rising stars:', error)
+      setRisingStarLeaders([])
+    }
+  }
+
+  const fetchHouseMvps = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('house_mvp_monthly')
+        .select('*')
+        .eq('month_start', getCurrentMonthStart())
+        .eq('rank', 1)
+
+      if (error) {
+        console.error('Error fetching house MVPs:', error)
+        setHouseMvpLeaders([])
+        return
+      }
+
+      const entries: HouseMvpEntry[] = (data || []).map((row: Record<string, unknown>) => ({
+        house: String(row.house ?? ''),
+        studentName: String(row.student_name ?? row.studentName ?? ''),
+        points: Number(row.total_points ?? row.points ?? 0),
+      }))
+      setHouseMvpLeaders(entries)
+    } catch (error) {
+      console.error('Error fetching house MVPs:', error)
+      setHouseMvpLeaders([])
+    }
+  }
+
+  const fetchGradeChampions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('grade_champions')
+        .select('*')
+        .eq('month_start', getCurrentMonthStart())
+        .eq('rank', 1)
+
+      if (error) {
+        console.error('Error fetching grade champions:', error)
+        setGradeChampionLeaders([])
+        return
+      }
+
+      const entries: GradeChampionEntry[] = (data || []).map((row: Record<string, unknown>) => ({
+        grade: Number(row.grade ?? 0),
+        section: String(row.section ?? ''),
+        points: Number(row.total_points ?? row.points ?? 0),
+      }))
+      setGradeChampionLeaders(entries)
+    } catch (error) {
+      console.error('Error fetching grade champions:', error)
+      setGradeChampionLeaders([])
+    }
+  }
+
+
+  const studentHouseMap = useMemo(() => {
+    const map = new Map<string, string>()
+    students.forEach((s) => {
+      const key = `${s.name.toLowerCase()}|${s.grade}|${s.section.toLowerCase()}`
+      map.set(key, s.house)
+    })
+    return map
+  }, [students])
 
   // Hall of Fame - students who reached milestones
   const hallOfFame = useMemo(() => {
@@ -274,130 +513,111 @@ export default function RewardsPage() {
 
   // Quarterly Badges - top in each category
   const badgeWinners = useMemo(() => {
-    return quarterlyBadges.map((badge) => {
-      const sorted = students
-        .filter((s) => (s.categoryPoints[badge.category] || 0) > 0)
-        .sort((a, b) => (b.categoryPoints[badge.category] || 0) - (a.categoryPoints[badge.category] || 0))
+    const toEntry = (leader?: BadgeLeader): BadgeWinnerEntry | null => {
+      if (!leader) return null
+      return {
+        name: leader.studentName,
+        grade: leader.grade,
+        categoryPoints: {
+          [leader.category]: leader.totalPoints,
+        },
+      }
+    }
 
-      const males = sorted.filter((s) => s.gender?.toLowerCase() === 'm' || s.gender?.toLowerCase() === 'male')
-      const females = sorted.filter((s) => s.gender?.toLowerCase() === 'f' || s.gender?.toLowerCase() === 'female')
+    return quarterlyBadges.map((badge) => {
+      const categoryLeaders = badgeLeaders.filter((leader) => leader.category === badge.category)
+      const topMale = categoryLeaders.find((leader) => ['m', 'male'].includes(leader.gender.toLowerCase()))
+      const topFemale = categoryLeaders.find((leader) => ['f', 'female'].includes(leader.gender.toLowerCase()))
 
       return {
         ...badge,
-        topMale: males[0] || null,
-        topFemale: females[0] || null,
+        topMale: toEntry(topMale),
+        topFemale: toEntry(topFemale),
       }
     })
-  }, [students])
+  }, [badgeLeaders])
 
-  // Consistency Crown - 20+ points for 3 consecutive weeks
+  // Consistency Crown - 20+ points in each of the past 3 consecutive weeks
   const consistencyCrown = useMemo(() => {
-    const { currentWeek, lastWeek, twoWeeksAgo } = getCurrentWeekKeys()
-    return students
-      .filter((s) => {
-        const w1 = s.weeklyPoints[currentWeek] || 0
-        const w2 = s.weeklyPoints[lastWeek] || 0
-        const w3 = s.weeklyPoints[twoWeeksAgo] || 0
-        return w1 >= 20 && w2 >= 20 && w3 >= 20
-      })
-      .sort((a, b) => b.totalPoints - a.totalPoints)
-  }, [students])
+    return consistencyLeaders.map((entry) => {
+      const key = `${entry.studentName.toLowerCase()}|${entry.grade}|${entry.section.toLowerCase()}`
+      return {
+        name: entry.studentName,
+        grade: entry.grade,
+        house: studentHouseMap.get(key) || '',
+      }
+    })
+  }, [consistencyLeaders, studentHouseMap])
 
-  // Rising Star - highest % increase month-over-month (min 30 last month, +20 improvement)
+  // Rising Star - highest % increase month-over-month
   const risingStars = useMemo(() => {
-    const { currentMonth, lastMonthKey } = getMonthKeys()
-    return students
-      .filter((s) => {
-        const lastMonthPts = s.monthlyPoints[lastMonthKey] || 0
-        const currentMonthPts = s.monthlyPoints[currentMonth] || 0
-        const improvement = currentMonthPts - lastMonthPts
-        return lastMonthPts >= 30 && improvement >= 20
-      })
-      .map((s) => {
-        const { currentMonth, lastMonthKey } = getMonthKeys()
-        const lastMonthPts = s.monthlyPoints[lastMonthKey] || 0
-        const currentMonthPts = s.monthlyPoints[currentMonth] || 0
-        const percentIncrease = lastMonthPts > 0 ? ((currentMonthPts - lastMonthPts) / lastMonthPts) * 100 : 0
-        return { ...s, percentIncrease, lastMonthPts, currentMonthPts }
+    return risingStarLeaders
+      .map((entry) => {
+        const key = `${entry.studentName.toLowerCase()}|${entry.grade}|${entry.section.toLowerCase()}`
+        return {
+          name: entry.studentName,
+          grade: entry.grade,
+          house: studentHouseMap.get(key) || '',
+          percentIncrease: entry.percentIncrease,
+          lastMonthPts: entry.lastMonthPts,
+          currentMonthPts: entry.currentMonthPts,
+        }
       })
       .sort((a, b) => b.percentIncrease - a.percentIncrease)
-  }, [students])
+  }, [risingStarLeaders, studentHouseMap])
 
   // House MVPs - top student per house this month
   const houseMVPs = useMemo(() => {
-    const { currentMonth } = getMonthKeys()
     const houses = ['House of Abū Bakr', 'House of Khadījah', 'House of ʿUmar', 'House of ʿĀʾishah']
-    const studentTotals: Record<string, { name: string; house: string; points: number }> = {}
-
-    meritEntries.forEach((entry) => {
-      if (!entry.timestamp) return
-      const date = new Date(entry.timestamp)
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-      if (monthKey !== currentMonth) return
-      const house = (entry.house || '').trim()
-      if (!house) return
-      const studentKey = `${entry.studentName.toLowerCase()}|${entry.grade}|${entry.section.toLowerCase()}|${house.toLowerCase()}`
-      if (!studentTotals[studentKey]) {
-        studentTotals[studentKey] = { name: entry.studentName, house, points: 0 }
-      }
-      studentTotals[studentKey].points += entry.points
-    })
-
+    const leaderMap = new Map(houseMvpLeaders.map((entry) => [entry.house, entry]))
     return houses.map((house) => {
-      const houseStudents = Object.values(studentTotals)
-        .filter((s) => s.house === house)
-        .sort((a, b) => b.points - a.points)
+      const leader = leaderMap.get(house) || null
       return {
         house,
-        mvp: houseStudents[0] || null,
-        points: houseStudents[0]?.points || 0,
+        mvp: leader ? { name: leader.studentName } : null,
+        points: leader?.points || 0,
       }
     })
-  }, [meritEntries])
+  }, [houseMvpLeaders])
 
   // Grade Champions - top section per grade this month
   const gradeChampions = useMemo(() => {
-    const { currentMonth } = getMonthKeys()
     const grades = [6, 7, 8, 9, 10, 11, 12]
-    const sectionPoints: Record<string, number> = {}
-
-    meritEntries.forEach((entry) => {
-      if (!entry.timestamp) return
-      const date = new Date(entry.timestamp)
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-      if (monthKey !== currentMonth) return
-      const key = `${entry.grade}|${entry.section}`
-      sectionPoints[key] = (sectionPoints[key] || 0) + entry.points
-    })
-
+    const leaderMap = new Map(gradeChampionLeaders.map((entry) => [entry.grade, entry]))
     return grades.map((grade) => {
-      const gradeSections = Object.entries(sectionPoints)
-        .filter(([key]) => key.startsWith(`${grade}|`))
-        .map(([key, points]) => {
-          const section = key.split('|')[1] || ''
-          return { section, points }
-        })
-        .sort((a, b) => b.points - a.points)
-
+      const leader = leaderMap.get(grade) || null
       return {
         grade,
-        champion: gradeSections[0] || null,
-        points: gradeSections[0]?.points || 0,
+        champion: leader ? { section: leader.section } : null,
+        points: leader?.points || 0,
       }
     })
-  }, [meritEntries])
+  }, [gradeChampionLeaders])
 
   // Approaching Milestones
   const approachingMilestones = useMemo(() => {
-    return hallOfFameTiers.map((tier) => {
-      const approaching = students
-        .filter((s) => s.totalPoints < tier.points && s.totalPoints >= tier.points - 20)
-        .sort((a, b) => b.totalPoints - a.totalPoints)
-        .slice(0, 10)
-        .map((s) => ({ ...s, pointsNeeded: tier.points - s.totalPoints }))
-      return { ...tier, students: approaching }
+    const grouped = new Map<string, ApproachingRow[]>()
+    approachingRows.forEach((row) => {
+      const key = String(row.tier)
+      if (!grouped.has(key)) grouped.set(key, [])
+      grouped.get(key)!.push(row)
     })
-  }, [students])
+
+    return hallOfFameTiers.map((tier) => {
+      const rows = grouped.get(tier.name) || []
+      const students = rows
+        .sort((a, b) => b.total_points - a.total_points)
+        .slice(0, 10)
+        .map((row) => ({
+          name: row.student_name,
+          grade: row.grade,
+          house: row.house,
+          totalPoints: row.total_points,
+          pointsNeeded: row.points_needed,
+        }))
+      return { ...tier, students }
+    })
+  }, [approachingRows])
 
   if (isLoading) {
     return <CrestLoader label="Loading rewards data..." />
@@ -520,47 +740,66 @@ export default function RewardsPage() {
 
       {/* Quarterly Badges Tab */}
       {selectedTab === 'badges' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {badgeWinners.map((badge) => (
-            <div key={badge.name} className="regal-card rounded-2xl p-6">
-              <div className="text-center mb-6">
-                <span className="text-5xl mb-3 block">{badge.icon}</span>
-                <h3 className="text-xl font-bold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                  {badge.name}
-                </h3>
-                <p className="text-sm text-[#1a1a2e]/50 mt-1">{badge.description}</p>
-                <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#c9a227]/10 text-[#9a7b1a]">
-                  {badge.category}
-                </span>
-              </div>
-              <div className="space-y-4">
-                {/* Top Male */}
-                <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
-                  <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">Top Male</p>
-                  {badge.topMale ? (
-                    <div>
-                      <p className="font-bold text-[#1a1a2e]">{badge.topMale.name}</p>
-                      <p className="text-sm text-[#1a1a2e]/50">Grade {badge.topMale.grade} • {badge.topMale.categoryPoints[badge.category]} pts</p>
-                    </div>
-                  ) : (
-                    <p className="text-[#1a1a2e]/30 text-sm">No data yet</p>
-                  )}
-                </div>
-                {/* Top Female */}
-                <div className="p-4 rounded-xl bg-pink-50 border border-pink-100">
-                  <p className="text-xs font-semibold text-pink-600 uppercase tracking-wider mb-2">Top Female</p>
-                  {badge.topFemale ? (
-                    <div>
-                      <p className="font-bold text-[#1a1a2e]">{badge.topFemale.name}</p>
-                      <p className="text-sm text-[#1a1a2e]/50">Grade {badge.topFemale.grade} • {badge.topFemale.categoryPoints[badge.category]} pts</p>
-                    </div>
-                  ) : (
-                    <p className="text-[#1a1a2e]/30 text-sm">No data yet</p>
-                  )}
-                </div>
-              </div>
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                Quarterly Badges
+              </h2>
+              <p className="text-sm text-[#1a1a2e]/50">Select the quarter to view top students by category.</p>
             </div>
-          ))}
+            <select
+              value={selectedQuarter}
+              onChange={(e) => setSelectedQuarter(e.target.value as 'q1' | 'q2')}
+              className="px-4 py-2.5 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white"
+            >
+              {quarterOptions.map((option) => (
+                <option key={option.id} value={option.id}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {badgeWinners.map((badge) => (
+              <div key={badge.name} className="regal-card rounded-2xl p-6">
+                <div className="text-center mb-6">
+                  <span className="text-5xl mb-3 block">{badge.icon}</span>
+                  <h3 className="text-xl font-bold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                    {badge.name}
+                  </h3>
+                  <p className="text-sm text-[#1a1a2e]/50 mt-1">{badge.description}</p>
+                  <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#c9a227]/10 text-[#9a7b1a]">
+                    {badge.category}
+                  </span>
+                </div>
+                <div className="space-y-4">
+                  {/* Top Male */}
+                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">Top Male</p>
+                    {badge.topMale ? (
+                      <div>
+                        <p className="font-bold text-[#1a1a2e]">{badge.topMale.name}</p>
+                        <p className="text-sm text-[#1a1a2e]/50">Grade {badge.topMale.grade} • {badge.topMale.categoryPoints[badge.category]} pts</p>
+                      </div>
+                    ) : (
+                      <p className="text-[#1a1a2e]/30 text-sm">No data yet</p>
+                    )}
+                  </div>
+                  {/* Top Female */}
+                  <div className="p-4 rounded-xl bg-pink-50 border border-pink-100">
+                    <p className="text-xs font-semibold text-pink-600 uppercase tracking-wider mb-2">Top Female</p>
+                    {badge.topFemale ? (
+                      <div>
+                        <p className="font-bold text-[#1a1a2e]">{badge.topFemale.name}</p>
+                        <p className="text-sm text-[#1a1a2e]/50">Grade {badge.topFemale.grade} • {badge.topFemale.categoryPoints[badge.category]} pts</p>
+                      </div>
+                    ) : (
+                      <p className="text-[#1a1a2e]/30 text-sm">No data yet</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

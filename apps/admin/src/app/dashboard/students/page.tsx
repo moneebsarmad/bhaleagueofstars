@@ -218,14 +218,19 @@ export default function StudentsPage() {
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
                       style={{
-                        backgroundColor: `${houseColors[student.house]}20`,
-                        color: houseColors[student.house],
+                        backgroundColor: '#eef2f0',
+                        color: '#0f5b3a',
                       }}
                     >
                       {getInitials(student.name)}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">{student.name}</p>
+                      <p
+                        className="font-semibold text-gray-900"
+                        style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}
+                      >
+                        {student.name}
+                      </p>
                       <div className="flex items-center gap-2 text-sm text-gray-500">
                         <span>Grade {student.grade}{student.section}</span>
                         <span>•</span>
@@ -237,7 +242,12 @@ export default function StudentsPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-gray-900">{student.points}</p>
+                      <p
+                        className="font-bold text-gray-900"
+                        style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}
+                      >
+                        {student.points}
+                      </p>
                       <p className="text-xs text-gray-500">points</p>
                     </div>
                   </div>
@@ -268,14 +278,19 @@ export default function StudentsPage() {
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold"
                   style={{
-                    backgroundColor: `${houseColors[selectedStudent.house]}20`,
-                    color: houseColors[selectedStudent.house],
+                    backgroundColor: '#eef2f0',
+                    color: '#0f5b3a',
                   }}
                 >
                   {getInitials(selectedStudent.name)}
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-gray-900">{selectedStudent.name}</p>
+                  <p
+                    className="text-xl font-bold text-gray-900"
+                    style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}
+                  >
+                    {selectedStudent.name}
+                  </p>
                   <p className="text-gray-500">
                     <Link
                       href={`/dashboard/analytics?grade=${encodeURIComponent(String(selectedStudent.grade))}&section=${encodeURIComponent(selectedStudent.section)}`}
@@ -300,7 +315,10 @@ export default function StudentsPage() {
               <p className="text-sm text-gray-500 mb-1">Total Points</p>
               <p
                 className="text-4xl font-bold"
-                style={{ color: houseColors[selectedStudent.house] }}
+                style={{
+                  color: '#0f5b3a',
+                  fontFamily: 'var(--font-playfair), Georgia, serif',
+                }}
               >
                 {selectedStudent.points}
               </p>

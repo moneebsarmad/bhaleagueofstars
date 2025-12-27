@@ -39,10 +39,61 @@ interface StaffMeritEntry {
   r: string
 }
 
+interface HouseSpiritRow {
+  month_start: string
+  house: string
+  staff_count: number
+  total_points: number
+  rank: number
+}
+
+interface AllStarRow {
+  month_start: string
+  staff_name: string
+  categories: number
+  total_points: number
+  rank: number
+}
+
+interface SteadyHandRow {
+  month_start: string
+  staff_name: string
+  active_days: number
+  awards: number
+  rank: number
+}
+
+interface DiamondFinderRow {
+  month_start: string
+  staff_name: string
+  students: number
+  total_points: number
+  rank: number
+}
+
+interface HouseChampionRow {
+  month_start: string
+  house: string
+  staff_name: string
+  total_points: number
+  rank: number
+}
+
 export default function StaffPage() {
   const [staffList, setStaffList] = useState<StaffMember[]>([])
+  const [staffData, setStaffData] = useState<Record<string, string | null>[]>([])
+  const [allMeritEntries, setAllMeritEntries] = useState<StaffMeritEntry[]>([])
   const [meritEntries, setMeritEntries] = useState<StaffMeritEntry[]>([])
+  const [houseSpiritRows, setHouseSpiritRows] = useState<HouseSpiritRow[]>([])
+  const [allStarRows, setAllStarRows] = useState<AllStarRow[]>([])
+  const [steadyHandRows, setSteadyHandRows] = useState<SteadyHandRow[]>([])
+  const [diamondFinderRows, setDiamondFinderRows] = useState<DiamondFinderRow[]>([])
+  const [houseChampionRows, setHouseChampionRows] = useState<HouseChampionRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  })
 
   useEffect(() => {
     fetchData()
@@ -53,9 +104,11 @@ export default function StaffPage() {
       .channel('staff-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: Tables.staff }, () => {
         fetchData()
+        fetchMonthlyAwardViews()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: Tables.meritLog }, () => {
         fetchData()
+        fetchMonthlyAwardViews()
       })
       .subscribe()
 
@@ -64,16 +117,166 @@ export default function StaffPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (staffData.length === 0) return
+    const filteredEntries = filterEntriesByMonth(allMeritEntries, selectedMonth)
+    setMeritEntries(filteredEntries)
+    setStaffList(buildStaffList(staffData, filteredEntries))
+  }, [selectedMonth, staffData, allMeritEntries])
+
+  useEffect(() => {
+    fetchMonthlyAwardViews()
+  }, [selectedMonth])
+
+  const getMonthKey = (value: string) => {
+    const date = new Date(value)
+    if (!Number.isFinite(date.getTime())) return ''
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+  }
+
+  const filterEntriesByMonth = (entries: StaffMeritEntry[], monthKey: string) => {
+    if (!monthKey) return entries
+    return entries.filter((entry) => getMonthKey(entry.timestamp) === monthKey)
+  }
+
+  const buildStaffList = (
+    staffRows: Record<string, string | null>[],
+    entries: StaffMeritEntry[]
+  ) => {
+    const staffStats: Record<string, {
+      points: number
+      awards: number
+      students: Set<string>
+      dates: Set<string>
+      lastActive: string
+    }> = {}
+
+    entries.forEach((m) => {
+      const name = m.staffName || ''
+      if (!name) return
+      const key = name.toLowerCase()
+      if (!staffStats[key]) {
+        staffStats[key] = { points: 0, awards: 0, students: new Set(), dates: new Set(), lastActive: '' }
+      }
+      staffStats[key].points += m.points || 0
+      staffStats[key].awards += 1
+      if (m.studentName) {
+        const studentKey = `${m.studentName.toLowerCase()}|${m.grade || ''}|${(m.section || '').toLowerCase()}`
+        staffStats[key].students.add(studentKey)
+      }
+      const dateStr = m.timestamp ? new Date(m.timestamp).toISOString().split('T')[0] : ''
+      if (dateStr) staffStats[key].dates.add(dateStr)
+      if (!staffStats[key].lastActive || m.timestamp > staffStats[key].lastActive) {
+        staffStats[key].lastActive = m.timestamp || ''
+      }
+    })
+
+    const parseDate = (value: string) => new Date(`${value}T00:00:00Z`)
+    const formatDate = (value: Date) => value.toISOString().split('T')[0]
+    const toLocalDate = (value: Date) =>
+      new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()))
+
+    const breakRanges = [
+      { start: '2025-11-24', end: '2025-11-30' },
+      { start: '2025-12-22', end: '2026-01-04' },
+    ].map((range) => ({
+      start: parseDate(range.start),
+      end: parseDate(range.end),
+    }))
+
+    const isInBreak = (date: Date) =>
+      breakRanges.some((range) => date >= range.start && date <= range.end)
+
+    const weekStart = (date: Date) => {
+      const d = toLocalDate(date)
+      const day = d.getUTCDay()
+      const diff = day === 0 ? -6 : 1 - day
+      d.setUTCDate(d.getUTCDate() + diff)
+      return d
+    }
+
+    const weekKey = (date: Date) => formatDate(weekStart(date))
+
+    const [year, month] = selectedMonth.split('-').map(Number)
+    const monthStart = weekStart(new Date(Date.UTC(year, month - 1, 1)))
+    const monthEndDate = new Date(Date.UTC(year, month, 0))
+    const monthEnd = weekStart(monthEndDate)
+
+    const buildEligibleWeeks = () => {
+      const weeks: string[] = []
+      for (let d = new Date(monthStart); d <= monthEnd; d.setUTCDate(d.getUTCDate() + 7)) {
+        if (!isInBreak(d)) {
+          weeks.push(formatDate(d))
+        }
+      }
+      return weeks
+    }
+
+    const eligibleWeeks = buildEligibleWeeks()
+
+    const calculateWeekStreak = (weeksWithSubmissions: Set<string>): number => {
+      if (eligibleWeeks.length === 0) return 0
+      let streak = 0
+      for (let i = eligibleWeeks.length - 1; i >= 0; i -= 1) {
+        const week = eligibleWeeks[i]
+        if (weeksWithSubmissions.has(week)) {
+          streak += 1
+        } else {
+          break
+        }
+      }
+      return streak
+    }
+
+    const list: StaffMember[] = staffRows.map((s) => {
+      const name = String(s.staff_name || '')
+      const key = name.toLowerCase()
+      const stats = staffStats[key] || { points: 0, awards: 0, students: new Set(), dates: new Set(), lastActive: '' }
+
+      const weeksWithSubmissions = new Set(
+        Array.from(stats.dates)
+          .map((d) => weekKey(parseDate(d)))
+          .filter((w) => eligibleWeeks.includes(w))
+      )
+      const consistency = eligibleWeeks.length > 0
+        ? Math.min(100, Math.round((weeksWithSubmissions.size / eligibleWeeks.length) * 100))
+        : 0
+
+      let tier: 'High' | 'Medium' | 'Low' = 'Low'
+      if (consistency >= 80) tier = 'High'
+      else if (consistency >= 30) tier = 'Medium'
+
+      return {
+        rank: 0,
+        name,
+        email: String(s.email || ''),
+        house: String(s.house || ''),
+        tier,
+        consistency,
+        streak: calculateWeekStreak(weeksWithSubmissions),
+        points: stats.points,
+        awards: stats.awards,
+        students: stats.students.size,
+        lastActive: stats.lastActive,
+      }
+    })
+
+    list.sort((a, b) => b.points - a.points)
+    list.forEach((s, i) => (s.rank = i + 1))
+
+    return list
+  }
+
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      const { data: staffData } = await supabase.from(Tables.staff).select('*')
+      const { data: staffRows } = await supabase.from(Tables.staff).select('*')
       const { data: meritData } = await supabase
         .from(Tables.meritLog)
         .select('*')
         .order('timestamp', { ascending: false })
 
-      if (staffData && meritData) {
+      if (staffRows && meritData) {
         const entries: StaffMeritEntry[] = meritData.map((m) => ({
           staffName: m.staff_name || '',
           studentName: m.student_name || '',
@@ -83,133 +286,56 @@ export default function StaffPage() {
           timestamp: m.timestamp || '',
           r: m.r || '',
         }))
-        setMeritEntries(entries)
-
-        const staffStats: Record<string, {
-          points: number
-          awards: number
-          students: Set<string>
-          dates: Set<string>
-          lastActive: string
-        }> = {}
-
-        meritData.forEach((m) => {
-          const name = m.staff_name || ''
-          if (!name) return
-          const key = name.toLowerCase()
-          if (!staffStats[key]) {
-            staffStats[key] = { points: 0, awards: 0, students: new Set(), dates: new Set(), lastActive: '' }
-          }
-          staffStats[key].points += m.points || 0
-          staffStats[key].awards += 1
-          if (m.student_name) {
-            const studentKey = `${m.student_name.toLowerCase()}|${m.grade || ''}|${(m.section || '').toLowerCase()}`
-            staffStats[key].students.add(studentKey)
-          }
-          const dateStr = m.timestamp ? new Date(m.timestamp).toISOString().split('T')[0] : ''
-          if (dateStr) staffStats[key].dates.add(dateStr)
-          if (!staffStats[key].lastActive || m.timestamp > staffStats[key].lastActive) {
-            staffStats[key].lastActive = m.timestamp || ''
-          }
-        })
-
-        const parseDate = (value: string) => new Date(`${value}T00:00:00Z`)
-        const formatDate = (value: Date) => value.toISOString().split('T')[0]
-        const toLocalDate = (value: Date) =>
-          new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()))
-
-        const breakRanges = [
-          { start: '2025-11-24', end: '2025-11-30' },
-          { start: '2025-12-22', end: '2026-01-04' },
-        ].map((range) => ({
-          start: parseDate(range.start),
-          end: parseDate(range.end),
-        }))
-
-        const isInBreak = (date: Date) =>
-          breakRanges.some((range) => date >= range.start && date <= range.end)
-
-        const weekStart = (date: Date) => {
-          const d = toLocalDate(date)
-          const day = d.getUTCDay()
-          const diff = day === 0 ? -6 : 1 - day
-          d.setUTCDate(d.getUTCDate() + diff)
-          return d
-        }
-
-        const weekKey = (date: Date) => formatDate(weekStart(date))
-
-        const startWeek = weekStart(parseDate('2025-10-13'))
-        const today = weekStart(new Date())
-
-        const buildEligibleWeeks = () => {
-          const weeks: string[] = []
-          for (let d = new Date(startWeek); d <= today; d.setUTCDate(d.getUTCDate() + 7)) {
-            if (!isInBreak(d)) {
-              weeks.push(formatDate(d))
-            }
-          }
-          return weeks
-        }
-
-        const eligibleWeeks = buildEligibleWeeks()
-
-        const calculateWeekStreak = (weeksWithSubmissions: Set<string>): number => {
-          if (eligibleWeeks.length === 0) return 0
-          let streak = 0
-          for (let i = eligibleWeeks.length - 1; i >= 0; i -= 1) {
-            const week = eligibleWeeks[i]
-            if (weeksWithSubmissions.has(week)) {
-              streak += 1
-            } else {
-              break
-            }
-          }
-          return streak
-        }
-
-        const list: StaffMember[] = staffData.map((s) => {
-          const name = s.staff_name || ''
-          const key = name.toLowerCase()
-          const stats = staffStats[key] || { points: 0, awards: 0, students: new Set(), dates: new Set(), lastActive: '' }
-
-          const weeksWithSubmissions = new Set(
-            Array.from(stats.dates)
-              .map((d) => weekKey(parseDate(d)))
-              .filter((w) => eligibleWeeks.includes(w))
-          )
-          const consistency = eligibleWeeks.length > 0
-            ? Math.min(100, Math.round((weeksWithSubmissions.size / eligibleWeeks.length) * 100))
-            : 0
-
-          let tier: 'High' | 'Medium' | 'Low' = 'Low'
-          if (consistency >= 80) tier = 'High'
-          else if (consistency >= 30) tier = 'Medium'
-
-          return {
-            rank: 0,
-            name,
-            email: s.email || '',
-            house: s.house || '',
-            tier,
-            consistency,
-            streak: calculateWeekStreak(weeksWithSubmissions),
-            points: stats.points,
-            awards: stats.awards,
-            students: stats.students.size,
-            lastActive: stats.lastActive,
-          }
-        })
-
-        list.sort((a, b) => b.points - a.points)
-        list.forEach((s, i) => (s.rank = i + 1))
-
-        setStaffList(list)
+        setStaffData(staffRows)
+        setAllMeritEntries(entries)
+        const filteredEntries = filterEntriesByMonth(entries, selectedMonth)
+        setMeritEntries(filteredEntries)
+        setStaffList(buildStaffList(staffRows, filteredEntries))
       }
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const getMonthStart = () => `${selectedMonth}-01`
+
+  const fetchMonthlyAwardViews = async () => {
+    const monthStart = getMonthStart()
+    try {
+      const [
+        houseSpiritRes,
+        allStarRes,
+        steadyHandRes,
+        diamondFinderRes,
+        houseChampionRes,
+      ] = await Promise.all([
+        supabase.from('staff_house_spirit_monthly').select('*').eq('month_start', monthStart).eq('rank', 1),
+        supabase.from('staff_3r_all_star_monthly').select('*').eq('month_start', monthStart).eq('rank', 1),
+        supabase.from('staff_steady_hand_monthly').select('*').eq('month_start', monthStart).eq('rank', 1),
+        supabase.from('staff_diamond_finder_monthly').select('*').eq('month_start', monthStart).eq('rank', 1),
+        supabase.from('staff_house_champion_monthly').select('*').eq('month_start', monthStart).eq('rank', 1),
+      ])
+
+      if (houseSpiritRes.error) console.error('House spirit view error:', houseSpiritRes.error)
+      if (allStarRes.error) console.error('All star view error:', allStarRes.error)
+      if (steadyHandRes.error) console.error('Steady hand view error:', steadyHandRes.error)
+      if (diamondFinderRes.error) console.error('Diamond finder view error:', diamondFinderRes.error)
+      if (houseChampionRes.error) console.error('House champion view error:', houseChampionRes.error)
+
+      setHouseSpiritRows((houseSpiritRes.data || []) as HouseSpiritRow[])
+      setAllStarRows((allStarRes.data || []) as AllStarRow[])
+      setSteadyHandRows((steadyHandRes.data || []) as SteadyHandRow[])
+      setDiamondFinderRows((diamondFinderRes.data || []) as DiamondFinderRow[])
+      setHouseChampionRows((houseChampionRes.data || []) as HouseChampionRow[])
+    } catch (error) {
+      console.error('Error fetching staff award views:', error)
+      setHouseSpiritRows([])
+      setAllStarRows([])
+      setSteadyHandRows([])
+      setDiamondFinderRows([])
+      setHouseChampionRows([])
     }
   }
 
@@ -224,6 +350,33 @@ export default function StaffPage() {
     ]
   }, [staffList])
 
+  const monthOptions = useMemo(() => {
+    const uniqueMonths = new Set<string>()
+    allMeritEntries.forEach((entry) => {
+      const key = getMonthKey(entry.timestamp)
+      if (key) uniqueMonths.add(key)
+    })
+    if (!uniqueMonths.has(selectedMonth)) {
+      uniqueMonths.add(selectedMonth)
+    }
+    return Array.from(uniqueMonths)
+      .sort()
+      .reverse()
+      .map((key) => {
+        const [year, month] = key.split('-').map(Number)
+        const label = new Date(year, month - 1, 1).toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        })
+        return { key, label }
+      })
+  }, [allMeritEntries, selectedMonth])
+
+  const selectedMonthLabel = useMemo(() => {
+    const match = monthOptions.find((option) => option.key === selectedMonth)
+    return match?.label || selectedMonth
+  }, [monthOptions, selectedMonth])
+
   const getThreeRCategory = (value: string) => {
     const raw = (value || '').toLowerCase()
     if (raw.includes('respect')) return 'Respect'
@@ -233,100 +386,63 @@ export default function StaffPage() {
   }
 
   const monthlyAwards = useMemo(() => {
-    const staffInfo = new Map(
-      staffList.map((s) => [s.name.toLowerCase(), { name: s.name, house: s.house || 'Unassigned' }])
-    )
-
-    const now = new Date()
-    const currentYear = now.getFullYear()
-    const currentMonth = now.getMonth()
-
-    const staffMonthly: Record<string, {
-      name: string
-      house: string
-      points: number
-      awards: number
-      students: Set<string>
-      days: Set<string>
-      categories: Set<string>
-    }> = {}
-
-    const houseParticipation: Record<string, { staff: Set<string>; points: number }> = {}
-
-    meritEntries.forEach((entry) => {
-      if (!entry.staffName) return
-      const entryDate = new Date(entry.timestamp)
-      if (!Number.isFinite(entryDate.getTime())) return
-      if (entryDate.getFullYear() !== currentYear || entryDate.getMonth() !== currentMonth) return
-
-      const staffKey = entry.staffName.toLowerCase()
-      const info = staffInfo.get(staffKey)
-      const staffName = info?.name || entry.staffName
-      const staffHouse = info?.house || 'Unassigned'
-
-      if (!staffMonthly[staffKey]) {
-        staffMonthly[staffKey] = {
-          name: staffName,
-          house: staffHouse,
-          points: 0,
-          awards: 0,
-          students: new Set(),
-          days: new Set(),
-          categories: new Set(),
-        }
-      }
-
-      const stats = staffMonthly[staffKey]
-      stats.points += entry.points
-      stats.awards += 1
-      if (entry.studentName) {
-        const studentKey = `${entry.studentName.toLowerCase()}|${entry.grade}|${entry.section.toLowerCase()}`
-        stats.students.add(studentKey)
-      }
-      stats.days.add(entryDate.toISOString().split('T')[0])
-      const category = getThreeRCategory(entry.r)
-      if (category) stats.categories.add(category)
-
-      if (!houseParticipation[staffHouse]) {
-        houseParticipation[staffHouse] = { staff: new Set(), points: 0 }
-      }
-      houseParticipation[staffHouse].staff.add(staffKey)
-      houseParticipation[staffHouse].points += entry.points
+    const [selectedYear, selectedMonthIndex] = selectedMonth.split('-').map(Number)
+    const monthLabel = new Date(selectedYear, selectedMonthIndex - 1, 1).toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
     })
 
-    const monthlyStaff = Object.values(staffMonthly)
-
-    const houseSpirit = Object.entries(houseParticipation)
-      .map(([house, data]) => ({ house, staffCount: data.staff.size, points: data.points }))
-      .sort((a, b) => b.staffCount - a.staffCount || b.points - a.points)[0]
+    const houseSpiritRow = houseSpiritRows[0] || null
+    const allStarRow = allStarRows[0] || null
+    const steadyHandRow = steadyHandRows[0] || null
+    const diamondFinderRow = diamondFinderRows[0] || null
 
     const houseChampions = houses.map((house) => {
-      const winner = monthlyStaff
-        .filter((s) => s.house === house)
-        .sort((a, b) => b.points - a.points)[0]
-      return { house, winner: winner || null }
+      const winner = houseChampionRows.find((row) => row.house === house) || null
+      return {
+        house,
+        winner: winner
+          ? {
+            name: winner.staff_name,
+            points: winner.total_points,
+          }
+          : null,
+      }
     })
-
-    const allStar = [...monthlyStaff]
-      .sort((a, b) => b.categories.size - a.categories.size || b.points - a.points)[0]
-
-    const steadyHand = [...monthlyStaff]
-      .sort((a, b) => b.days.size - a.days.size || b.awards - a.awards)[0]
-
-    const diamondFinder = [...monthlyStaff]
-      .sort((a, b) => b.students.size - a.students.size || b.points - a.points)[0]
-
-    const monthLabel = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
     return {
       monthLabel,
-      houseSpirit,
+      houseSpirit: houseSpiritRow
+        ? {
+          house: houseSpiritRow.house,
+          staffCount: houseSpiritRow.staff_count,
+          points: houseSpiritRow.total_points,
+        }
+        : null,
+      allStar: allStarRow
+        ? {
+          name: allStarRow.staff_name,
+          categories: allStarRow.categories,
+          points: allStarRow.total_points,
+        }
+        : null,
+      steadyHand: steadyHandRow
+        ? {
+          name: steadyHandRow.staff_name,
+          days: steadyHandRow.active_days,
+          awards: steadyHandRow.awards,
+        }
+        : null,
+      diamondFinder: diamondFinderRow
+        ? {
+          name: diamondFinderRow.staff_name,
+          students: diamondFinderRow.students,
+          points: diamondFinderRow.total_points,
+        }
+        : null,
       houseChampions,
-      allStar,
-      steadyHand,
-      diamondFinder,
     }
-  }, [meritEntries, staffList])
+  }, [selectedMonth, houseSpiritRows, allStarRows, steadyHandRows, diamondFinderRows, houseChampionRows])
 
   const consistencyLeaderboard = useMemo(() => {
     return [...staffList]
@@ -351,12 +467,28 @@ export default function StaffPage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-          Staff Engagement
-        </h1>
-        <div className="flex items-center gap-3">
-          <div className="h-1 w-16 bg-gradient-to-r from-[#c9a227] to-[#e8d48b] rounded-full"></div>
-          <p className="text-[#1a1a2e]/50 text-sm font-medium">Performance metrics and consistency tracking</p>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+              Staff Engagement
+            </h1>
+            <div className="flex items-center gap-3">
+              <div className="h-1 w-16 bg-gradient-to-r from-[#c9a227] to-[#e8d48b] rounded-full"></div>
+              <p className="text-[#1a1a2e]/50 text-sm font-medium">Performance metrics and consistency tracking</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs uppercase tracking-widest text-[#1a1a2e]/40">Month</span>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-4 py-2.5 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white"
+            >
+              {monthOptions.map((option) => (
+                <option key={option.key} value={option.key}>{option.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -458,7 +590,7 @@ export default function StaffPage() {
               <p className="text-lg font-bold text-[#1a1a2e]">{monthlyAwards.allStar?.name || 'No data'}</p>
               {monthlyAwards.allStar && (
                 <p className="text-xs text-[#1a1a2e]/50 mt-1">
-                  {monthlyAwards.allStar.categories.size} categories • {monthlyAwards.allStar.points.toLocaleString()} pts
+                  {monthlyAwards.allStar.categories} categories • {monthlyAwards.allStar.points.toLocaleString()} pts
                 </p>
               )}
             </div>
@@ -471,7 +603,7 @@ export default function StaffPage() {
               <p className="text-lg font-bold text-[#1a1a2e]">{monthlyAwards.steadyHand?.name || 'No data'}</p>
               {monthlyAwards.steadyHand && (
                 <p className="text-xs text-[#1a1a2e]/50 mt-1">
-                  {monthlyAwards.steadyHand.days.size} days • {monthlyAwards.steadyHand.awards} awards
+                  {monthlyAwards.steadyHand.days} days • {monthlyAwards.steadyHand.awards} awards
                 </p>
               )}
             </div>
@@ -484,7 +616,7 @@ export default function StaffPage() {
               <p className="text-lg font-bold text-[#1a1a2e]">{monthlyAwards.diamondFinder?.name || 'No data'}</p>
               {monthlyAwards.diamondFinder && (
                 <p className="text-xs text-[#1a1a2e]/50 mt-1">
-                  {monthlyAwards.diamondFinder.students.size} students • {monthlyAwards.diamondFinder.points.toLocaleString()} pts
+                  {monthlyAwards.diamondFinder.students} students • {monthlyAwards.diamondFinder.points.toLocaleString()} pts
                 </p>
               )}
             </div>
@@ -522,10 +654,17 @@ export default function StaffPage() {
       {/* Detailed Staff Table */}
       <div className="regal-card rounded-2xl overflow-hidden">
         <div className="p-6 border-b border-[#c9a227]/10">
-          <h3 className="text-lg font-semibold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-            Detailed Staff Engagement
-          </h3>
-          <p className="text-xs text-[#1a1a2e]/40 mt-1">Complete performance breakdown for all staff members</p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-semibold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                Detailed Staff Engagement
+              </h3>
+              <p className="text-xs text-[#1a1a2e]/40 mt-1">Complete performance breakdown for all staff members</p>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-wider bg-[#c9a227]/15 text-[#9a7b1a] px-3 py-1 rounded-full">
+              {selectedMonthLabel}
+            </span>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full regal-table">

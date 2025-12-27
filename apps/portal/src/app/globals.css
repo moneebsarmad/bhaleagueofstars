@@ -280,15 +280,15 @@ h1, h2, h3 {
 
 .auth-logo {
   position: relative;
-  width: 112px;
-  height: 112px;
+  width: 140px;
+  height: 140px;
   display: grid;
   place-items: center;
 }
 
 .auth-logo-inner {
-  width: 92px;
-  height: 92px;
+  width: 120px;
+  height: 120px;
   border-radius: 22px;
   background: linear-gradient(135deg, var(--gold), var(--gold-dark));
   display: grid;
@@ -303,15 +303,15 @@ h1, h2, h3 {
 }
 
 .auth-logo-inner img {
-  width: 64px;
-  height: 64px;
+  width: 84px;
+  height: 84px;
   object-fit: contain;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
 }
 
 .auth-logo-glow {
   position: absolute;
-  inset: 10px;
+  inset: 12px;
   border-radius: 22px;
   background: var(--gold);
   filter: blur(20px);

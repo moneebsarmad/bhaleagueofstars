@@ -63,13 +63,21 @@ export default function StudentsPage() {
   const [meritEntries, setMeritEntries] = useState<MeritEntry[]>([])
   const [searchText, setSearchText] = useState('')
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null)
+  const [selectedSection, setSelectedSection] = useState<string | null>(null)
   const [selectedHouse, setSelectedHouse] = useState<string | null>(null)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const [selectedStaff, setSelectedStaff] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     fetchData()
   }, [])
+
+  useEffect(() => {
+    if (selectedStaff) {
+      setSelectedStaff(null)
+    }
+  }, [selectedStudent])
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -123,12 +131,14 @@ export default function StudentsPage() {
   }
 
   const grades = [...new Set(students.map((s) => s.grade))].sort((a, b) => a - b)
+  const sections = [...new Set(students.map((s) => s.section).filter(Boolean))].sort()
   const houses = [...new Set(students.map((s) => canonicalHouse(s.house)))].filter(Boolean)
 
   const filteredStudents = students
     .filter((s) => {
       if (searchText && !s.name.toLowerCase().includes(searchText.toLowerCase())) return false
       if (selectedGrade && s.grade !== parseInt(selectedGrade)) return false
+      if (selectedSection && s.section !== selectedSection) return false
       if (selectedHouse && canonicalHouse(s.house) !== selectedHouse) return false
       return true
     })
@@ -152,6 +162,9 @@ export default function StudentsPage() {
         e.section.toLowerCase() === selectedStudent.section.toLowerCase()
       )
     : []
+  const filteredStudentMerits = selectedStaff
+    ? studentMerits.filter((e) => e.staffName === selectedStaff)
+    : studentMerits
 
   if (isLoading) {
     return (
@@ -218,6 +231,18 @@ export default function StudentsPage() {
               <option value="">All Houses</option>
               {houses.map((h) => (
                 <option key={h} value={h}>{h}</option>
+              ))}
+            </select>
+
+            {/* Section Filter */}
+            <select
+              value={selectedSection || ''}
+              onChange={(e) => setSelectedSection(e.target.value || null)}
+              className="px-4 py-2.5 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white"
+            >
+              <option value="">All Sections</option>
+              {sections.map((section) => (
+                <option key={section} value={section}>{section}</option>
               ))}
             </select>
           </div>
@@ -318,9 +343,24 @@ export default function StudentsPage() {
                     {selectedStudent.name}
                   </p>
                   <p className="text-[#1a1a2e]/50">
-                    Grade {selectedStudent.grade}{selectedStudent.section}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedGrade(String(selectedStudent.grade))
+                        setSelectedSection(selectedStudent.section || null)
+                      }}
+                      className="text-[#2f0a61] underline underline-offset-2 decoration-[#c9a227] decoration-2 hover:text-[#1a1a2e] transition-colors"
+                    >
+                      Grade {selectedStudent.grade}{selectedStudent.section}
+                    </button>
                     <span className="text-[#1a1a2e]/20"> • </span>
-                    {canonicalHouse(selectedStudent.house)}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedHouse(canonicalHouse(selectedStudent.house))}
+                      className="text-[#2f0a61] underline underline-offset-2 decoration-[#c9a227] decoration-2 hover:text-[#1a1a2e] transition-colors"
+                    >
+                      {canonicalHouse(selectedStudent.house)}
+                    </button>
                   </p>
                 </div>
               </div>
@@ -366,18 +406,35 @@ export default function StudentsPage() {
 
             {/* Recent Activity */}
             <div className="p-6">
-              <h3 className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider mb-3">Recent Activity</h3>
-              {studentMerits.length === 0 ? (
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider">Recent Activity</h3>
+                {selectedStaff ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStaff(null)}
+                    className="text-xs text-[#1a1a2e]/50 hover:text-[#2f0a61] transition-colors"
+                  >
+                    Clear staff filter
+                  </button>
+                ) : null}
+              </div>
+              {filteredStudentMerits.length === 0 ? (
                 <p className="text-[#1a1a2e]/40 text-sm">No activity yet</p>
               ) : (
                 <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {studentMerits.slice(0, 10).map((merit, index) => (
+                  {filteredStudentMerits.slice(0, 10).map((merit, index) => (
                     <div key={index} className="flex items-center justify-between py-2.5 border-b border-[#1a1a2e]/5 last:border-0">
                       <div>
                         <p className="text-sm font-medium text-[#1a1a2e]">
                           {merit.subcategory || merit.r?.split(' – ')[0]}
                         </p>
-                        <p className="text-xs text-[#1a1a2e]/40">{merit.staffName}</p>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStaff(merit.staffName)}
+                          className="text-xs text-[#2f0a61] underline underline-offset-2 decoration-[#c9a227] decoration-2 hover:text-[#1a1a2e] transition-colors"
+                        >
+                          {merit.staffName}
+                        </button>
                       </div>
                       <span className="text-[#055437] font-semibold">+{merit.points}</span>
                     </div>

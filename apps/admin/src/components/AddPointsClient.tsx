@@ -91,6 +91,22 @@ export default function AddPointsClient() {
     fetchAdminName()
   }, [])
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('add-points-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.students }, () => {
+        fetchStudents()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.admins }, () => {
+        fetchAdminName()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
   const fetchAdminName = async () => {
     try {
       const { data: authData } = await supabase.auth.getUser()

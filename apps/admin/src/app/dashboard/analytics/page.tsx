@@ -45,6 +45,14 @@ const categoryColors = [
 export default function AnalyticsPage() {
   const [allEntries, setAllEntries] = useState<MeritEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    totalPoints: 0,
+    totalRecords: 0,
+    uniqueStudents: 0,
+    activeStaff: 0,
+    avgPerStudent: '0',
+    avgPerAward: '0',
+  })
   const searchParams = useSearchParams()
   const paramsApplied = useRef(false)
   const [filters, setFilters] = useState<Filters>({
@@ -101,19 +109,6 @@ export default function AnalyticsPage() {
       return true
     })
   }, [allEntries, appliedFilters])
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const totalPoints = filteredEntries.reduce((sum, e) => sum + e.points, 0)
-    const totalRecords = filteredEntries.length
-    const uniqueStudents = new Set(
-      filteredEntries.map((e) => `${e.studentName.toLowerCase()}|${e.grade}|${e.section.toLowerCase()}`)
-    ).size
-    const activeStaff = new Set(filteredEntries.map(e => e.staffName).filter(Boolean)).size
-    const avgPerStudent = uniqueStudents > 0 ? (totalPoints / uniqueStudents).toFixed(1) : '0'
-    const avgPerAward = totalRecords > 0 ? (totalPoints / totalRecords).toFixed(1) : '0'
-    return { totalPoints, totalRecords, uniqueStudents, activeStaff, avgPerStudent, avgPerAward }
-  }, [filteredEntries])
 
   // Points by House chart data
   const houseChartData = useMemo(() => {
@@ -186,9 +181,61 @@ export default function AnalyticsPage() {
     }
   }, [])
 
+  const fetchStats = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_analytics_stats', {
+        p_house: appliedFilters.house || null,
+        p_grade: appliedFilters.grade ? Number(appliedFilters.grade) : null,
+        p_section: appliedFilters.section || null,
+        p_staff: appliedFilters.staff || null,
+        p_category: appliedFilters.category || null,
+        p_subcategory: appliedFilters.subcategory || null,
+        p_start_date: appliedFilters.startDate || null,
+        p_end_date: appliedFilters.endDate || null,
+      })
+
+      if (error) {
+        console.error('Error fetching analytics stats:', error)
+        return
+      }
+
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row) return
+
+      setStats({
+        totalPoints: Number(row.total_points) || 0,
+        totalRecords: Number(row.total_records) || 0,
+        uniqueStudents: Number(row.unique_students) || 0,
+        activeStaff: Number(row.active_staff) || 0,
+        avgPerStudent: row.avg_per_student !== null ? Number(row.avg_per_student).toFixed(1) : '0',
+        avgPerAward: row.avg_per_award !== null ? Number(row.avg_per_award).toFixed(1) : '0',
+      })
+    } catch (error) {
+      console.error('Error fetching analytics stats:', error)
+    }
+  }, [appliedFilters])
+
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('analytics-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.meritLog }, () => {
+        fetchData()
+        fetchStats()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchData, fetchStats])
 
   useEffect(() => {
     if (paramsApplied.current) return

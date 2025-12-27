@@ -287,7 +287,7 @@ export default function HouseMvpsPage() {
               return (
                 <div
                   key={houseName}
-                  className="relative rounded-lg overflow-hidden shadow-lg"
+                  className="relative rounded-lg overflow-hidden shadow-lg float-card"
                   style={{
                     borderLeft: `5px solid ${config.color}`,
                     background: config.bgColor,

@@ -82,19 +82,32 @@ export default function ReportsPage() {
   const [selectedGrade, setSelectedGrade] = useState('')
   const [selectedSection, setSelectedSection] = useState('')
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      const { data } = await supabase.from(Tables.students).select('*')
-      const allStudents = (data || []).map((s) => ({
-        name: s.student_name || '',
-        grade: s.grade || 0,
-        section: s.section || '',
-        house: s.house || '',
-      }))
-      setStudents(allStudents.filter((s) => s.name))
-    }
+  const fetchStudents = async () => {
+    const { data } = await supabase.from(Tables.students).select('*')
+    const allStudents = (data || []).map((s) => ({
+      name: s.student_name || '',
+      grade: s.grade || 0,
+      section: s.section || '',
+      house: s.house || '',
+    }))
+    setStudents(allStudents.filter((s) => s.name))
+  }
 
+  useEffect(() => {
     fetchStudents()
+  }, [])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('reports-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.students }, () => {
+        fetchStudents()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const fetchAllMeritEntries = async () => {

@@ -48,6 +48,22 @@ export default function StaffPage() {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('staff-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.staff }, () => {
+        fetchData()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.meritLog }, () => {
+        fetchData()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
   const fetchData = async () => {
     setIsLoading(true)
     try {

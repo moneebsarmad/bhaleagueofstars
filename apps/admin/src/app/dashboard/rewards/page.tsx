@@ -27,11 +27,19 @@ interface MeritEntry {
   section: string
 }
 
+interface HallEntry {
+  name: string
+  grade: number
+  section: string
+  gender: string
+  totalPoints: number
+}
+
 // Hall of Fame tiers
 const hallOfFameTiers = [
-  { name: 'Century Club', points: 100, icon: '💯', color: 'from-[#6b4a1a] to-[#b08a2e]' },
-  { name: 'Badr Club', points: 300, icon: '🌙', color: 'from-[#1f2a44] to-[#3b537a]' },
-  { name: 'Elite 500', points: 500, icon: '👑', color: 'from-[#7a0f2b] to-[#b13a52]' },
+  { name: 'Century Club', points: 100, icon: '💯', color: 'from-[#6b4a1a] to-[#b08a2e]', view: 'century_club' },
+  { name: 'Badr Club', points: 300, icon: '🌙', color: 'from-[#1f2a44] to-[#3b537a]', view: 'badr_club' },
+  { name: 'Fath Club', points: 500, icon: '🏆', color: 'from-[#23523b] to-[#3a7b59]', view: 'fath_club' },
 ]
 
 // Quarterly badges
@@ -51,11 +59,28 @@ const houseLogos: Record<string, string> = {
 export default function RewardsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [meritEntries, setMeritEntries] = useState<MeritEntry[]>([])
+  const [hallOfFameEntries, setHallOfFameEntries] = useState<Record<string, HallEntry[]>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState<'hall-of-fame' | 'badges' | 'monthly' | 'approaching'>('hall-of-fame')
 
   useEffect(() => {
     fetchData()
+  }, [])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('rewards-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.students }, () => {
+        fetchData()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.meritLog }, () => {
+        fetchData()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const getThreeRCategory = (value: string) => {
@@ -69,6 +94,58 @@ export default function RewardsPage() {
   const fetchData = async () => {
     setIsLoading(true)
     try {
+      const getRowValue = (row: Record<string, unknown>, keys: string[]) => {
+        for (const key of keys) {
+          if (key in row) return row[key]
+        }
+        const normalizedKeys = Object.keys(row).reduce<Record<string, string>>((acc, key) => {
+          acc[key.toLowerCase()] = key
+          return acc
+        }, {})
+        for (const key of keys) {
+          const normalized = normalizedKeys[key.toLowerCase()]
+          if (normalized) return row[normalized]
+        }
+        return undefined
+      }
+
+      const fetchHallOfFame = async () => {
+        const results = await Promise.all(
+          hallOfFameTiers.map(async (tier) => {
+            const { data, error } = await supabase.from(tier.view).select('*')
+            if (error) {
+              console.error(`Error fetching ${tier.view}:`, error)
+              return { view: tier.view, entries: [] as HallEntry[] }
+            }
+            const entries = (data || [])
+              .map((row: Record<string, unknown>) => {
+                const nameRaw = getRowValue(row, ['student_name', 'student', 'name', 'full_name'])
+                const gradeRaw = getRowValue(row, ['grade'])
+                const sectionRaw = getRowValue(row, ['section'])
+                const genderRaw = getRowValue(row, ['gender'])
+                const pointsRaw = getRowValue(row, ['total_points', 'points', 'total'])
+                const name = String(nameRaw ?? '').trim()
+                if (!name) return null
+                return {
+                  name,
+                  grade: Number(gradeRaw) || 0,
+                  section: String(sectionRaw ?? ''),
+                  gender: String(genderRaw ?? ''),
+                  totalPoints: Number(pointsRaw) || 0,
+                }
+              })
+              .filter(Boolean) as HallEntry[]
+            return { view: tier.view, entries }
+          })
+        )
+
+        const next: Record<string, HallEntry[]> = {}
+        results.forEach((result) => {
+          next[result.view] = result.entries
+        })
+        setHallOfFameEntries(next)
+      }
+
       // Fetch students from all grade tables
       const studentMap: Record<string, Student> = {}
       const { data: studentData } = await supabase.from(Tables.students).select('*')
@@ -149,6 +226,7 @@ export default function RewardsPage() {
       }
 
       setStudents(Object.values(studentMap))
+      await fetchHallOfFame()
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -186,16 +264,13 @@ export default function RewardsPage() {
   // Hall of Fame - students who reached milestones
   const hallOfFame = useMemo(() => {
     return hallOfFameTiers.map((tier) => {
-      const qualified = students
-        .filter((s) => s.totalPoints >= tier.points)
-        .sort((a, b) => b.totalPoints - a.totalPoints)
+      const entries = (hallOfFameEntries[tier.view] || []).slice().sort((a, b) => b.totalPoints - a.totalPoints)
+      const males = entries.filter((s) => s.gender?.toLowerCase() === 'm' || s.gender?.toLowerCase() === 'male')
+      const females = entries.filter((s) => s.gender?.toLowerCase() === 'f' || s.gender?.toLowerCase() === 'female')
 
-      const males = qualified.filter((s) => s.gender?.toLowerCase() === 'm' || s.gender?.toLowerCase() === 'male')
-      const females = qualified.filter((s) => s.gender?.toLowerCase() === 'f' || s.gender?.toLowerCase() === 'female')
-
-      return { ...tier, males, females, total: qualified.length }
+      return { ...tier, males, females, total: entries.length }
     })
-  }, [students])
+  }, [hallOfFameEntries])
 
   // Quarterly Badges - top in each category
   const badgeWinners = useMemo(() => {

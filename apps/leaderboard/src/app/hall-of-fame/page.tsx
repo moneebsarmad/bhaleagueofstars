@@ -209,7 +209,7 @@ export default function HallOfFamePage() {
               return (
                 <div
                   key={section.id}
-                  className="rounded-lg overflow-hidden shadow-lg"
+                  className="rounded-lg overflow-hidden shadow-lg float-card"
                   style={{
                     borderLeft: `5px solid ${section.accent}`,
                     background: section.tint,

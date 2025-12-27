@@ -60,6 +60,19 @@ export default function DashboardPage() {
     fetchDashboardData()
   }, [])
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('dashboard-overview')
+      .on('postgres_changes', { event: '*', schema: 'public', table: Tables.meritLog }, () => {
+        fetchDashboardData()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
   const fetchDashboardData = async () => {
     setIsLoading(true)
     try {
@@ -118,9 +131,6 @@ export default function DashboardPage() {
           return ''
         }
 
-        const getStudentKey = (e: MeritEntry) =>
-          `${e.studentName.toLowerCase()}|${e.grade}|${e.section.toLowerCase()}`
-
         // Calculate house points directly from merit entries
         const housePoints: Record<string, number> = {}
         entries.forEach((e) => {
@@ -129,29 +139,61 @@ export default function DashboardPage() {
           housePoints[house] = (housePoints[house] || 0) + e.points
         })
 
-        // Calculate top students per house using stable student keys
-        const studentTotals: Record<string, { name: string; house: string; points: number }> = {}
-        entries.forEach((e) => {
-          const house = e.house ? canonicalHouse(e.house) : ''
+        const getRowValue = (row: Record<string, unknown>, keys: string[]) => {
+          for (const key of keys) {
+            if (key in row) {
+              return row[key]
+            }
+          }
+          const normalizedKeys = Object.keys(row).reduce<Record<string, string>>((acc, key) => {
+            acc[key.toLowerCase()] = key
+            return acc
+          }, {})
+          for (const key of keys) {
+            const normalized = normalizedKeys[key.toLowerCase()]
+            if (normalized) {
+              return row[normalized]
+            }
+          }
+          return undefined
+        }
+
+        const { data: topStudentsData, error: topStudentsError } = await supabase
+          .from('top_students_per_house')
+          .select('*')
+
+        if (topStudentsError) {
+          console.error('Error fetching top students per house:', topStudentsError)
+        }
+
+        const houseStudents: Record<string, { name: string; points: number; rank?: number | null }[]> = {}
+        ;(topStudentsData || []).forEach((row: Record<string, unknown>) => {
+          const houseRaw = getRowValue(row, ['house', 'house_name'])
+          const studentRaw = getRowValue(row, ['student_name', 'student', 'name'])
+          const pointsRaw = getRowValue(row, ['total_points', 'points'])
+          const rankRaw = getRowValue(row, ['house_rank', 'rank'])
+          const house = houseRaw ? canonicalHouse(String(houseRaw)) : ''
           if (!house) return
-          const key = `${getStudentKey(e)}|${house.toLowerCase()}`
-          if (!studentTotals[key]) {
-            studentTotals[key] = { name: e.studentName, house, points: 0 }
+          const studentName = String(studentRaw ?? '').trim() || 'Unnamed Student'
+          const points = Number(pointsRaw) || 0
+          const rank = Number(rankRaw)
+          if (!houseStudents[house]) {
+            houseStudents[house] = []
           }
-          studentTotals[key].points += e.points
+          houseStudents[house].push({
+            name: studentName,
+            points,
+            rank: Number.isFinite(rank) ? rank : null,
+          })
         })
 
-        const houseStudents: Record<string, { name: string; points: number }[]> = {}
-        Object.values(studentTotals).forEach((student) => {
-          if (!houseStudents[student.house]) {
-            houseStudents[student.house] = []
-          }
-          houseStudents[student.house].push({ name: student.name, points: student.points })
-        })
-
-        // Sort students within each house
         Object.keys(houseStudents).forEach((house) => {
-          houseStudents[house].sort((a, b) => b.points - a.points)
+          houseStudents[house].sort((a, b) => {
+            const rankA = Number.isFinite(a.rank ?? NaN) ? (a.rank as number) : Number.POSITIVE_INFINITY
+            const rankB = Number.isFinite(b.rank ?? NaN) ? (b.rank as number) : Number.POSITIVE_INFINITY
+            if (rankA !== rankB) return rankA - rankB
+            return b.points - a.points
+          })
         })
 
         const totalPoints = Object.values(housePoints).reduce((a, b) => a + b, 0)
@@ -165,7 +207,10 @@ export default function DashboardPage() {
           accentGradient: houseConfig[name].accentGradient,
           logo: houseConfig[name].logo,
           percentage: totalPoints > 0 ? ((housePoints[name] || 0) / totalPoints) * 100 : 0,
-          topStudents: (houseStudents[name] || []).slice(0, 5),
+          topStudents: (houseStudents[name] || []).slice(0, 5).map((student) => ({
+            name: student.name,
+            points: student.points,
+          })),
         }))
 
         houseData.sort((a, b) => b.points - a.points)

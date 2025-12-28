@@ -88,11 +88,17 @@ export default function BehaviourIntelligencePage() {
         body: formData,
       })
       const contentType = response.headers.get('content-type') || ''
-      const rawBody = await response.text()
-      const data =
-        contentType.includes('application/json') && rawBody
-          ? (JSON.parse(rawBody) as UploadResponse)
-          : ({ error: rawBody } as UploadResponse)
+      const rawBody = (await response.text()).trim()
+      let data: UploadResponse
+      if (contentType.includes('application/json') && rawBody) {
+        try {
+          data = JSON.parse(rawBody) as UploadResponse
+        } catch (error) {
+          data = { error: `Upload failed: ${String(error)}` }
+        }
+      } else {
+        data = { error: rawBody }
+      }
 
       if (!response.ok) {
         setUploadError(data.error || 'Upload failed. Please review the file and try again.')
@@ -118,11 +124,17 @@ export default function BehaviourIntelligencePage() {
         body: JSON.stringify({}),
       })
       const contentType = response.headers.get('content-type') || ''
-      const rawBody = await response.text()
-      const data =
-        contentType.includes('application/json') && rawBody
-          ? (JSON.parse(rawBody) as { processed?: number; error?: string })
-          : ({ error: rawBody } as { processed?: number; error?: string })
+      const rawBody = (await response.text()).trim()
+      let data: { processed?: number; error?: string }
+      if (contentType.includes('application/json') && rawBody) {
+        try {
+          data = JSON.parse(rawBody) as { processed?: number; error?: string }
+        } catch (error) {
+          data = { error: `Reprocess failed: ${String(error)}` }
+        }
+      } else {
+        data = { error: rawBody }
+      }
 
       if (!response.ok) {
         setReprocessMessage(data.error || 'Reprocess failed.')

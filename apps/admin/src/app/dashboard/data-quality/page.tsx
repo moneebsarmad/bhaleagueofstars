@@ -160,7 +160,7 @@ export default function DataQualityPage() {
           { label: 'House Variants', value: stats.houseVariantCount },
         ].map((item) => (
           <div key={item.label} className="regal-card rounded-2xl p-6">
-            <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider">{item.label}</p>
+            <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-wider">{item.label}</p>
             <p className="text-3xl font-semibold text-[#1a1a2e] mt-2">{item.value}</p>
           </div>
         ))}

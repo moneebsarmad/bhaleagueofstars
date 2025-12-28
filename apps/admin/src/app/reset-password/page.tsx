@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
 
           <form onSubmit={handleReset} className="p-8 pt-6">
             <div className="mb-6">
-              <label htmlFor="email" className="block text-xs font-semibold text-white/40 mb-2 uppercase tracking-wider">
+              <label htmlFor="email" className="block text-xs font-semibold text-white/40 mb-2 tracking-wider">
                 Admin Email
               </label>
               <input

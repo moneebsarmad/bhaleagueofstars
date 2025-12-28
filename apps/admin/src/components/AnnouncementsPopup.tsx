@@ -104,7 +104,7 @@ export default function AnnouncementsPopup() {
           </h3>
           <button
             onClick={handleDismiss}
-            className="text-xs font-semibold uppercase tracking-wider text-[#1a1a2e]/50 hover:text-[#1a1a2e]"
+            className="text-xs font-semibold tracking-wider text-[#1a1a2e]/50 hover:text-[#1a1a2e]"
           >
             Dismiss
           </button>
@@ -114,7 +114,7 @@ export default function AnnouncementsPopup() {
           {unseenAnnouncements.map((item) => (
             <div key={item.id} className="rounded-xl border border-[#c9a227]/20 bg-white/90 px-4 py-3">
               <div className="flex items-center gap-2">
-                {item.pinned && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a227]/20 text-[#7a5b1a] font-semibold uppercase tracking-wider">Pinned</span>}
+                {item.pinned && <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a227]/20 text-[#7a5b1a] font-semibold tracking-wider">Pinned</span>}
                 <h4 className="text-sm font-semibold text-[#1a1a2e]">{item.title}</h4>
               </div>
               <p className="text-xs text-[#1a1a2e]/60 mt-1">

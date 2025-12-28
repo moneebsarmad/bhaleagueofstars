@@ -146,7 +146,7 @@ export default function AnnouncementsPage() {
         <div className="flex items-center gap-3">
           <div className="h-1 w-16 bg-gradient-to-r from-[#c9a227] to-[#e8d48b] rounded-full"></div>
           <p className="text-[#1a1a2e]/50 text-sm font-medium">Share updates with staff and students</p>
-          <div className={`ml-auto flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full border ${
+          <div className={`ml-auto flex items-center gap-2 text-[11px] font-semibold tracking-widest px-3 py-1 rounded-full border ${
             isLive
               ? 'text-emerald-700 border-emerald-200 bg-emerald-50'
               : 'text-amber-700 border-amber-200 bg-amber-50'
@@ -163,7 +163,7 @@ export default function AnnouncementsPage() {
         </h3>
         <div className="mt-4 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
               Title
             </label>
             <input
@@ -175,7 +175,7 @@ export default function AnnouncementsPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
               Message
             </label>
             <textarea
@@ -187,7 +187,7 @@ export default function AnnouncementsPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
                 Publish At
               </label>
               <input
@@ -199,7 +199,7 @@ export default function AnnouncementsPage() {
               <p className="text-[11px] text-[#1a1a2e]/40 mt-1">Leave empty to publish immediately.</p>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
                 Expires At
               </label>
               <input
@@ -212,7 +212,7 @@ export default function AnnouncementsPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
               Audience Roles
             </label>
             <div className="flex flex-wrap gap-2">
@@ -234,7 +234,7 @@ export default function AnnouncementsPage() {
             <p className="text-[11px] text-[#1a1a2e]/40 mt-1">Leave empty to show to all roles.</p>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
               Target Houses
             </label>
             <div className="flex flex-wrap gap-2">
@@ -256,7 +256,7 @@ export default function AnnouncementsPage() {
             <p className="text-[11px] text-[#1a1a2e]/40 mt-1">Leave empty to show to all houses.</p>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
               Target Grades
             </label>
             <div className="flex flex-wrap gap-2">
@@ -319,11 +319,11 @@ export default function AnnouncementsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {announcement.pinned && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a227]/20 text-[#7a5b1a] font-semibold uppercase tracking-wider">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a227]/20 text-[#7a5b1a] font-semibold tracking-wider">
                       Pinned
                     </span>
                   )}
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider ${getStatus(announcement).tone}`}>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold tracking-wider ${getStatus(announcement).tone}`}>
                     {getStatus(announcement).label}
                   </span>
                 </div>

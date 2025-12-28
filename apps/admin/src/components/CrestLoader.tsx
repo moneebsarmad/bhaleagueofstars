@@ -14,7 +14,7 @@ export default function CrestLoader({ label }: CrestLoaderProps) {
         <div className="text-xl md:text-2xl font-semibold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           League of Stars
         </div>
-        <div className="mt-2 md:mt-3 text-[10px] md:text-sm font-semibold uppercase tracking-[0.18em] md:tracking-[0.2em]">
+        <div className="mt-2 md:mt-3 text-[10px] md:text-sm font-semibold tracking-[0.18em] md:tracking-[0.2em]">
           <span className="text-[#2f0a61]">Loyalty</span>
           <span className="text-[#1a1a2e]/40"> | </span>
           <span className="text-[#055437]">Wisdom</span>

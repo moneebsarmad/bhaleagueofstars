@@ -683,7 +683,7 @@ export default function RewardsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Males */}
                   <div>
-                    <h4 className="text-sm font-semibold text-[#1a1a2e]/40 uppercase tracking-wider mb-4">Male Recipients ({tier.males.length})</h4>
+                    <h4 className="text-sm font-semibold text-[#1a1a2e]/40 tracking-wider mb-4">Male Recipients ({tier.males.length})</h4>
                     {tier.males.length === 0 ? (
                       <p className="text-[#1a1a2e]/30 text-sm">No male students have reached this milestone yet</p>
                     ) : (
@@ -708,7 +708,7 @@ export default function RewardsPage() {
                   </div>
                   {/* Females */}
                   <div>
-                    <h4 className="text-sm font-semibold text-[#1a1a2e]/40 uppercase tracking-wider mb-4">Female Recipients ({tier.females.length})</h4>
+                    <h4 className="text-sm font-semibold text-[#1a1a2e]/40 tracking-wider mb-4">Female Recipients ({tier.females.length})</h4>
                     {tier.females.length === 0 ? (
                       <p className="text-[#1a1a2e]/30 text-sm">No female students have reached this milestone yet</p>
                     ) : (
@@ -774,7 +774,7 @@ export default function RewardsPage() {
                 <div className="space-y-4">
                   {/* Top Male */}
                   <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
-                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">Top Male</p>
+                    <p className="text-xs font-semibold text-blue-600 tracking-wider mb-2">Top Male</p>
                     {badge.topMale ? (
                       <div>
                         <p className="font-bold text-[#1a1a2e]">{badge.topMale.name}</p>
@@ -786,7 +786,7 @@ export default function RewardsPage() {
                   </div>
                   {/* Top Female */}
                   <div className="p-4 rounded-xl bg-pink-50 border border-pink-100">
-                    <p className="text-xs font-semibold text-pink-600 uppercase tracking-wider mb-2">Top Female</p>
+                    <p className="text-xs font-semibold text-pink-600 tracking-wider mb-2">Top Female</p>
                     {badge.topFemale ? (
                       <div>
                         <p className="font-bold text-[#1a1a2e]">{badge.topFemale.name}</p>
@@ -888,7 +888,7 @@ export default function RewardsPage() {
                   {houseLogos[h.house] && (
                     <img src={houseLogos[h.house]} alt={h.house} className="w-12 h-12 mx-auto mb-3 object-contain" />
                   )}
-                  <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider mb-2">{h.house.replace('House of ', '')}</p>
+                  <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-wider mb-2">{h.house.replace('House of ', '')}</p>
                   {h.mvp ? (
                     <>
                       <p className="font-bold text-[#1a1a2e]">{h.mvp.name}</p>
@@ -916,7 +916,7 @@ export default function RewardsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {gradeChampions.map((g) => (
                 <div key={g.grade} className="p-4 rounded-xl bg-[#f5f3ef] text-center">
-                  <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider mb-2">Grade {g.grade}</p>
+                  <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-wider mb-2">Grade {g.grade}</p>
                   {g.champion ? (
                     <>
                       <p className="font-bold text-[#1a1a2e] text-sm truncate">Section {g.champion.section}</p>

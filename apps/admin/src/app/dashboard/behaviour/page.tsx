@@ -151,7 +151,7 @@ export default function BehaviourIntelligencePage() {
   return (
     <div>
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c9a227] mb-2">Behaviour Intelligence</p>
+        <p className="text-xs font-semibold tracking-[0.2em] text-[#c9a227] mb-2">Behaviour Intelligence</p>
         <h1
           className="text-3xl font-bold text-[#1a1a2e] mb-2"
           style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}
@@ -176,7 +176,7 @@ export default function BehaviourIntelligencePage() {
 
           <div className="grid gap-5">
             <div className="border border-dashed border-[#c9a227]/40 rounded-2xl p-5 bg-white/60">
-              <label className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/50">CSV file</label>
+              <label className="text-xs tracking-[0.2em] text-[#1a1a2e]/50">CSV file</label>
               <div className="mt-3 flex flex-col gap-3">
                 <input
                   type="file"
@@ -199,7 +199,7 @@ export default function BehaviourIntelligencePage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="bg-white rounded-2xl p-4 border border-[#c9a227]/20">
-                <label className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/50">Source system</label>
+                <label className="text-xs tracking-[0.2em] text-[#1a1a2e]/50">Source system</label>
                 <input
                   value={sourceSystem}
                   onChange={(event) => setSourceSystem(event.target.value)}
@@ -208,7 +208,7 @@ export default function BehaviourIntelligencePage() {
                 />
               </div>
               <div className="bg-white rounded-2xl p-4 border border-[#c9a227]/20">
-                <label className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/50">Upload type</label>
+                <label className="text-xs tracking-[0.2em] text-[#1a1a2e]/50">Upload type</label>
                 <select
                   value={uploadType}
                   onChange={(event) => setUploadType(event.target.value as 'append' | 'replace_range' | 'replace_all')}
@@ -224,7 +224,7 @@ export default function BehaviourIntelligencePage() {
             {uploadType === 'replace_range' && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="bg-white rounded-2xl p-4 border border-[#c9a227]/20">
-                  <label className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/50">Date range start</label>
+                  <label className="text-xs tracking-[0.2em] text-[#1a1a2e]/50">Date range start</label>
                   <input
                     type="date"
                     value={dateRangeStart}
@@ -233,7 +233,7 @@ export default function BehaviourIntelligencePage() {
                   />
                 </div>
                 <div className="bg-white rounded-2xl p-4 border border-[#c9a227]/20">
-                  <label className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/50">Date range end</label>
+                  <label className="text-xs tracking-[0.2em] text-[#1a1a2e]/50">Date range end</label>
                   <input
                     type="date"
                     value={dateRangeEnd}

@@ -157,7 +157,7 @@ export default function SearchPage() {
       </div>
 
       <div className="regal-card rounded-2xl p-6 mb-8">
-        <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 uppercase tracking-wider">
+        <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
           Search by name
         </label>
         <input
@@ -208,7 +208,7 @@ export default function SearchPage() {
 
           {selectedStudentKey && (
             <div className="mt-6">
-              <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider mb-2">Recent recognitions</p>
+              <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-wider mb-2">Recent recognitions</p>
               {studentHistory.length === 0 ? (
                 <p className="text-sm text-[#1a1a2e]/40">No recognitions found.</p>
               ) : (
@@ -257,15 +257,15 @@ export default function SearchPage() {
           {selectedStaffName && staffStats && (
             <div className="mt-6 grid grid-cols-3 gap-3">
               <div className="rounded-xl bg-[#f5f3ef] px-4 py-3 text-center">
-                <p className="text-xs text-[#1a1a2e]/40 uppercase tracking-wider">Points</p>
+                <p className="text-xs text-[#1a1a2e]/40 tracking-wider">Points</p>
                 <p className="text-lg font-semibold text-[#1a1a2e]">{staffStats.points.toLocaleString()}</p>
               </div>
               <div className="rounded-xl bg-[#f5f3ef] px-4 py-3 text-center">
-                <p className="text-xs text-[#1a1a2e]/40 uppercase tracking-wider">Awards</p>
+                <p className="text-xs text-[#1a1a2e]/40 tracking-wider">Awards</p>
                 <p className="text-lg font-semibold text-[#1a1a2e]">{staffStats.awards.toLocaleString()}</p>
               </div>
               <div className="rounded-xl bg-[#f5f3ef] px-4 py-3 text-center">
-                <p className="text-xs text-[#1a1a2e]/40 uppercase tracking-wider">Students</p>
+                <p className="text-xs text-[#1a1a2e]/40 tracking-wider">Students</p>
                 <p className="text-lg font-semibold text-[#1a1a2e]">{staffStats.students.toLocaleString()}</p>
               </div>
             </div>

@@ -478,7 +478,7 @@ export default function StaffPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest text-[#1a1a2e]/40">Month</span>
+            <span className="text-xs tracking-widest text-[#1a1a2e]/40">Month</span>
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
@@ -571,7 +571,7 @@ export default function StaffPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="p-5 rounded-xl bg-[#f5f3ef] border border-[#c9a227]/20">
-            <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-widest">House Spirit Award</p>
+            <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-widest">House Spirit Award</p>
             <p className="text-sm text-[#1a1a2e]/60 mt-1">House with the highest collective staff participation</p>
             <div className="mt-4">
               <p className="text-lg font-bold text-[#1a1a2e]">{monthlyAwards.houseSpirit?.house || 'No data'}</p>
@@ -584,7 +584,7 @@ export default function StaffPage() {
           </div>
 
           <div className="p-5 rounded-xl bg-[#f5f3ef] border border-[#c9a227]/20">
-            <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-widest">3R All-Star</p>
+            <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-widest">3R All-Star</p>
             <p className="text-sm text-[#1a1a2e]/60 mt-1">Most diverse merit categories</p>
             <div className="mt-4">
               <p className="text-lg font-bold text-[#1a1a2e]">{monthlyAwards.allStar?.name || 'No data'}</p>
@@ -597,7 +597,7 @@ export default function StaffPage() {
           </div>
 
           <div className="p-5 rounded-xl bg-[#f5f3ef] border border-[#c9a227]/20">
-            <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-widest">The Steady Hand</p>
+            <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-widest">The Steady Hand</p>
             <p className="text-sm text-[#1a1a2e]/60 mt-1">Most days with point submissions</p>
             <div className="mt-4">
               <p className="text-lg font-bold text-[#1a1a2e]">{monthlyAwards.steadyHand?.name || 'No data'}</p>
@@ -610,7 +610,7 @@ export default function StaffPage() {
           </div>
 
           <div className="p-5 rounded-xl bg-[#f5f3ef] border border-[#c9a227]/20">
-            <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-widest">The Diamond Finder</p>
+            <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-widest">The Diamond Finder</p>
             <p className="text-sm text-[#1a1a2e]/60 mt-1">Most unique students recognized</p>
             <div className="mt-4">
               <p className="text-lg font-bold text-[#1a1a2e]">{monthlyAwards.diamondFinder?.name || 'No data'}</p>
@@ -626,7 +626,7 @@ export default function StaffPage() {
         <div className="mt-6 p-5 rounded-xl bg-white border border-[#c9a227]/10">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-widest">House Champion Award</p>
+              <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-widest">House Champion Award</p>
               <p className="text-sm text-[#1a1a2e]/60 mt-1">Top contributor from each house</p>
             </div>
             <span className="text-xs text-[#1a1a2e]/40">4 recipients</span>
@@ -634,7 +634,7 @@ export default function StaffPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {monthlyAwards.houseChampions.map((entry) => (
               <div key={entry.house} className="rounded-xl bg-[#f5f3ef] px-4 py-3">
-                <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider">
+                <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-wider">
                   {entry.house.replace('House of ', '')}
                 </p>
                 {entry.winner ? (
@@ -661,7 +661,7 @@ export default function StaffPage() {
               </h3>
               <p className="text-xs text-[#1a1a2e]/40 mt-1">Complete performance breakdown for all staff members</p>
             </div>
-            <span className="text-xs font-semibold uppercase tracking-wider bg-[#c9a227]/15 text-[#9a7b1a] px-3 py-1 rounded-full">
+            <span className="text-xs font-semibold tracking-wider bg-[#c9a227]/15 text-[#9a7b1a] px-3 py-1 rounded-full">
               {selectedMonthLabel}
             </span>
           </div>

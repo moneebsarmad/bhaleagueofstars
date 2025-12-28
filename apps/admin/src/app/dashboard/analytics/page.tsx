@@ -435,12 +435,12 @@ export default function AnalyticsPage() {
           <svg className="w-5 h-5 text-[#c9a227]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
-          <h3 className="text-sm font-semibold text-[#1a1a2e] uppercase tracking-wider">Filter Data</h3>
+          <h3 className="text-sm font-semibold text-[#1a1a2e] tracking-wider">Filter Data</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-5">
           {/* House Filter */}
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">House</label>
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">House</label>
             <select
               value={filters.house}
               onChange={(e) => handleFilterChange('house', e.target.value)}
@@ -455,7 +455,7 @@ export default function AnalyticsPage() {
 
           {/* Grade Filter */}
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">Grade</label>
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">Grade</label>
             <select
               value={filters.grade}
               onChange={(e) => handleFilterChange('grade', e.target.value)}
@@ -470,7 +470,7 @@ export default function AnalyticsPage() {
 
           {/* Section Filter */}
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">Section</label>
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">Section</label>
             <select
               value={filters.section}
               onChange={(e) => handleFilterChange('section', e.target.value)}
@@ -485,7 +485,7 @@ export default function AnalyticsPage() {
 
           {/* Staff Filter */}
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">Staff</label>
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">Staff</label>
             <select
               value={filters.staff}
               onChange={(e) => handleFilterChange('staff', e.target.value)}
@@ -500,7 +500,7 @@ export default function AnalyticsPage() {
 
           {/* Category Filter */}
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">Category</label>
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">Category</label>
             <select
               value={filters.category}
               onChange={(e) => handleFilterChange('category', e.target.value)}
@@ -515,7 +515,7 @@ export default function AnalyticsPage() {
 
           {/* Subcategory Filter */}
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">Subcategory</label>
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">Subcategory</label>
             <select
               value={filters.subcategory}
               onChange={(e) => handleFilterChange('subcategory', e.target.value)}
@@ -530,7 +530,7 @@ export default function AnalyticsPage() {
 
           {/* Start Date */}
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">Start Date</label>
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">Start Date</label>
             <input
               type="date"
               value={filters.startDate}
@@ -541,7 +541,7 @@ export default function AnalyticsPage() {
 
           {/* End Date */}
           <div>
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">End Date</label>
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">End Date</label>
             <input
               type="date"
               value={filters.endDate}
@@ -600,7 +600,7 @@ export default function AnalyticsPage() {
         ].map((stat) => (
           <div key={stat.label} className="regal-card rounded-xl p-5">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider">{stat.label}</p>
+              <p className="text-xs font-semibold text-[#1a1a2e]/40 tracking-wider">{stat.label}</p>
               <span className="text-lg">{stat.icon}</span>
             </div>
             <p className="text-2xl font-bold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>

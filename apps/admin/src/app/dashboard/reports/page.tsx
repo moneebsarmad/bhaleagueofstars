@@ -173,20 +173,20 @@ export default function ReportsPage() {
             .report { background: #fffdf9; border: 1px solid #e7dfcf; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(20, 14, 4, 0.06); }
             .header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
             .crest { width: 64px; height: 64px; object-fit: contain; }
-            .brand { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #7a6a43; }
+            .brand { font-size: 12px; letter-spacing: 0.12em; color: #7a6a43; }
             .title { font-size: 20px; margin: 4px 0 0; }
             .subtitle { font-size: 12px; color: #6b5b3a; margin: 6px 0 16px; }
             .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
             .summary-card { border: 1px solid #eadfca; background: #fbf8f1; border-radius: 12px; padding: 10px 12px; }
-            .summary-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #8a7a55; margin-bottom: 4px; }
+            .summary-label { font-size: 10px; letter-spacing: 0.12em; color: #8a7a55; margin-bottom: 4px; }
             .summary-value { font-size: 16px; font-weight: 700; color: #2b1d0a; }
             .divider { height: 1px; background: #eadfca; margin: 14px 0; }
             .charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 16px 0; }
             .chart-card { border: 1px solid #eadfca; border-radius: 12px; padding: 12px; background: #fffaf0; }
-            .chart-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #7a6a43; margin-bottom: 8px; }
+            .chart-title { font-size: 11px; letter-spacing: 0.12em; color: #7a6a43; margin-bottom: 8px; }
             table { width: 100%; border-collapse: collapse; font-size: 11px; }
             th, td { border: 1px solid #e7dfcf; padding: 7px 8px; text-align: left; }
-            th { background: #f3ead6; color: #5b4a22; letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
+            th { background: #f3ead6; color: #5b4a22; letter-spacing: 0.08em; font-size: 10px; }
             tr:nth-child(even) td { background: #fbf8f1; }
             .report-card .title { font-size: 22px; }
             .report-card .crest { width: 72px; height: 72px; }
@@ -1095,7 +1095,7 @@ export default function ReportsPage() {
       <div className="regal-card rounded-2xl p-4 mb-6">
         <div className="flex flex-wrap items-center gap-4 justify-between">
           <div className="flex items-center gap-3">
-            <h3 className="text-sm font-semibold text-[#1a1a2e] uppercase tracking-wider">
+            <h3 className="text-sm font-semibold text-[#1a1a2e] tracking-wider">
               Report Date Range
             </h3>
             <span className="text-xs px-2.5 py-1 rounded-full bg-[#f5f3ef] text-[#1a1a2e]/60 border border-[#c9a227]/20">
@@ -1103,7 +1103,7 @@ export default function ReportsPage() {
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <label className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-[#1a1a2e]/40 tracking-wider">
               Start
             </label>
             <input
@@ -1112,7 +1112,7 @@ export default function ReportsPage() {
               onChange={(event) => setStartDate(event.target.value)}
               className="regal-input px-3 py-2 rounded-xl text-sm"
             />
-            <label className="text-xs font-semibold text-[#1a1a2e]/40 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-[#1a1a2e]/40 tracking-wider">
               End
             </label>
             <input
@@ -1142,7 +1142,7 @@ export default function ReportsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
-            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">
               Student
             </label>
             <div className="relative">
@@ -1213,7 +1213,7 @@ export default function ReportsPage() {
               PDF / CSV
             </span>
           </div>
-          <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">
             House
           </label>
           <select
@@ -1266,7 +1266,7 @@ export default function ReportsPage() {
               PDF / CSV
             </span>
           </div>
-          <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">
             Grade
           </label>
           <select
@@ -1314,7 +1314,7 @@ export default function ReportsPage() {
           </div>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div>
-              <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">
                 Grade
               </label>
               <select
@@ -1332,7 +1332,7 @@ export default function ReportsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-1.5 tracking-wider">
                 Section
               </label>
               <select
@@ -1381,7 +1381,7 @@ export default function ReportsPage() {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#1a1a2e]/40">{template.format}</span>
+              <span className="text-xs font-semibold tracking-wider text-[#1a1a2e]/40">{template.format}</span>
               <div className="flex gap-2">
                 <button
                   onClick={() => generateReport(template, 'PDF')}

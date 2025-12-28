@@ -259,7 +259,7 @@ export default function DashboardPage() {
               {/* House Header */}
               <div className="flex items-start justify-between gap-6 mb-5">
                 <div>
-                  <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-semibold text-white/70 bg-white/10 border border-white/15 px-3 py-1 rounded-full mb-4">
+                  <div className="inline-flex items-center gap-2 text-[10px] tracking-[0.2em] font-semibold text-white/70 bg-white/10 border border-white/15 px-3 py-1 rounded-full mb-4">
                     <span className="text-white/50">Rank</span>
                     <span className="text-white">{index + 1}</span>
                   </div>
@@ -297,7 +297,7 @@ export default function DashboardPage() {
 
               {/* Top Students */}
               <div className="mt-6">
-                <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-4">Top Performers</p>
+                <p className="text-white/50 text-xs font-semibold tracking-widest mb-4">Top Performers</p>
                 <div className="flex gap-3 overflow-x-auto pb-1">
                   {house.topStudents.map((student, i) => (
                     <div

@@ -1,5 +1,7 @@
-@import "@fontsource/cinzel/400.css";
-@import "@fontsource/cinzel/700.css";
+@import "@fontsource/cormorant-garamond/400.css";
+@import "@fontsource/cormorant-garamond/500.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/cormorant-garamond/700.css";
 @import "@fontsource/playfair-display/400.css";
 @import "@fontsource/playfair-display/500.css";
 @import "@fontsource/playfair-display/600.css";
@@ -9,7 +11,7 @@
 :root {
   --background: #faf9f7;
   --foreground: #1a1a2e;
-  --font-cinzel: "Cinzel", "Garamond", "Palatino Linotype", "Book Antiqua", serif;
+  --font-body: "Cormorant Garamond", "Garamond", "Palatino Linotype", "Book Antiqua", serif;
   --font-playfair: "Playfair Display", "Baskerville", "Garamond", "Palatino", serif;
 
   /* Regal Color Palette */
@@ -32,14 +34,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-cinzel);
+  --font-sans: var(--font-body);
   --font-display: var(--font-playfair);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), 'Cinzel', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-sans), 'Cormorant Garamond', Georgia, serif;
 }
 
 /* Elegant headings */

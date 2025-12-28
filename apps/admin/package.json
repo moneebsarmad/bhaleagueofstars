@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@fontsource/cinzel": "^5.2.8",
+    "@fontsource/cormorant-garamond": "^5.2.8",
     "@fontsource/playfair-display": "^5.2.8",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.88.0",

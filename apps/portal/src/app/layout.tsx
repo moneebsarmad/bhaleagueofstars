@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Cinzel, Playfair_Display } from "next/font/google";
+import { Cormorant_Garamond, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./providers";
 
-const cinzel = Cinzel({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-cinzel",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
 });
 
 const playfair = Playfair_Display({
@@ -25,7 +25,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${cinzel.variable} ${playfair.variable} antialiased`}>
+      <body className={`${cormorant.variable} ${playfair.variable} antialiased`}>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

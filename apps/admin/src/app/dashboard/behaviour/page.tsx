@@ -67,11 +67,6 @@ export default function BehaviourIntelligencePage() {
       return
     }
 
-    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-      setUploadError('PDF ingestion is not supported yet. Please upload a CSV file.')
-      return
-    }
-
     if (uploadType === 'replace_range' && (!dateRangeStart || !dateRangeEnd)) {
       setUploadError('Please provide both start and end dates for replace range uploads.')
       return
@@ -167,7 +162,7 @@ export default function BehaviourIntelligencePage() {
                   className="text-sm text-[#1a1a2e]/70 file:mr-4 file:rounded-xl file:border-0 file:bg-[#c9a227] file:px-4 file:py-2 file:text-white file:shadow-sm hover:file:bg-[#b08a1f]"
                 />
                 <div className="text-xs text-[#1a1a2e]/50">
-                  CSV is supported. PDF ingestion is coming soon.
+                  CSV and PDF reports are supported. PDFs are parsed from the Discipline Event Summary format.
                 </div>
                 <a
                   href={sampleCsvHref}

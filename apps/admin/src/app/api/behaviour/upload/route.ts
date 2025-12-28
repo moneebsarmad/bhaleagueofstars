@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { PDFParse } from 'pdf-parse'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { reprocessBehaviourInsights } from '@/backend/services/behaviourRulesEngine'
@@ -71,6 +72,137 @@ const parseCsv = (text: string) => {
   })
 }
 
+const parseDisciplinePdf = async (file: File) => {
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const parser = new PDFParse({ data: buffer })
+  const result = await parser.getText()
+  const lines = result.text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('--') && !line.includes('Author Details Points'))
+
+  const rows: CsvRow[] = []
+  let currentGrade: number | null = null
+  let currentStudent: string | null = null
+
+  const isGradeLine = (line: string) => /^\d{1,2}(st|nd|rd|th)$/i.test(line)
+  const isDateLine = (line: string) => /^\d{2}\/\d{2}\/\d{4}/.test(line)
+  const isStudentLine = (line: string) =>
+    line.includes(',') &&
+    !/Violation|Description|Resolution|Student Total|Support|MS\s*:|Level/i.test(line)
+
+  const parseHeader = (headerLine: string) => {
+    const pointsMatch = headerLine.match(/(-?\d+)\s*$/)
+    const pointsRaw = pointsMatch ? Number.parseInt(pointsMatch[1], 10) : null
+    const points = pointsRaw !== null && !Number.isNaN(pointsRaw) ? Math.abs(pointsRaw) : null
+    const header = pointsMatch ? headerLine.slice(0, pointsMatch.index).trim() : headerLine.trim()
+
+    let category = ''
+    let subcategory = header
+    if (/Support Violation/i.test(header)) {
+      category = 'Support Violation'
+      subcategory = header.replace(/Support Violation/i, '').trim()
+    } else if (/Violation/i.test(header)) {
+      category = 'Violation'
+      subcategory = header.replace(/Violation/i, '').trim()
+    }
+
+    subcategory = subcategory.replace(/^MS\s*:\s*/i, '').replace(/^Level\s*\d+\s*:\s*/i, '').trim()
+
+    const eventType = /Buy Back/i.test(header) || (pointsRaw !== null && pointsRaw < 0) ? 'merit' : 'demerit'
+
+    return { category, subcategory, points, eventType }
+  }
+
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
+    if (isGradeLine(line)) {
+      currentGrade = Number.parseInt(line, 10)
+      i += 1
+      continue
+    }
+
+    if (isStudentLine(line)) {
+      currentStudent = line
+      i += 1
+      continue
+    }
+
+    if (isDateLine(line) && currentStudent) {
+      const dateMatch = line.match(/^(\d{2}\/\d{2}\/\d{4})/)
+      const eventDate = dateMatch ? dateMatch[1] : ''
+      const remainder = line.replace(eventDate, '').trim().replace(/^,/, '').trim()
+
+      let staffName = ''
+      let headerLine = ''
+      const keywordIndex = remainder.search(/\bViolation\b|\bSupport\b/i)
+      if (keywordIndex > -1) {
+        const staffPart = remainder.slice(0, keywordIndex).trim().replace(/,$/, '')
+        if (staffPart && !/student/i.test(staffPart)) {
+          staffName = staffPart
+        }
+        headerLine = remainder.slice(keywordIndex).trim()
+      } else if (remainder && !/student/i.test(remainder)) {
+        staffName = remainder
+      }
+
+      if (!headerLine && lines[i + 1]) {
+        headerLine = lines[i + 1]
+        i += 1
+      }
+
+      const headerData = parseHeader(headerLine)
+      let description = ''
+      let resolution = ''
+      let section: 'description' | 'resolution' | null = null
+
+      i += 1
+      while (i < lines.length) {
+        const nextLine = lines[i]
+        if (isDateLine(nextLine) || isStudentLine(nextLine) || isGradeLine(nextLine)) {
+          i -= 1
+          break
+        }
+        if (/^Description/i.test(nextLine)) {
+          section = 'description'
+          description += `${nextLine.replace(/^Description/i, '').trim()} `
+        } else if (/^Resolution/i.test(nextLine)) {
+          section = 'resolution'
+          resolution += `${nextLine.replace(/^Resolution/i, '').trim()} `
+        } else if (/^Student Total/i.test(nextLine)) {
+          break
+        } else if (section === 'description') {
+          description += `${nextLine} `
+        } else if (section === 'resolution') {
+          resolution += `${nextLine} `
+        }
+        i += 1
+      }
+
+      const notes = [description.trim(), resolution.trim()].filter(Boolean).join(' | ')
+
+      rows.push({
+        student_name: currentStudent,
+        grade: currentGrade ? String(currentGrade) : '',
+        section: '',
+        event_type: headerData.eventType,
+        event_date: eventDate,
+        staff_name: staffName,
+        category: headerData.category,
+        subcategory: headerData.subcategory,
+        points: headerData.points !== null ? String(headerData.points) : '0',
+        notes,
+        source_system: 'Discipline Event Summary PDF',
+      })
+    }
+
+    i += 1
+  }
+
+  return rows
+}
+
 const parseDate = (value?: string) => {
   if (!value) return null
   const parsed = new Date(value)
@@ -128,11 +260,10 @@ export async function POST(request: Request) {
     const dateRangeEnd = parseDate(formData.get('date_range_end') as string | null)
 
     if (!file || !(file instanceof File)) {
-      return NextResponse.json({ error: 'CSV file is required.' }, { status: 400 })
+      return NextResponse.json({ error: 'CSV or PDF file is required.' }, { status: 400 })
     }
-
-    const csvText = await file.text()
-    const rows = parseCsv(csvText)
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    const rows = isPdf ? await parseDisciplinePdf(file) : parseCsv(await file.text())
 
     if (rows.length === 0) {
       return NextResponse.json({ error: 'No rows found in CSV.' }, { status: 400 })
@@ -195,25 +326,29 @@ export async function POST(request: Request) {
       const grade = parseIntSafe(row.grade)
       const section = row.section || ''
 
-      if (!studentId && studentName && grade !== null && section) {
-        const cacheKey = `${studentName}|${grade}|${section}`.toLowerCase()
+      if (!studentId && studentName) {
+        const cacheKey = `${studentName}|${grade ?? ''}|${section || ''}`.toLowerCase()
         const cached = studentCache.get(cacheKey)
         if (cached) {
           studentId = cached
         } else {
-          const { data: studentData, error: studentError } = await supabaseAdmin
-            .from('students')
-            .select('student_id')
-            .ilike('student_name', studentName)
-            .eq('grade', grade)
-            .eq('section', section)
-            .single()
-
-          if (studentError || !studentData?.student_id) {
+          let query = supabaseAdmin.from('students').select('student_id').ilike('student_name', studentName)
+          if (grade !== null) {
+            query = query.eq('grade', grade)
+          }
+          if (section) {
+            query = query.eq('section', section)
+          }
+          const { data: studentData, error: studentError } = await query
+          if (studentError || !studentData || studentData.length === 0) {
             errors.push({ row: index + 2, message: 'Unable to resolve student_id for row.' })
             continue
           }
-          studentId = studentData.student_id
+          if (studentData.length > 1) {
+            errors.push({ row: index + 2, message: 'Multiple students match. Provide section to disambiguate.' })
+            continue
+          }
+          studentId = studentData[0].student_id
           studentCache.set(cacheKey, studentId)
         }
       }

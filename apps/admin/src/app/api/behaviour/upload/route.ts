@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { PDFParse } from 'pdf-parse'
+import pdfParse from 'pdf-parse'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { reprocessBehaviourInsights } from '@/backend/services/behaviourRulesEngine'
@@ -74,8 +74,7 @@ const parseCsv = (text: string) => {
 
 const parseDisciplinePdf = async (file: File) => {
   const buffer = Buffer.from(await file.arrayBuffer())
-  const parser = new PDFParse({ data: buffer })
-  const result = await parser.getText()
+  const result = await pdfParse(buffer)
   const lines = result.text
     .split('\n')
     .map((line) => line.trim())

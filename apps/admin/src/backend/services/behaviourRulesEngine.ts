@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 type BehaviourEvent = {
   event_id: string
@@ -161,6 +161,7 @@ const computeInsightsForWindow = (events: BehaviourEvent[], timeWindow: '7d' | '
 }
 
 export const reprocessBehaviourInsights = async (studentIds?: string[]) => {
+  const supabaseAdmin = getSupabaseAdmin()
   const today = startOfDay(new Date())
   let ids = studentIds ?? []
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { reprocessBehaviourInsights } from '@/backend/services/behaviourRulesEngine'
 
 type CsvRow = Record<string, string>
@@ -119,6 +119,7 @@ const chunkArray = <T,>(items: T[], size: number) => {
 
 export async function POST(request: Request) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const formData = await request.formData()
     const file = formData.get('file')
     const sourceSystem = (formData.get('source_system') as string | null) ?? 'csv_upload'

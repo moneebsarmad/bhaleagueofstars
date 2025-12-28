@@ -3,6 +3,8 @@
 :root {
   --background: #faf9f7;
   --foreground: #1a1a2e;
+  --font-cinzel: "Cinzel", "Garamond", "Palatino Linotype", "Book Antiqua", serif;
+  --font-playfair: "Playfair Display", "Baskerville", "Garamond", "Palatino", serif;
 
   /* Regal Color Palette */
   --royal-purple: #2f0a61;

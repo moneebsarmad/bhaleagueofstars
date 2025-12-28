@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import pdfParse from 'pdf-parse'
+export const runtime = 'nodejs'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { reprocessBehaviourInsights } from '@/backend/services/behaviourRulesEngine'
@@ -73,6 +73,7 @@ const parseCsv = (text: string) => {
 }
 
 const parseDisciplinePdf = async (file: File) => {
+  const { default: pdfParse } = await import('pdf-parse')
   const buffer = Buffer.from(await file.arrayBuffer())
   const result = await pdfParse(buffer)
   const lines = result.text

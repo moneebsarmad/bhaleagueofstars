@@ -87,10 +87,15 @@ export default function BehaviourIntelligencePage() {
         method: 'POST',
         body: formData,
       })
+      const contentType = response.headers.get('content-type') || ''
+      const rawBody = await response.text()
+      const data =
+        contentType.includes('application/json') && rawBody
+          ? (JSON.parse(rawBody) as UploadResponse)
+          : ({ error: rawBody } as UploadResponse)
 
-      const data = (await response.json()) as UploadResponse
       if (!response.ok) {
-        setUploadError(data.error || 'Upload failed. Please review the CSV and try again.')
+        setUploadError(data.error || 'Upload failed. Please review the file and try again.')
       } else {
         setUploadResponse(data)
         setFile(null)
@@ -112,7 +117,13 @@ export default function BehaviourIntelligencePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       })
-      const data = await response.json()
+      const contentType = response.headers.get('content-type') || ''
+      const rawBody = await response.text()
+      const data =
+        contentType.includes('application/json') && rawBody
+          ? (JSON.parse(rawBody) as { processed?: number; error?: string })
+          : ({ error: rawBody } as { processed?: number; error?: string })
+
       if (!response.ok) {
         setReprocessMessage(data.error || 'Reprocess failed.')
       } else {

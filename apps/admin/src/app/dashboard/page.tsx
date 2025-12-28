@@ -259,7 +259,7 @@ export default function DashboardPage() {
               {/* House Header */}
               <div className="flex items-start justify-between gap-6 mb-5">
                 <div>
-                  <div className="inline-flex items-center gap-2 text-[10px] tracking-[0.2em] font-semibold text-white/70 bg-white/10 border border-white/15 px-3 py-1 rounded-full mb-4">
+                  <div className="inline-flex items-center gap-2 text-xs tracking-[0.15em] font-semibold text-white/70 bg-white/10 border border-white/15 px-3 py-1.5 rounded-full mb-4">
                     <span className="text-white/50">Rank</span>
                     <span className="text-white">{index + 1}</span>
                   </div>
@@ -285,19 +285,19 @@ export default function DashboardPage() {
                       }}
                     />
                   </div>
-                  <p className="text-white/60 text-sm font-medium">{house.percentage.toFixed(1)}% of total points</p>
+                  <p className="text-white/60 text-base font-medium">{house.percentage.toFixed(1)}% of total points</p>
                 </div>
                 <div className="text-right flex flex-col items-end gap-2 min-w-[150px] pt-4">
                   <p className="text-4xl font-bold text-white leading-none" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
                     {house.points.toLocaleString()}
                   </p>
-                  <p className="text-white/50 text-sm font-medium">Total Points</p>
+                  <p className="text-white/50 text-base font-medium">Total Points</p>
                 </div>
               </div>
 
               {/* Top Students */}
               <div className="mt-6">
-                <p className="text-white/50 text-xs font-semibold tracking-widest mb-4">Top Performers</p>
+                <p className="text-white/50 text-sm font-semibold tracking-widest mb-4">Top Performers</p>
                 <div className="flex gap-3 overflow-x-auto pb-1">
                   {house.topStudents.map((student, i) => (
                     <div

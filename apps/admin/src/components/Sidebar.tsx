@@ -22,6 +22,7 @@ const navItems: NavItem[] = [
   { id: 'search', name: 'Search', href: '/dashboard/search', icon: 'M21 21l-4.35-4.35m1.6-4.15a7 7 0 11-14 0 7 7 0 0114 0z' },
   { id: 'announcements', name: 'Announcements', href: '/dashboard/announcements', icon: 'M7 8h10M7 12h10M7 16h6M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
   { id: 'data-quality', name: 'Data Quality', href: '/dashboard/data-quality', icon: 'M9 12h6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h6l4 4v12a2 2 0 01-2 2zM14 3v5h5' },
+  { id: 'behaviour', name: 'Behaviour', href: '/dashboard/behaviour', icon: 'M12 3l7 4v6c0 5-3.5 9.5-7 11-3.5-1.5-7-6-7-11V7l7-4zM9 12l2 2 4-4' },
   { id: 'reports', name: 'Reports', href: '/dashboard/reports', icon: 'M9 12h6m-6 4h6M7 8h10M5 20h14a2 2 0 002-2V7.414a2 2 0 00-.586-1.414l-3.414-3.414A2 2 0 0015.586 2H5a2 2 0 00-2 2v14a2 2 0 002 2z' },
 ]
 
@@ -36,6 +37,7 @@ const defaultGroups: Record<string, 'Primary' | 'Admin'> = {
   search: 'Admin',
   announcements: 'Admin',
   'data-quality': 'Admin',
+  behaviour: 'Admin',
   reports: 'Admin',
 }
 
@@ -64,11 +66,14 @@ export default function Sidebar() {
         .maybeSingle()
 
       if (data) {
-        setOrder(data.order || defaultOrder)
-        setHidden(data.hidden || [])
-        setFavorites(data.favorites || [])
+        const savedOrder = (data.order || defaultOrder).filter((id: string) => defaultOrder.includes(id))
+        const mergedOrder = [...savedOrder, ...defaultOrder.filter((id) => !savedOrder.includes(id))]
+        const mergedGroups = { ...defaultGroups, ...(data.groups || {}) }
+        setOrder(mergedOrder)
+        setHidden((data.hidden || []).filter((id: string) => defaultOrder.includes(id)))
+        setFavorites((data.favorites || []).filter((id: string) => defaultOrder.includes(id)))
         setCompact(Boolean(data.compact))
-        setGroups(data.groups || defaultGroups)
+        setGroups(mergedGroups)
       }
     }
 

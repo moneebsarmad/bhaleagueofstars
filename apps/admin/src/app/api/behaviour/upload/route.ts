@@ -366,28 +366,50 @@ export async function POST(request: Request) {
         } else {
           let foundStudent = false
           for (const nameVariant of nameVariants) {
-            let query = supabaseAdmin.from('students').select('student_id').ilike('student_name', nameVariant)
+            // First try exact match with grade
             if (grade !== null) {
-              query = query.eq('grade', grade)
+              let query = supabaseAdmin.from('students').select('student_id').ilike('student_name', nameVariant).eq('grade', grade)
+              const { data: studentData } = await query
+              if (studentData && studentData.length === 1) {
+                studentId = studentData[0].student_id
+                studentCache.set(cacheKey, studentId)
+                foundStudent = true
+                break
+              }
             }
-            if (section) {
-              query = query.eq('section', section)
-            }
-            const { data: studentData, error: studentError } = await query
-            if (!studentError && studentData && studentData.length === 1) {
-              studentId = studentData[0].student_id
-              studentCache.set(cacheKey, studentId)
-              foundStudent = true
-              break
-            }
-            if (studentData && studentData.length > 1) {
-              errors.push({ row: index + 2, message: `Multiple students match "${nameVariant}". Provide section to disambiguate.` })
-              foundStudent = true // skip to next row
-              break
+
+            // If not found, try name-only match (more lenient)
+            if (!foundStudent) {
+              const { data: studentData } = await supabaseAdmin
+                .from('students')
+                .select('student_id, grade')
+                .ilike('student_name', nameVariant)
+
+              if (studentData && studentData.length === 1) {
+                studentId = studentData[0].student_id
+                studentCache.set(cacheKey, studentId)
+                foundStudent = true
+                break
+              }
+              if (studentData && studentData.length > 1) {
+                // Multiple matches - try to narrow down by grade if provided
+                if (grade !== null) {
+                  const gradeMatch = studentData.find(s => s.grade === grade)
+                  if (gradeMatch) {
+                    studentId = gradeMatch.student_id
+                    studentCache.set(cacheKey, studentId)
+                    foundStudent = true
+                    break
+                  }
+                }
+                errors.push({ row: index + 2, message: `Multiple students match "${nameVariant}". Found ${studentData.length} matches.` })
+                foundStudent = true // skip to next row
+                break
+              }
             }
           }
           if (!foundStudent) {
-            errors.push({ row: index + 2, message: `Unable to find student "${studentNameRaw}" in database.` })
+            errors.push({ row: index + 2, message: `Unable to find student "${studentNameRaw}" (tried "${nameVariants[1]}") in database.` })
             continue
           }
           if (!studentId) continue // skip if multiple match error

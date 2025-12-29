@@ -321,7 +321,6 @@ export async function POST(request: Request) {
           uploaded_by: uploadedBy,
           source_system: sourceSystem,
           file_name: file.name,
-          row_count: rows.length,
         },
       ])
       .select('upload_id')

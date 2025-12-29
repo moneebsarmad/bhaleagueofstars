@@ -7,7 +7,6 @@ type UploadRecord = {
   upload_id: string
   file_name: string | null
   source_system: string | null
-  row_count: number | null
   created_at: string
 }
 
@@ -41,7 +40,7 @@ export default function BehaviourIntelligencePage() {
     setRefreshingUploads(true)
     const { data } = await supabase
       .from('behaviour_uploads')
-      .select('upload_id,file_name,source_system,row_count,created_at')
+      .select('upload_id,file_name,source_system,created_at')
       .order('created_at', { ascending: false })
       .limit(6)
     setRecentUploads(data || [])
@@ -232,7 +231,6 @@ export default function BehaviourIntelligencePage() {
                       <p className="font-semibold text-[#1a1a2e]">{upload.file_name || 'Manual upload'}</p>
                       <p className="text-xs text-[#1a1a2e]/50">
                         {upload.source_system || 'Unknown source'}
-                        {upload.row_count ? ` • ${upload.row_count} rows` : ''}
                       </p>
                     </div>
                     <div className="text-right text-xs text-[#1a1a2e]/50">

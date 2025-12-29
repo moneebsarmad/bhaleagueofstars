@@ -87,9 +87,20 @@ const parseDisciplinePdf = async (file: File) => {
 
   const isGradeLine = (line: string) => /^\d{1,2}(st|nd|rd|th)$/i.test(line)
   const isDateLine = (line: string) => /^\d{2}\/\d{2}\/\d{4}/.test(line)
+  // Student names are "Last, First" format - exclude lines with keywords
   const isStudentLine = (line: string) =>
+    /^[A-Za-z]/.test(line) &&
     line.includes(',') &&
-    !/Violation|Description|Resolution|Student Total|Support|MS\s*:|Level/i.test(line)
+    !/Violation|Description|Resolution|Student Total|Grand Total|MS\s*:|Level\s*\d/i.test(line) &&
+    !isDateLine(line)
+
+  // Convert MM/DD/YYYY to YYYY-MM-DD
+  const convertDate = (dateStr: string) => {
+    const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})/)
+    if (!match) return dateStr
+    const [, month, day, year] = match
+    return `${year}-${month}-${day}`
+  }
 
   const parseHeader = (headerLine: string) => {
     const pointsMatch = headerLine.match(/(-?\d+)\s*$/)
@@ -131,25 +142,42 @@ const parseDisciplinePdf = async (file: File) => {
 
     if (isDateLine(line) && currentStudent) {
       const dateMatch = line.match(/^(\d{2}\/\d{2}\/\d{4})/)
-      const eventDate = dateMatch ? dateMatch[1] : ''
-      const remainder = line.replace(eventDate, '').trim().replace(/^,/, '').trim()
+      const rawDate = dateMatch ? dateMatch[1] : ''
+      const eventDate = convertDate(rawDate)
+      const remainder = line.replace(rawDate, '').trim().replace(/^,/, '').trim()
 
       let staffName = ''
       let headerLine = ''
-      const keywordIndex = remainder.search(/\bViolation\b|\bSupport\b/i)
-      if (keywordIndex > -1) {
-        const staffPart = remainder.slice(0, keywordIndex).trim().replace(/,$/, '')
-        if (staffPart && !/student/i.test(staffPart)) {
-          staffName = staffPart
+
+      // Check if remainder contains "Student Support" or a staff name followed by Violation
+      if (/^,?\s*Student\s*Support/i.test(remainder) || /^\s*,\s*Student$/i.test(remainder)) {
+        // This is a student support entry (buy back)
+        staffName = 'Student Support'
+        // Look for Violation keyword
+        const violationMatch = remainder.match(/Support\s*(Violation.*)/i)
+        if (violationMatch) {
+          headerLine = violationMatch[1]
         }
-        headerLine = remainder.slice(keywordIndex).trim()
-      } else if (remainder && !/student/i.test(remainder)) {
-        staffName = remainder
+      } else {
+        const keywordIndex = remainder.search(/\bViolation\b/i)
+        if (keywordIndex > -1) {
+          const staffPart = remainder.slice(0, keywordIndex).trim().replace(/,$/, '')
+          if (staffPart && !/^\s*$/.test(staffPart)) {
+            staffName = staffPart.replace(/^,\s*/, '')
+          }
+          headerLine = remainder.slice(keywordIndex).trim()
+        } else if (remainder && !/student/i.test(remainder)) {
+          staffName = remainder.replace(/^,\s*/, '')
+        }
       }
 
+      // If no header line yet, check next line
       if (!headerLine && lines[i + 1]) {
-        headerLine = lines[i + 1]
-        i += 1
+        const nextLine = lines[i + 1]
+        if (/Violation/i.test(nextLine) || /Support Violation/i.test(nextLine)) {
+          headerLine = nextLine
+          i += 1
+        }
       }
 
       const headerData = parseHeader(headerLine)
@@ -170,7 +198,7 @@ const parseDisciplinePdf = async (file: File) => {
         } else if (/^Resolution/i.test(nextLine)) {
           section = 'resolution'
           resolution += `${nextLine.replace(/^Resolution/i, '').trim()} `
-        } else if (/^Student Total/i.test(nextLine)) {
+        } else if (/^Student Total/i.test(nextLine) || /^Grand Total/i.test(nextLine)) {
           break
         } else if (section === 'description') {
           description += `${nextLine} `

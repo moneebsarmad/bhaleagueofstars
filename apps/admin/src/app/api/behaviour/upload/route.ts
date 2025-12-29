@@ -79,7 +79,7 @@ const parseDisciplinePdf = async (file: File) => {
   const lines = result.text
     .split('\n')
     .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('--') && !line.includes('Author Details Points'))
+    .filter((line) => line && !line.startsWith('--') && !/Author\s*Details\s*Points/i.test(line))
 
   const rows: CsvRow[] = []
   let currentGrade: number | null = null
@@ -87,12 +87,16 @@ const parseDisciplinePdf = async (file: File) => {
 
   const isGradeLine = (line: string) => /^\d{1,2}(st|nd|rd|th)$/i.test(line)
   const isDateLine = (line: string) => /^\d{2}\/\d{2}\/\d{4}/.test(line)
-  // Student names are "Last, First" format - exclude lines with keywords
-  const isStudentLine = (line: string) =>
-    /^[A-Za-z]/.test(line) &&
-    line.includes(',') &&
-    !/Violation|Description|Resolution|Student Total|Grand Total|MS\s*:|Level\s*\d/i.test(line) &&
-    !isDateLine(line)
+  // Student names are "LastName, FirstName" format - must be capitalized words only
+  const isStudentLine = (line: string) => {
+    // Must start with a letter and contain exactly one comma separating two capitalized name parts
+    if (!line.includes(',') || isDateLine(line)) return false
+    // Exclude lines with keywords that appear in event data
+    if (/Violation|Description|Resolution|Student Total|Grand Total|MS\s*:|Level\s*\d|salah|class|behavior|warned|talking/i.test(line)) return false
+    // Match pattern: "LastName, FirstName" where both parts are capitalized words
+    const match = line.match(/^([A-Z][a-zA-Z\s'-]+),\s*([A-Z][a-zA-Z\s'-]*)$/)
+    return match !== null
+  }
 
   // Convert MM/DD/YYYY to YYYY-MM-DD
   const convertDate = (dateStr: string) => {

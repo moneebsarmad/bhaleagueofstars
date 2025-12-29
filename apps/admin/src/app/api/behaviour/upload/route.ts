@@ -335,38 +335,62 @@ export async function POST(request: Request) {
     const parsedEvents: ParsedEvent[] = []
     const studentCache = new Map<string, string>()
 
+    // Helper to convert "Last, First" to "First Last" format
+    const convertLastFirstToFirstLast = (name: string) => {
+      const commaIndex = name.indexOf(',')
+      if (commaIndex === -1) return name
+      const lastName = name.slice(0, commaIndex).trim()
+      const firstName = name.slice(commaIndex + 1).trim()
+      return `${firstName} ${lastName}`
+    }
+
     for (let index = 0; index < rows.length; index += 1) {
       const row = rows[index]
       const studentIdValue = row.student_id || row.student_uuid || ''
       let studentId = studentIdValue || ''
-      const studentName = row.student_name || row.name || ''
+      const studentNameRaw = row.student_name || row.name || ''
       const grade = parseIntSafe(row.grade)
       const section = row.section || ''
 
-      if (!studentId && studentName) {
-        const cacheKey = `${studentName}|${grade ?? ''}|${section || ''}`.toLowerCase()
+      if (!studentId && studentNameRaw) {
+        // Try both "Last, First" (as-is) and "First Last" (converted) formats
+        const nameVariants = [
+          studentNameRaw,
+          convertLastFirstToFirstLast(studentNameRaw),
+        ]
+
+        const cacheKey = `${studentNameRaw}|${grade ?? ''}|${section || ''}`.toLowerCase()
         const cached = studentCache.get(cacheKey)
         if (cached) {
           studentId = cached
         } else {
-          let query = supabaseAdmin.from('students').select('student_id').ilike('student_name', studentName)
-          if (grade !== null) {
-            query = query.eq('grade', grade)
+          let foundStudent = false
+          for (const nameVariant of nameVariants) {
+            let query = supabaseAdmin.from('students').select('student_id').ilike('student_name', nameVariant)
+            if (grade !== null) {
+              query = query.eq('grade', grade)
+            }
+            if (section) {
+              query = query.eq('section', section)
+            }
+            const { data: studentData, error: studentError } = await query
+            if (!studentError && studentData && studentData.length === 1) {
+              studentId = studentData[0].student_id
+              studentCache.set(cacheKey, studentId)
+              foundStudent = true
+              break
+            }
+            if (studentData && studentData.length > 1) {
+              errors.push({ row: index + 2, message: `Multiple students match "${nameVariant}". Provide section to disambiguate.` })
+              foundStudent = true // skip to next row
+              break
+            }
           }
-          if (section) {
-            query = query.eq('section', section)
-          }
-          const { data: studentData, error: studentError } = await query
-          if (studentError || !studentData || studentData.length === 0) {
-            errors.push({ row: index + 2, message: 'Unable to resolve student_id for row.' })
+          if (!foundStudent) {
+            errors.push({ row: index + 2, message: `Unable to find student "${studentNameRaw}" in database.` })
             continue
           }
-          if (studentData.length > 1) {
-            errors.push({ row: index + 2, message: 'Multiple students match. Provide section to disambiguate.' })
-            continue
-          }
-          studentId = studentData[0].student_id
-          studentCache.set(cacheKey, studentId)
+          if (!studentId) continue // skip if multiple match error
         }
       }
 

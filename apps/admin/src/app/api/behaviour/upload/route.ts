@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import { reprocessBehaviourInsights } from '@/backend/services/behaviourRulesEngine'
+import { analyzeAndStoreInsights, type ParsedEvent } from '@/backend/services/behaviourAnalyzer'
 
 type CsvRow = Record<string, string>
 
@@ -241,38 +241,47 @@ const normaliseSeverity = (value?: string) => {
   return null
 }
 
-const chunkArray = <T,>(items: T[], size: number) => {
-  const chunks: T[][] = []
-  for (let i = 0; i < items.length; i += size) {
-    chunks.push(items.slice(i, i + size))
-  }
-  return chunks
-}
-
 export async function POST(request: Request) {
   try {
+    // Authentication check
+    const authClient = await createSupabaseServerClient()
+    const { data: authData } = await authClient.auth.getUser()
+    if (!authData?.user?.id) {
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 })
+    }
+    const uploadedBy = authData.user.id
+
     const supabaseAdmin = getSupabaseAdmin()
     const formData = await request.formData()
     const file = formData.get('file')
     const sourceSystem = (formData.get('source_system') as string | null) ?? 'csv_upload'
-    const uploadType = (formData.get('upload_type') as string | null) ?? 'append'
-    const dateRangeStart = parseDate(formData.get('date_range_start') as string | null)
-    const dateRangeEnd = parseDate(formData.get('date_range_end') as string | null)
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: 'CSV or PDF file is required.' }, { status: 400 })
     }
-    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
-    const rows = isPdf ? await parseDisciplinePdf(file) : parseCsv(await file.text())
 
-    if (rows.length === 0) {
-      return NextResponse.json({ error: 'No rows found in CSV.' }, { status: 400 })
+    // File size limit (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File size must be under 10MB.' }, { status: 400 })
     }
 
-    const authClient = await createSupabaseServerClient()
-    const { data: authData } = await authClient.auth.getUser()
-    const uploadedBy = authData?.user?.id ?? null
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
+    let rows: CsvRow[]
+    try {
+      rows = isPdf ? await parseDisciplinePdf(file) : parseCsv(await file.text())
+    } catch (parseError) {
+      const message = isPdf
+        ? 'Failed to parse PDF. Ensure it matches the Discipline Event Summary format.'
+        : 'Failed to parse CSV. Check the file format and encoding.'
+      return NextResponse.json({ error: message }, { status: 400 })
+    }
+
+    if (rows.length === 0) {
+      return NextResponse.json({ error: 'No rows found in file.' }, { status: 400 })
+    }
+
+    // Log the upload for audit purposes (no raw events stored)
     const { data: uploadRecord, error: uploadError } = await supabaseAdmin
       .from('behaviour_uploads')
       .insert([
@@ -280,9 +289,7 @@ export async function POST(request: Request) {
           uploaded_by: uploadedBy,
           source_system: sourceSystem,
           file_name: file.name,
-          upload_type: uploadType,
-          date_range_start: dateRangeStart,
-          date_range_end: dateRangeEnd,
+          row_count: rows.length,
         },
       ])
       .select('upload_id')
@@ -292,31 +299,10 @@ export async function POST(request: Request) {
 
     const uploadId = uploadRecord?.upload_id
 
-    if (uploadType === 'replace_all') {
-      const { error: deleteError } = await supabaseAdmin
-        .from('behaviour_events')
-        .delete()
-        .gte('event_date', '0001-01-01')
-      if (deleteError) throw deleteError
-    } else if (uploadType === 'replace_range') {
-      if (!dateRangeStart || !dateRangeEnd) {
-        return NextResponse.json(
-          { error: 'date_range_start and date_range_end are required for replace_range uploads.' },
-          { status: 400 }
-        )
-      }
-      const { error: deleteError } = await supabaseAdmin
-        .from('behaviour_events')
-        .delete()
-        .gte('event_date', dateRangeStart)
-        .lte('event_date', dateRangeEnd)
-      if (deleteError) throw deleteError
-    }
-
+    // Resolve student IDs and build parsed events for analysis
     const errors: { row: number; message: string }[] = []
-    const events: Record<string, unknown>[] = []
+    const parsedEvents: ParsedEvent[] = []
     const studentCache = new Map<string, string>()
-    const affectedStudents = new Set<string>()
 
     for (let index = 0; index < rows.length; index += 1) {
       const row = rows[index]
@@ -375,44 +361,31 @@ export async function POST(request: Request) {
         continue
       }
 
-      const event = {
+      // Build ParsedEvent for stateless analysis (no storage of raw events)
+      parsedEvents.push({
         student_id: studentId,
-        student_name: studentName || null,
-        grade,
-        section: section || null,
-        event_type: eventType,
+        student_name: studentName || undefined,
+        grade: grade ?? undefined,
+        section: section || undefined,
+        event_type: eventType as 'merit' | 'demerit',
         event_date: eventDate,
-        event_time: parseTime(row.event_time || row.time),
-        staff_id: row.staff_id || row.staff_uuid || null,
-        staff_name: row.staff_name || null,
-        class_context: row.class_context || null,
-        location: row.location || null,
-        category: row.category || null,
-        subcategory: row.subcategory || null,
-        severity: normaliseSeverity(row.severity),
+        staff_name: row.staff_name || undefined,
+        category: row.category || undefined,
+        subcategory: row.subcategory || undefined,
         points,
-        notes: row.notes || null,
-        source_system: row.source_system || sourceSystem,
-        source_upload_id: uploadId,
-      }
-
-      events.push(event)
-      affectedStudents.add(studentId)
+      })
     }
 
-    if (events.length > 0) {
-      const chunks = chunkArray(events, 500)
-      for (const chunk of chunks) {
-        const { error } = await supabaseAdmin.from('behaviour_events').insert(chunk)
-        if (error) throw error
-      }
+    // Analyze events and store ONLY computed insights (not raw events)
+    let analysisResult = { processed: 0, students: [] as string[] }
+    if (parsedEvents.length > 0) {
+      analysisResult = await analyzeAndStoreInsights(parsedEvents)
     }
-
-    await reprocessBehaviourInsights([...affectedStudents])
 
     return NextResponse.json({
       upload_id: uploadId,
-      inserted: events.length,
+      analyzed: parsedEvents.length,
+      students_updated: analysisResult.processed,
       errors,
     })
   } catch (error) {

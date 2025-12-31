@@ -44,23 +44,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] via-[#16162a] to-[#0f0f1a] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#faf9f7] via-[#f8f6f3] to-[#f5f3ef] relative overflow-hidden pattern-overlay">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Large star decoration */}
-        <div className="absolute -top-20 -right-20 w-96 h-96 opacity-5">
+        <div className="absolute -top-20 -right-20 w-96 h-96 opacity-[0.06]">
           <svg viewBox="0 0 200 200" className="w-full h-full">
             <path fill="#c9a227" d="M100,10 L120,80 L190,80 L130,120 L150,190 L100,150 L50,190 L70,120 L10,80 L80,80 Z" />
           </svg>
         </div>
-        <div className="absolute -bottom-20 -left-20 w-80 h-80 opacity-5">
+        <div className="absolute -bottom-20 -left-20 w-80 h-80 opacity-[0.06]">
           <svg viewBox="0 0 200 200" className="w-full h-full">
             <path fill="#c9a227" d="M100,10 L120,80 L190,80 L130,120 L150,190 L100,150 L50,190 L70,120 L10,80 L80,80 Z" />
           </svg>
         </div>
         {/* Gradient orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#2f0a61] rounded-full blur-[128px] opacity-20"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#c9a227] rounded-full blur-[128px] opacity-10"></div>
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#2f0a61] rounded-full blur-[128px] opacity-[0.06]"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#c9a227] rounded-full blur-[128px] opacity-[0.08]"></div>
       </div>
 
       {/* Login Card */}
@@ -68,7 +68,7 @@ export default function LoginPage() {
         {/* Top gold line */}
         <div className="h-1 bg-gradient-to-r from-transparent via-[#c9a227] to-transparent mb-8"></div>
 
-        <div className="bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+        <div className="regal-card rounded-3xl shadow-xl overflow-hidden">
           {/* Header */}
           <div className="p-8 pb-6 text-center">
             {/* Logo */}
@@ -79,22 +79,22 @@ export default function LoginPage() {
                 </svg>
               </div>
               {/* Glow effect */}
-              <div className="absolute inset-0 w-20 h-20 rounded-2xl bg-[#c9a227] blur-2xl opacity-30"></div>
+              <div className="absolute inset-0 w-20 h-20 rounded-2xl bg-[#c9a227] blur-2xl opacity-20"></div>
             </div>
 
-            <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+            <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               League of Stars
             </h1>
-            <p className="text-white/50 text-sm font-medium tracking-wide">Admin Portal</p>
+            <p className="text-[#1a1a2e]/50 text-sm font-medium tracking-wide">Admin Portal</p>
           </div>
 
           {/* Divider */}
-          <div className="mx-8 h-px bg-gradient-to-r from-transparent via-[#c9a227]/30 to-transparent"></div>
+          <div className="mx-8 h-px bg-gradient-to-r from-transparent via-[#c9a227]/40 to-transparent"></div>
 
           {/* Form */}
           <form onSubmit={handleLogin} className="p-8 pt-6">
             <div className="mb-6">
-              <label htmlFor="email" className="block text-xs font-semibold text-white/40 mb-2 tracking-wider">
+              <label htmlFor="email" className="block text-xs font-semibold text-[#1a1a2e]/50 mb-2 tracking-wider">
                 Admin Email
               </label>
               <input
@@ -102,13 +102,13 @@ export default function LoginPage() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:border-[#c9a227]/50 focus:ring-2 focus:ring-[#c9a227]/20 outline-none transition-all"
+                className="w-full px-5 py-4 bg-white border border-[#1a1a2e]/10 rounded-xl text-[#1a1a2e] placeholder-[#1a1a2e]/30 focus:border-[#c9a227] focus:ring-2 focus:ring-[#c9a227]/20 outline-none transition-all"
                 placeholder="Enter your admin email"
                 required
               />
             </div>
             <div className="mb-6">
-              <label htmlFor="password" className="block text-xs font-semibold text-white/40 mb-2 tracking-wider">
+              <label htmlFor="password" className="block text-xs font-semibold text-[#1a1a2e]/50 mb-2 tracking-wider">
                 Password
               </label>
               <input
@@ -116,14 +116,14 @@ export default function LoginPage() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:border-[#c9a227]/50 focus:ring-2 focus:ring-[#c9a227]/20 outline-none transition-all"
+                className="w-full px-5 py-4 bg-white border border-[#1a1a2e]/10 rounded-xl text-[#1a1a2e] placeholder-[#1a1a2e]/30 focus:border-[#c9a227] focus:ring-2 focus:ring-[#c9a227]/20 outline-none transition-all"
                 placeholder="Enter your password"
                 required
               />
             </div>
 
             {error && (
-              <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 px-5 py-4 rounded-xl text-sm font-medium">
+              <div className="mb-6 bg-[#910000]/5 border border-[#910000]/20 text-[#910000] px-5 py-4 rounded-xl text-sm font-medium">
                 {error}
               </div>
             )}
@@ -147,7 +147,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => router.push('/reset-password')}
-                className="text-xs font-semibold text-[#c9a227] hover:text-[#e8d48b] transition-colors tracking-wide"
+                className="text-xs font-semibold text-[#2f0a61] hover:text-[#c9a227] transition-colors tracking-wide"
               >
                 Forgot password?
               </button>
@@ -157,9 +157,9 @@ export default function LoginPage() {
           {/* Footer */}
           <div className="px-8 pb-8">
             <div className="text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a2e]/5 border border-[#1a1a2e]/5">
                 <div className="w-2 h-2 rounded-full bg-[#c9a227]"></div>
-                <p className="text-white/30 text-xs font-medium tracking-wide">
+                <p className="text-[#1a1a2e]/40 text-xs font-medium tracking-wide">
                   Brighter Horizon Academy
                 </p>
               </div>

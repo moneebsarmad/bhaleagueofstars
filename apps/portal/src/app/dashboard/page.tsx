@@ -146,81 +146,92 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* House Cards - 2x2 Grid */}
+      {/* House Race Leaderboard */}
       {houses.length === 0 ? (
         <div className="regal-card rounded-2xl p-8 text-center">
           <p className="text-[#1a1a2e]/50">No points logged yet.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {houses.map((house, index) => (
-            <div
-              key={house.name}
-              className="rounded-2xl overflow-hidden shadow-xl relative"
-              style={{ background: house.gradient }}
-            >
-              {/* Decorative star */}
-              <div className="absolute top-4 right-4 w-20 h-20 opacity-[0.06]">
-                <svg viewBox="0 0 200 200" className="w-full h-full">
-                  <path fill="white" d="M100,10 L120,80 L190,80 L130,120 L150,190 L100,150 L50,190 L70,120 L10,80 L80,80 Z" />
-                </svg>
-              </div>
+        <div className="bg-white rounded-2xl shadow-lg border border-[#c9a227]/10 overflow-hidden">
+          {/* Leaderboard rows */}
+          <div className="divide-y divide-[#1a1a2e]/5">
+            {houses.map((house, index) => {
+              const maxPoints = houses[0]?.points || 1
+              const barWidth = (house.points / maxPoints) * 100
 
-              {/* Rank Badge */}
-              <div className="absolute top-4 left-4 z-20">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg ${
-                  index === 0
-                    ? 'bg-gradient-to-br from-[#ffd700] to-[#b8860b] text-white'
-                    : index === 1
-                      ? 'bg-gradient-to-br from-[#e8e8e8] to-[#b8b8b8] text-[#1a1a2e]'
-                      : index === 2
-                        ? 'bg-gradient-to-br from-[#cd7f32] to-[#8b4513] text-white'
-                        : 'bg-white/20 text-white'
-                }`}>
-                  {index + 1}
-                </div>
-              </div>
+              return (
+                <div
+                  key={house.name}
+                  className="flex items-center gap-4 p-5 hover:bg-[#faf9f7] transition-colors"
+                >
+                  {/* Rank */}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shrink-0 ${
+                    index === 0
+                      ? 'bg-gradient-to-br from-[#ffd700] to-[#b8860b] text-white shadow-md'
+                      : index === 1
+                        ? 'bg-gradient-to-br from-[#e8e8e8] to-[#b8b8b8] text-[#1a1a2e] shadow-md'
+                        : index === 2
+                          ? 'bg-gradient-to-br from-[#cd7f32] to-[#8b4513] text-white shadow-md'
+                          : 'bg-[#1a1a2e]/10 text-[#1a1a2e]/60'
+                  }`}>
+                    {index + 1}
+                  </div>
 
-              <div className="p-5 pt-16 relative z-10">
-                {/* House Logo & Name */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm p-1.5 shadow-lg border border-white/10">
+                  {/* House Logo */}
+                  <div
+                    className="w-12 h-12 rounded-xl p-1.5 shrink-0 shadow-md"
+                    style={{ background: house.gradient }}
+                  >
                     <img
                       src={house.logo}
                       alt={house.name}
-                      className="w-full h-full object-contain drop-shadow-md"
+                      className="w-full h-full object-contain drop-shadow-sm"
                     />
                   </div>
-                  <h2 className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                    {house.name.replace('House of ', '')}
-                  </h2>
-                </div>
 
-                {/* Points */}
-                <div className="mb-4">
-                  <p className="text-3xl font-bold text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                    {house.points.toLocaleString()}
-                  </p>
-                  <p className="text-white/50 text-sm font-medium">Total Points</p>
-                </div>
+                  {/* House Name & Bar */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-[#1a1a2e] truncate" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                        {house.name}
+                      </h3>
+                      <span className="text-sm text-[#1a1a2e]/50 ml-2 shrink-0">
+                        {house.percentage.toFixed(1)}%
+                      </span>
+                    </div>
+                    {/* Progress Bar */}
+                    <div className="h-3 bg-[#1a1a2e]/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700 ease-out"
+                        style={{
+                          width: `${barWidth}%`,
+                          background: house.gradient,
+                        }}
+                      />
+                    </div>
+                  </div>
 
-                {/* Progress bar */}
-                <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden mb-2">
-                  <div
-                    className="h-full rounded-full transition-all duration-700 ease-out"
-                    style={{
-                      width: `${house.percentage}%`,
-                      background: 'linear-gradient(90deg, #c9a227 0%, #e8d48b 50%, #c9a227 100%)',
-                    }}
-                  />
+                  {/* Points */}
+                  <div className="text-right shrink-0 min-w-[80px]">
+                    <p className="text-xl font-bold" style={{ color: house.color, fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                      {house.points.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-[#1a1a2e]/40">points</p>
+                  </div>
                 </div>
-                <p className="text-white/60 text-xs font-medium">{house.percentage.toFixed(1)}% of total</p>
-              </div>
+              )
+            })}
+          </div>
 
-              {/* Bottom accent line */}
-              <div className="h-1 bg-gradient-to-r from-transparent via-[#c9a227]/50 to-transparent"></div>
+          {/* Footer with total */}
+          <div className="bg-gradient-to-r from-[#1a1a2e] to-[#2a2a4e] px-5 py-4">
+            <div className="flex items-center justify-between text-white">
+              <span className="text-sm font-medium text-white/60">Total Points Awarded</span>
+              <span className="text-xl font-bold" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                {houses.reduce((sum, h) => sum + h.points, 0).toLocaleString()}
+              </span>
             </div>
-          ))}
+          </div>
         </div>
       )}
     </div>

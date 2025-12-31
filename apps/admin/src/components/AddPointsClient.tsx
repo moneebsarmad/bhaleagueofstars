@@ -81,6 +81,7 @@ export default function AddPointsClient() {
   const [selectedCategory, setSelectedCategory] = useState<MeritCategory | null>(null)
   const [selectedSubcategory, setSelectedSubcategory] = useState<MeritSubcategory | null>(null)
   const [notes, setNotes] = useState('')
+  const [eventDate, setEventDate] = useState(() => new Date().toISOString().split('T')[0])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -169,7 +170,7 @@ export default function AddPointsClient() {
       const meritEntry = {
         merit_id: `MERIT-${Date.now()}`,
         timestamp: new Date().toISOString(),
-        date_of_event: new Date().toISOString().split('T')[0],
+        date_of_event: eventDate || new Date().toISOString().split('T')[0],
         student_name: selectedStudent.name,
         grade: selectedStudent.grade,
         section: selectedStudent.section,
@@ -206,6 +207,7 @@ export default function AddPointsClient() {
     setSelectedCategory(null)
     setSelectedSubcategory(null)
     setNotes('')
+    setEventDate(new Date().toISOString().split('T')[0])
     setSearchText('')
   }
 
@@ -388,6 +390,22 @@ export default function AddPointsClient() {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
           <div className="flex items-center gap-3 mb-5">
             <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">4</span>
+            <h2 className="text-lg font-semibold text-[#1a1a2e]">Date of Event</h2>
+          </div>
+
+          <input
+            type="date"
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+            className="w-full px-4 py-3 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none transition-all"
+          />
+        </div>
+      )}
+
+      {selectedSubcategory && (
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">5</span>
             <h2 className="text-lg font-semibold text-[#1a1a2e]">Add Notes (Optional)</h2>
           </div>
 

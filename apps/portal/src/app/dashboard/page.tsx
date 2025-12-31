@@ -146,65 +146,75 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* House Cards */}
+      {/* House Cards - 2x2 Grid */}
       {houses.length === 0 ? (
         <div className="regal-card rounded-2xl p-8 text-center">
           <p className="text-[#1a1a2e]/50">No points logged yet.</p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {houses.map((house, index) => (
             <div
               key={house.name}
               className="rounded-2xl overflow-hidden shadow-xl relative"
               style={{ background: house.gradient }}
             >
-              {/* Decorative elements */}
-              <div className="absolute top-8 right-10 w-40 h-40 opacity-[0.06]">
+              {/* Decorative star */}
+              <div className="absolute top-4 right-4 w-20 h-20 opacity-[0.06]">
                 <svg viewBox="0 0 200 200" className="w-full h-full">
                   <path fill="white" d="M100,10 L120,80 L190,80 L130,120 L150,190 L100,150 L50,190 L70,120 L10,80 L80,80 Z" />
                 </svg>
               </div>
 
-              <div className="p-6 relative z-10">
-                {/* House Header */}
-                <div className="flex items-start justify-between gap-6 mb-5">
-                  <div>
-                    <div className="inline-flex items-center gap-2 text-sm tracking-[0.15em] font-semibold text-white/70 bg-white/10 border border-white/15 px-3 py-1.5 rounded-full mb-4">
-                      <span className="text-white/50">Rank</span>
-                      <span className="text-white">{index + 1}</span>
-                    </div>
-                    <div className="flex items-center gap-4 mb-2">
-                      <div className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm p-1.5 shadow-lg border border-white/10">
-                        <img
-                          src={house.logo}
-                          alt={house.name}
-                          className="w-full h-full object-contain drop-shadow-md"
-                        />
-                      </div>
-                      <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                        {house.name}
-                      </h2>
-                    </div>
-                    {/* Progress bar */}
-                    <div className="w-64 h-2.5 bg-white/20 rounded-full overflow-hidden mb-2 backdrop-blur-sm">
-                      <div
-                        className="h-full rounded-full transition-all duration-700 ease-out"
-                        style={{
-                          width: `${house.percentage}%`,
-                          background: 'linear-gradient(90deg, #c9a227 0%, #e8d48b 50%, #c9a227 100%)',
-                        }}
-                      />
-                    </div>
-                    <p className="text-white/60 text-sm font-medium">{house.percentage.toFixed(1)}% of total points</p>
-                  </div>
-                  <div className="text-right flex flex-col items-end gap-2 min-w-[150px] pt-4">
-                    <p className="text-4xl font-bold text-white leading-none" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                      {house.points.toLocaleString()}
-                    </p>
-                    <p className="text-white/50 text-lg font-medium">Total Points</p>
-                  </div>
+              {/* Rank Badge */}
+              <div className="absolute top-4 left-4 z-20">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg ${
+                  index === 0
+                    ? 'bg-gradient-to-br from-[#ffd700] to-[#b8860b] text-white'
+                    : index === 1
+                      ? 'bg-gradient-to-br from-[#e8e8e8] to-[#b8b8b8] text-[#1a1a2e]'
+                      : index === 2
+                        ? 'bg-gradient-to-br from-[#cd7f32] to-[#8b4513] text-white'
+                        : 'bg-white/20 text-white'
+                }`}>
+                  {index + 1}
                 </div>
+              </div>
+
+              <div className="p-5 pt-16 relative z-10">
+                {/* House Logo & Name */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm p-1.5 shadow-lg border border-white/10">
+                    <img
+                      src={house.logo}
+                      alt={house.name}
+                      className="w-full h-full object-contain drop-shadow-md"
+                    />
+                  </div>
+                  <h2 className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                    {house.name.replace('House of ', '')}
+                  </h2>
+                </div>
+
+                {/* Points */}
+                <div className="mb-4">
+                  <p className="text-3xl font-bold text-white" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
+                    {house.points.toLocaleString()}
+                  </p>
+                  <p className="text-white/50 text-sm font-medium">Total Points</p>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden mb-2">
+                  <div
+                    className="h-full rounded-full transition-all duration-700 ease-out"
+                    style={{
+                      width: `${house.percentage}%`,
+                      background: 'linear-gradient(90deg, #c9a227 0%, #e8d48b 50%, #c9a227 100%)',
+                    }}
+                  />
+                </div>
+                <p className="text-white/60 text-xs font-medium">{house.percentage.toFixed(1)}% of total</p>
               </div>
 
               {/* Bottom accent line */}

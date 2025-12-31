@@ -448,3 +448,15 @@ h1, h2, h3 {
     padding: 28px 22px;
   }
 }
+
+/* Animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

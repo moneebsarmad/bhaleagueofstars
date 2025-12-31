@@ -426,6 +426,26 @@ h1, h2, h3 {
   cursor: not-allowed;
 }
 
+.auth-forgot {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.auth-forgot button {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--royal-purple);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease;
+}
+
+.auth-forgot button:hover {
+  color: var(--gold);
+}
+
 .auth-footer {
   margin-top: 22px;
   display: inline-flex;

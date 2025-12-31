@@ -17,6 +17,30 @@ interface House {
     logo?: string | null;
   }
 
+function canonicalHouse(value: string): string {
+  const normalized = value
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[’‘`]/g, "'")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " ");
+
+  if (normalized.includes("bakr") || normalized.includes("abu")) {
+    return "House of Abu Bakr";
+  }
+  if (normalized.includes("khadijah") || normalized.includes("khad")) {
+    return "House of Khadijah";
+  }
+  if (normalized.includes("umar")) {
+    return "House of 'Umar";
+  }
+  if (normalized.includes("aishah") || normalized.includes("aish")) {
+    return "House of 'A'ishah";
+  }
+  return value.trim();
+}
+
 const houseConfig: Record<string, Omit<House, "rank" | "points" | "name">> = {
     "House of Abu Bakr": {
       virtue: "Loyalty",
@@ -100,8 +124,8 @@ export default function Home() {
 
         const mapped =
           data?.map((row: Record<string, unknown>, index: number) => {
-            const houseNameRaw = row.house_name ?? row.name ?? "";
-            const houseName = String(houseNameRaw ?? "").trim();
+            const houseNameRaw = row.house_name ?? row.house ?? row.name ?? "";
+            const houseName = canonicalHouse(String(houseNameRaw ?? ""));
             const config = houseConfig[houseName];
             if (!config) {
               return null;

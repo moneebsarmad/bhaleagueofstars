@@ -44,131 +44,82 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#faf9f7] via-[#f8f6f3] to-[#f5f3ef] relative overflow-hidden pattern-overlay">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Large star decoration */}
-        <div className="absolute -top-20 -right-20 w-96 h-96 opacity-[0.06]">
-          <svg viewBox="0 0 200 200" className="w-full h-full">
-            <path fill="#c9a227" d="M100,10 L120,80 L190,80 L130,120 L150,190 L100,150 L50,190 L70,120 L10,80 L80,80 Z" />
+    <div className="auth-page">
+      <div className="auth-background">
+        <div className="auth-star auth-star-top">
+          <svg viewBox="0 0 200 200">
+            <path d="M100,10 L120,80 L190,80 L130,120 L150,190 L100,150 L50,190 L70,120 L10,80 L80,80 Z" />
           </svg>
         </div>
-        <div className="absolute -bottom-20 -left-20 w-80 h-80 opacity-[0.06]">
-          <svg viewBox="0 0 200 200" className="w-full h-full">
-            <path fill="#c9a227" d="M100,10 L120,80 L190,80 L130,120 L150,190 L100,150 L50,190 L70,120 L10,80 L80,80 Z" />
+        <div className="auth-star auth-star-bottom">
+          <svg viewBox="0 0 200 200">
+            <path d="M100,10 L120,80 L190,80 L130,120 L150,190 L100,150 L50,190 L70,120 L10,80 L80,80 Z" />
           </svg>
         </div>
-        {/* Gradient orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#2f0a61] rounded-full blur-[128px] opacity-[0.06]"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#c9a227] rounded-full blur-[128px] opacity-[0.08]"></div>
+        <div className="auth-orb auth-orb-purple"></div>
+        <div className="auth-orb auth-orb-gold"></div>
       </div>
 
-      {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md mx-4">
-        {/* Top gold line */}
-        <div className="h-1 bg-gradient-to-r from-transparent via-[#c9a227] to-transparent mb-8"></div>
-
-        <div className="regal-card rounded-3xl shadow-xl overflow-hidden">
-          {/* Header */}
-          <div className="p-8 pb-6 text-center">
-            {/* Logo */}
-            <div className="relative inline-block mb-6">
-              <img
-                src="/crest.png"
-                alt="League of Stars crest"
-                className="w-32 h-32 object-contain drop-shadow-lg"
-              />
-              {/* Glow effect */}
-              <div className="absolute inset-0 w-32 h-32 bg-[#c9a227] blur-3xl opacity-15 -z-10"></div>
+      <div className="auth-shell">
+        <div className="auth-line"></div>
+        <div className="auth-card">
+          <div className="auth-header">
+            <div className="auth-logo">
+              <div className="auth-logo-inner">
+                <img src="/crest.png" alt="League of Stars crest" />
+              </div>
+              <span className="auth-logo-glow"></span>
             </div>
-
-            <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-              League of Stars
-            </h1>
-            <p className="text-[#1a1a2e]/50 text-sm font-medium tracking-wide">Admin Portal</p>
+            <h1>League of Stars</h1>
+            <p>Admin Portal</p>
           </div>
 
-          {/* Divider */}
-          <div className="mx-8 h-px bg-gradient-to-r from-transparent via-[#c9a227]/40 to-transparent"></div>
+          <div className="auth-divider"></div>
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="p-8 pt-6">
-            <div className="mb-6">
-              <label htmlFor="email" className="block text-xs font-semibold text-[#1a1a2e]/50 mb-2 tracking-wider">
-                Admin Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-4 bg-white border border-[#1a1a2e]/10 rounded-xl text-[#1a1a2e] placeholder-[#1a1a2e]/30 focus:border-[#c9a227] focus:ring-2 focus:ring-[#c9a227]/20 outline-none transition-all"
-                placeholder="Enter your admin email"
-                required
-              />
-            </div>
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-xs font-semibold text-[#1a1a2e]/50 mb-2 tracking-wider">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 bg-white border border-[#1a1a2e]/10 rounded-xl text-[#1a1a2e] placeholder-[#1a1a2e]/30 focus:border-[#c9a227] focus:ring-2 focus:ring-[#c9a227]/20 outline-none transition-all"
-                placeholder="Enter your password"
-                required
-              />
-            </div>
+          <form className="auth-form" onSubmit={handleLogin}>
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-            {error && (
-              <div className="mb-6 bg-[#910000]/5 border border-[#910000]/20 text-[#910000] px-5 py-4 rounded-xl text-sm font-medium">
-                {error}
-              </div>
-            )}
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            {error && <div className="auth-error">{error}</div>}
 
             <button
+              className="auth-submit"
               type="submit"
-              disabled={isLoading}
-              className="w-full py-4 rounded-xl font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
-              style={{
-                background: 'linear-gradient(135deg, #4a1a8a 0%, #2f0a61 50%, #1a0536 100%)',
-              }}
+              disabled={isLoading || !email || !password}
             >
-              {/* Hover effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#c9a227]/0 via-[#c9a227]/20 to-[#c9a227]/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <span className="relative">
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </span>
+              <span>{isLoading ? 'Signing in...' : 'Sign In'}</span>
             </button>
-
-            <div className="mt-5 text-center">
-              <button
-                type="button"
-                onClick={() => router.push('/reset-password')}
-                className="text-xs font-semibold text-[#2f0a61] hover:text-[#c9a227] transition-colors tracking-wide"
-              >
-                Forgot password?
-              </button>
-            </div>
           </form>
 
-          {/* Footer */}
-          <div className="px-8 pb-8">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a2e]/5 border border-[#1a1a2e]/5">
-                <div className="w-2 h-2 rounded-full bg-[#c9a227]"></div>
-                <p className="text-[#1a1a2e]/40 text-xs font-medium tracking-wide">
-                  Brighter Horizon Academy
-                </p>
-              </div>
-            </div>
+          <div className="auth-forgot">
+            <button type="button" onClick={() => router.push('/reset-password')}>
+              Forgot password?
+            </button>
+          </div>
+
+          <div className="auth-footer">
+            <span className="auth-dot"></span>
+            Brighter Horizon Academy
           </div>
         </div>
-
-        {/* Bottom gold line */}
-        <div className="h-1 bg-gradient-to-r from-transparent via-[#c9a227] to-transparent mt-8"></div>
+        <div className="auth-line"></div>
       </div>
     </div>
   )

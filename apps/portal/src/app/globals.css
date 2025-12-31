@@ -316,9 +316,10 @@ h1, h2, h3 {
 }
 
 .auth-header p {
-  font-size: 13px;
+  font-size: 14px;
   color: rgba(26, 26, 46, 0.5);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.15em;
+  font-weight: 500;
 }
 
 .auth-divider {

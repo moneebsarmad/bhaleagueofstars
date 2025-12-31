@@ -117,7 +117,7 @@ export default function Sidebar({ role, portalLabel }: SidebarProps) {
           <p className="text-xs text-white/40 font-medium tracking-wide">
             Brighter Horizon Academy
           </p>
-          <p className="text-[10px] text-white/20 mt-1">
+          <p className="text-xs text-white/20 mt-1">
             Excellence in Education
           </p>
         </div>

@@ -174,10 +174,10 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className={`flex-1 ${compact ? 'p-4' : 'p-6'} overflow-y-auto`}>
-        <p className="text-xs font-semibold text-white/30 tracking-widest mb-4 px-4">Navigation</p>
+        <p className="text-sm font-semibold text-white/30 tracking-widest mb-4 px-4">Navigation</p>
         <ul className="space-y-1">
           {groupedItems.pinned.length > 0 && (
-            <li className="px-4 py-2 text-[10px] font-semibold tracking-[0.2em] text-[#e8d48b]/70">
+            <li className="px-4 py-2 text-xs font-semibold tracking-[0.2em] text-[#e8d48b]/70">
               Pinned
             </li>
           )}
@@ -186,7 +186,7 @@ export default function Sidebar() {
           ))}
 
           {groupedItems.primary.length > 0 && (
-            <li className="px-4 py-2 text-[10px] font-semibold tracking-[0.2em] text-white/30">
+            <li className="px-4 py-2 text-xs font-semibold tracking-[0.2em] text-white/30">
               Primary
             </li>
           )}
@@ -195,7 +195,7 @@ export default function Sidebar() {
           ))}
 
           {groupedItems.admin.length > 0 && (
-            <li className="px-4 py-2 text-[10px] font-semibold tracking-[0.2em] text-white/30">
+            <li className="px-4 py-2 text-xs font-semibold tracking-[0.2em] text-white/30">
               Admin
             </li>
           )}
@@ -290,10 +290,10 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="p-6 border-t border-white/5">
         <div className="px-4 py-3 rounded-xl bg-white/5">
-          <p className="text-xs text-white/40 font-medium tracking-wide">
+          <p className="text-sm text-white/40 font-medium tracking-wide">
             Brighter Horizon Academy
           </p>
-          <p className="text-[10px] text-white/20 mt-1">
+          <p className="text-xs text-white/20 mt-1">
             Excellence in Education
           </p>
         </div>

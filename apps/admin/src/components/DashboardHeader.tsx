@@ -42,8 +42,8 @@ export default function DashboardHeader({ adminName }: DashboardHeaderProps) {
                 .toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#1a1a2e]">{adminName}</p>
-              <p className="text-xs text-[#1a1a2e]/40">Administrator</p>
+              <p className="text-base font-semibold text-[#1a1a2e]">{adminName}</p>
+              <p className="text-sm text-[#1a1a2e]/40">Administrator</p>
             </div>
           </div>
           <div className="w-px h-8 bg-[#1a1a2e]/10"></div>

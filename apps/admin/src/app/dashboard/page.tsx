@@ -259,7 +259,7 @@ export default function DashboardPage() {
               {/* House Header */}
               <div className="flex items-start justify-between gap-6 mb-5">
                 <div>
-                  <div className="inline-flex items-center gap-2 text-xs tracking-[0.15em] font-semibold text-white/70 bg-white/10 border border-white/15 px-3 py-1.5 rounded-full mb-4">
+                  <div className="inline-flex items-center gap-2 text-sm tracking-[0.15em] font-semibold text-white/70 bg-white/10 border border-white/15 px-3 py-1.5 rounded-full mb-4">
                     <span className="text-white/50">Rank</span>
                     <span className="text-white">{index + 1}</span>
                   </div>
@@ -291,13 +291,13 @@ export default function DashboardPage() {
                   <p className="text-4xl font-bold text-white leading-none" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
                     {house.points.toLocaleString()}
                   </p>
-                  <p className="text-white/50 text-base font-medium">Total Points</p>
+                  <p className="text-white/50 text-lg font-medium">Total Points</p>
                 </div>
               </div>
 
               {/* Top Students */}
               <div className="mt-6">
-                <p className="text-white/50 text-sm font-semibold tracking-widest mb-4">Top Performers</p>
+                <p className="text-white/50 text-base font-semibold tracking-widest mb-4">Top Performers</p>
                 <div className="flex gap-3 overflow-x-auto pb-1">
                   {house.topStudents.map((student, i) => (
                     <div
@@ -305,16 +305,16 @@ export default function DashboardPage() {
                       className="bg-white/10 backdrop-blur-md rounded-xl px-4 py-3 min-w-[150px] border border-white/10 hover:bg-white/15 transition-colors"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
                           i === 0 ? 'bg-[#c9a227] text-white' :
                           i === 1 ? 'bg-white/30 text-white' :
                           'bg-white/20 text-white/80'
                         }`}>
                           {i + 1}
                         </span>
-                        <p className="text-white font-semibold text-sm truncate flex-1">{student.name}</p>
+                        <p className="text-white font-semibold text-base truncate flex-1">{student.name}</p>
                       </div>
-                      <p className="text-[#c9a227] text-lg font-bold">{student.points} <span className="text-xs text-white/50 font-normal">pts</span></p>
+                      <p className="text-[#c9a227] text-lg font-bold">{student.points} <span className="text-sm text-white/50 font-normal">pts</span></p>
                     </div>
                   ))}
                 </div>

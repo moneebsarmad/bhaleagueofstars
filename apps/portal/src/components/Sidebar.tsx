@@ -53,16 +53,13 @@ export default function Sidebar({ role, portalLabel }: SidebarProps) {
       <div className="p-8 border-b border-white/5">
         <div className="flex items-center gap-4">
           {/* Crest Logo */}
-          <div className="relative">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] flex items-center justify-center shadow-lg">
-              <img
-                src="/crest.png"
-                alt="League of Stars crest"
-                className="w-9 h-9 object-contain drop-shadow-sm"
-              />
-            </div>
-            {/* Subtle glow effect */}
-            <div className="absolute inset-0 w-14 h-14 rounded-xl bg-[#c9a227] blur-xl opacity-20"></div>
+          <div className="relative w-14 h-14 flex items-center justify-center">
+            <img
+              src="/crest.png"
+              alt="League of Stars crest"
+              className="w-12 h-12 object-contain drop-shadow-md"
+            />
+            <div className="absolute inset-0 rounded-full bg-[#c9a227] blur-xl opacity-20 -z-10"></div>
           </div>
           <div>
             <h1 className="text-xl font-semibold text-white tracking-tight" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>

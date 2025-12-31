@@ -25,7 +25,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${cormorant.variable} ${playfair.variable} antialiased`}>
+      <body className={`${cormorant.variable} ${playfair.variable} ${cormorant.className} antialiased`}>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

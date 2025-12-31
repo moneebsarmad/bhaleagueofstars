@@ -68,13 +68,13 @@ export default function Sidebar({ role, portalLabel }: SidebarProps) {
             <h1 className="text-xl font-semibold text-white tracking-tight" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
               League of Stars
             </h1>
-            <p className="text-sm text-[#c9a227]/80 font-medium tracking-wide">{portalLabel}</p>
+            <p className="text-sm text-[#c9a227]/80 font-medium tracking-wide" style={{ fontFamily: 'var(--font-body), Cormorant Garamond, Georgia, serif' }}>{portalLabel}</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-6 overflow-y-auto">
+      <nav className="flex-1 p-6 overflow-y-auto" style={{ fontFamily: 'var(--font-body), Cormorant Garamond, Georgia, serif' }}>
         <p className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4 px-4">Navigation</p>
         <ul className="space-y-1">
           {navItems.map((item) => {
@@ -112,7 +112,7 @@ export default function Sidebar({ role, portalLabel }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="p-6 border-t border-white/5">
+      <div className="p-6 border-t border-white/5" style={{ fontFamily: 'var(--font-body), Cormorant Garamond, Georgia, serif' }}>
         <div className="px-4 py-3 rounded-xl bg-white/5">
           <p className="text-xs text-white/40 font-medium tracking-wide">
             Brighter Horizon Academy

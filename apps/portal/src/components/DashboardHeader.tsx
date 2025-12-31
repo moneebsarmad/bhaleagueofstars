@@ -42,7 +42,7 @@ export default function DashboardHeader({ userName, role }: DashboardHeaderProps
   }
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-[#c9a227]/10 sticky top-0 z-10">
+    <header className="bg-white/80 backdrop-blur-md border-b border-[#c9a227]/10 sticky top-0 z-10" style={{ fontFamily: 'var(--font-body), Cormorant Garamond, Georgia, serif' }}>
       <div className="px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-[#c9a227]"></div>

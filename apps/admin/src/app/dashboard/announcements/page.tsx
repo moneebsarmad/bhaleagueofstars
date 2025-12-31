@@ -146,7 +146,7 @@ export default function AnnouncementsPage() {
         <div className="flex items-center gap-3">
           <div className="h-1 w-16 bg-gradient-to-r from-[#c9a227] to-[#e8d48b] rounded-full"></div>
           <p className="text-[#1a1a2e]/50 text-sm font-medium">Share updates with staff and students</p>
-          <div className={`ml-auto flex items-center gap-2 text-[11px] font-semibold tracking-widest px-3 py-1 rounded-full border ${
+          <div className={`ml-auto flex items-center gap-2 text-xs font-semibold tracking-widest px-3 py-1 rounded-full border ${
             isLive
               ? 'text-emerald-700 border-emerald-200 bg-emerald-50'
               : 'text-amber-700 border-amber-200 bg-amber-50'
@@ -196,7 +196,7 @@ export default function AnnouncementsPage() {
                 onChange={(event) => setPublishAt(event.target.value)}
                 className="regal-input w-full px-4 py-3 rounded-xl text-sm"
               />
-              <p className="text-[11px] text-[#1a1a2e]/40 mt-1">Leave empty to publish immediately.</p>
+              <p className="text-xs text-[#1a1a2e]/40 mt-1">Leave empty to publish immediately.</p>
             </div>
             <div>
               <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
@@ -208,7 +208,7 @@ export default function AnnouncementsPage() {
                 onChange={(event) => setExpiresAt(event.target.value)}
                 className="regal-input w-full px-4 py-3 rounded-xl text-sm"
               />
-              <p className="text-[11px] text-[#1a1a2e]/40 mt-1">Optional. Leave empty for no expiry.</p>
+              <p className="text-xs text-[#1a1a2e]/40 mt-1">Optional. Leave empty for no expiry.</p>
             </div>
           </div>
           <div>
@@ -231,7 +231,7 @@ export default function AnnouncementsPage() {
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[#1a1a2e]/40 mt-1">Leave empty to show to all roles.</p>
+            <p className="text-xs text-[#1a1a2e]/40 mt-1">Leave empty to show to all roles.</p>
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
@@ -253,7 +253,7 @@ export default function AnnouncementsPage() {
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[#1a1a2e]/40 mt-1">Leave empty to show to all houses.</p>
+            <p className="text-xs text-[#1a1a2e]/40 mt-1">Leave empty to show to all houses.</p>
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#1a1a2e]/40 mb-2 tracking-wider">
@@ -275,7 +275,7 @@ export default function AnnouncementsPage() {
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[#1a1a2e]/40 mt-1">Leave empty to show to all grades.</p>
+            <p className="text-xs text-[#1a1a2e]/40 mt-1">Leave empty to show to all grades.</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -319,11 +319,11 @@ export default function AnnouncementsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {announcement.pinned && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c9a227]/20 text-[#7a5b1a] font-semibold tracking-wider">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[#c9a227]/20 text-[#7a5b1a] font-semibold tracking-wider">
                       Pinned
                     </span>
                   )}
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold tracking-wider ${getStatus(announcement).tone}`}>
+                  <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold tracking-wider ${getStatus(announcement).tone}`}>
                     {getStatus(announcement).label}
                   </span>
                 </div>
@@ -331,7 +331,7 @@ export default function AnnouncementsPage() {
               <p className="mt-4 text-sm text-[#1a1a2e]/70 whitespace-pre-wrap">
                 {announcement.body}
               </p>
-              <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-[#1a1a2e]/50">
+              <div className="mt-4 flex flex-wrap gap-2 text-xs text-[#1a1a2e]/50">
                 {announcement.publish_at && (
                   <span>Publishes: {new Date(announcement.publish_at).toLocaleString()}</span>
                 )}

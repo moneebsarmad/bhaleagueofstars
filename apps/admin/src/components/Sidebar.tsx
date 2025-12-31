@@ -274,7 +274,7 @@ export default function Sidebar() {
                   <select
                     value={groups[id] || 'Primary'}
                     onChange={(event) => setGroups((prev) => ({ ...prev, [id]: event.target.value as 'Primary' | 'Admin' }))}
-                    className="bg-white/10 text-white/70 rounded-md px-2 py-1 text-[10px]"
+                    className="bg-white/10 text-white/70 rounded-md px-2 py-1 text-xs"
                   >
                     {groupOptions.map((group) => (
                       <option key={group} value={group}>{group}</option>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import HouseCard from "@/components/HouseCard";
 
@@ -78,9 +78,14 @@ const fallbackHouses: House[] = [
 export default function Home() {
   const [houses, setHouses] = useState<House[]>(fallbackHouses);
   const [loading, setLoading] = useState(true);
+  const fetchingRef = useRef(false);
 
   useEffect(() => {
     async function fetchHouses() {
+      if (fetchingRef.current) {
+        return;
+      }
+      fetchingRef.current = true;
       try {
         const { data, error } = await supabase
           .from("house_standings_view")
@@ -118,6 +123,7 @@ export default function Home() {
         setHouses(fallbackHouses);
       } finally {
         setLoading(false);
+        fetchingRef.current = false;
       }
     }
 
@@ -141,8 +147,18 @@ export default function Home() {
       )
       .subscribe();
 
+    const refreshInterval = setInterval(fetchHouses, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchHouses();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(refreshInterval);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 

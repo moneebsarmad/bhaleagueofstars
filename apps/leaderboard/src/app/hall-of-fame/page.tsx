@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface HallEntry {
@@ -80,6 +80,7 @@ export default function HallOfFamePage() {
   const [data, setData] = useState<Record<string, HallEntry[]>>({});
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const fetchingRef = useRef(false);
 
   useEffect(() => {
     async function fetchSection(section: HallSection) {
@@ -95,6 +96,10 @@ export default function HallOfFamePage() {
     }
 
     async function fetchAll() {
+      if (fetchingRef.current) {
+        return;
+      }
+      fetchingRef.current = true;
       try {
         const results = await Promise.all(
           sections.map(async (section) => ({
@@ -112,6 +117,7 @@ export default function HallOfFamePage() {
         setErrorMessage("Unable to load Hall of Fame right now.");
       } finally {
         setLoading(false);
+        fetchingRef.current = false;
       }
     }
 
@@ -135,8 +141,18 @@ export default function HallOfFamePage() {
       )
       .subscribe();
 
+    const refreshInterval = setInterval(fetchAll, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchAll();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(refreshInterval);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 

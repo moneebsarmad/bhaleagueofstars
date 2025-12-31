@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const houseConfig: Record<
@@ -72,6 +72,7 @@ export default function HouseMvpsPage() {
   const [students, setStudents] = useState<StudentEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const fetchingRef = useRef(false);
 
   useEffect(() => {
     function getRowValue(
@@ -100,6 +101,10 @@ export default function HouseMvpsPage() {
     }
 
     async function fetchTopStudents() {
+      if (fetchingRef.current) {
+        return;
+      }
+      fetchingRef.current = true;
       try {
         const { data, error } = await supabase
           .from("top_students_per_house")
@@ -145,6 +150,7 @@ export default function HouseMvpsPage() {
         setErrorMessage("Unable to load House MVPs right now.");
       } finally {
         setLoading(false);
+        fetchingRef.current = false;
       }
     }
 
@@ -168,8 +174,18 @@ export default function HouseMvpsPage() {
       )
       .subscribe();
 
+    const refreshInterval = setInterval(fetchTopStudents, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchTopStudents();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(refreshInterval);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 

@@ -316,6 +316,7 @@ h1, h2, h3 {
 }
 
 .auth-header p {
+  font-family: var(--font-body), 'Cormorant Garamond', Georgia, serif;
   font-size: 14px;
   color: rgba(26, 26, 46, 0.5);
   letter-spacing: 0.15em;

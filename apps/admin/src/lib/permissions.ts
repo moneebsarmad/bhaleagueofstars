@@ -37,19 +37,8 @@ export interface UserProfile {
   email: string
   role: Role | null
   assigned_house: string | null
-  staff_id: string | null
-  admin_id: string | null
-  staff?: {
-    id: string
-    staff_name: string
-    email: string
-    role: string
-  } | null
-  admin?: {
-    id: string
-    name: string
-    email: string
-  } | null
+  full_name?: string | null
+  student_name?: string | null
 }
 
 // Check if user has a specific permission
@@ -148,7 +137,7 @@ export async function getUserPermissions(
   }
 }
 
-// Get full user profile with relations
+// Get full user profile
 export async function getUserProfile(supabase: SupabaseClient): Promise<UserProfile | null> {
   try {
     const {
@@ -158,13 +147,7 @@ export async function getUserProfile(supabase: SupabaseClient): Promise<UserProf
 
     const { data, error } = await supabase
       .from('profiles')
-      .select(
-        `
-        *,
-        staff:staff_id(*),
-        admin:admin_id(*)
-      `
-      )
+      .select('*')
       .eq('id', user.id)
       .single()
 

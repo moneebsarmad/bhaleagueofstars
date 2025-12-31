@@ -44,14 +44,14 @@ DROP POLICY IF EXISTS "Staff can view own record" ON staff;
 DROP POLICY IF EXISTS "Admins can view all staff" ON staff;
 DROP POLICY IF EXISTS "Staff manage permission can modify staff" ON staff;
 
--- Staff can view their own record
+-- Staff can view their own record (linked by email)
 CREATE POLICY "Staff can view own record"
 ON staff FOR SELECT
 USING (
   EXISTS (
     SELECT 1 FROM profiles
     WHERE profiles.id = auth.uid()
-    AND profiles.staff_id = staff.id
+    AND profiles.email = staff.email
   )
 );
 

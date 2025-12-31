@@ -85,37 +85,14 @@ ON CONFLICT (role_name, permission_name) DO NOTHING;
 -- 4. UPDATE PROFILES TABLE WITH RBAC COLUMNS
 ALTER TABLE profiles
 ADD COLUMN IF NOT EXISTS role TEXT REFERENCES roles(role_name),
-ADD COLUMN IF NOT EXISTS assigned_house TEXT,
-ADD COLUMN IF NOT EXISTS staff_id UUID,
-ADD COLUMN IF NOT EXISTS admin_id UUID;
+ADD COLUMN IF NOT EXISTS assigned_house TEXT;
 
--- Add foreign key constraints if staff/admins tables exist
-DO $$
-BEGIN
-  -- Try to add staff_id FK
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'staff') THEN
-    BEGIN
-      ALTER TABLE profiles ADD CONSTRAINT fk_profiles_staff
-        FOREIGN KEY (staff_id) REFERENCES staff(id);
-    EXCEPTION WHEN duplicate_object THEN
-      NULL;
-    END;
-  END IF;
-
-  -- Try to add admin_id FK
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'admins') THEN
-    BEGIN
-      ALTER TABLE profiles ADD CONSTRAINT fk_profiles_admin
-        FOREIGN KEY (admin_id) REFERENCES admins(id);
-    EXCEPTION WHEN duplicate_object THEN
-      NULL;
-    END;
-  END IF;
-END $$;
+-- Note: We're not adding staff_id/admin_id FK columns since:
+-- - admins table uses auth_user_id (UUID) as primary key, not id
+-- - staff table may not have a UUID primary key
+-- Instead, we link via email address which is already in profiles
 
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
-CREATE INDEX IF NOT EXISTS idx_profiles_staff_id ON profiles(staff_id);
-CREATE INDEX IF NOT EXISTS idx_profiles_admin_id ON profiles(admin_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_assigned_house ON profiles(assigned_house);
 
 -- 5. CREATE HELPER FUNCTIONS
@@ -171,31 +148,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Get user's staff name (for merit_log matching)
+-- Get user's staff name (for merit_log matching) - uses email to link
 CREATE OR REPLACE FUNCTION get_user_staff_name(user_id UUID)
 RETURNS TEXT AS $$
 BEGIN
   RETURN (
     SELECT s.staff_name
     FROM profiles p
-    JOIN staff s ON p.staff_id = s.id
+    JOIN staff s ON p.email = s.email
     WHERE p.id = user_id
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 6. LINK EXISTING PROFILES TO STAFF/ADMINS
-UPDATE profiles p
-SET staff_id = s.id
-FROM staff s
-WHERE p.email = s.email
-AND p.staff_id IS NULL;
-
-UPDATE profiles p
-SET admin_id = a.id
-FROM admins a
-WHERE p.email = a.email
-AND p.admin_id IS NULL;
+-- Check if user is an admin (in admins table)
+CREATE OR REPLACE FUNCTION is_admin_user(user_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1
+    FROM admins a
+    WHERE a.auth_user_id = user_id
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 7. CREATE AUDIT LOG TABLE
 CREATE TABLE IF NOT EXISTS audit_logs (

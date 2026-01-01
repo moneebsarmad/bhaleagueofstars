@@ -10,6 +10,17 @@ import CrestLoader from '../../components/CrestLoader'
 
 type Role = 'student' | 'parent' | 'staff'
 
+// RBAC roles that map to 'staff' portal access
+const STAFF_ROLES = ['staff', 'super_admin', 'admin', 'house_mentor', 'teacher', 'support_staff']
+
+function mapRoleToPortalRole(dbRole: string | null): Role | null {
+  if (!dbRole) return null
+  if (dbRole === 'student') return 'student'
+  if (dbRole === 'parent') return 'parent'
+  if (STAFF_ROLES.includes(dbRole)) return 'staff'
+  return null
+}
+
 function formatDisplayName(email: string) {
   if (!email) return 'User'
   const localPart = email.split('@')[0] ?? ''
@@ -68,7 +79,7 @@ export default function DashboardLayout({
       if (error) {
         setRole(null)
       } else {
-        setRole((data?.role as Role) ?? null)
+        setRole(mapRoleToPortalRole(data?.role ?? null))
       }
       setProfileLoading(false)
     }

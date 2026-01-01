@@ -7,6 +7,17 @@ import CrestLoader from '../../../components/CrestLoader'
 
 type Role = 'student' | 'parent' | 'staff'
 
+// RBAC roles that map to 'staff' portal access
+const STAFF_ROLES = ['staff', 'super_admin', 'admin', 'house_mentor', 'teacher', 'support_staff']
+
+function mapRoleToPortalRole(dbRole: string | null): Role | null {
+  if (!dbRole) return null
+  if (dbRole === 'student') return 'student'
+  if (dbRole === 'parent') return 'parent'
+  if (STAFF_ROLES.includes(dbRole)) return 'staff'
+  return null
+}
+
 type ToggleOption = {
   key: string
   label: string
@@ -81,9 +92,9 @@ export default function SettingsPage() {
         .maybeSingle()
 
       if (error) {
-        setRole('student')
+        setRole(null)
       } else {
-        setRole((data?.role as Role) ?? 'student')
+        setRole(mapRoleToPortalRole(data?.role ?? null))
       }
       setLoading(false)
     }

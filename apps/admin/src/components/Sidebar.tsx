@@ -10,7 +10,11 @@ type NavItem = {
   name: string
   href: string
   icon: string
+  superAdminOnly?: boolean
 }
+
+// Items that should only be visible to super_admin
+const SUPER_ADMIN_ONLY_ITEMS = ['announcements', 'data-quality', 'behaviour']
 
 const navItems: NavItem[] = [
   { id: 'overview', name: 'Overview', href: '/dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -53,6 +57,27 @@ export default function Sidebar() {
   const [groups, setGroups] = useState<Record<string, 'Primary' | 'Admin'>>(defaultGroups)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
+
+  // Load user role from profiles table
+  useEffect(() => {
+    const loadUserRole = async () => {
+      const { data: authData } = await supabase.auth.getUser()
+      if (!authData.user) return
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .maybeSingle()
+
+      if (profile?.role) {
+        setUserRole(profile.role)
+      }
+    }
+
+    loadUserRole()
+  }, [])
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -80,7 +105,13 @@ export default function Sidebar() {
     loadPreferences()
   }, [])
 
-  const visibleOrder = order.filter((id) => !hidden.includes(id))
+  // Filter out super admin only items if user is not super_admin
+  const isSuperAdmin = userRole === 'super_admin'
+  const visibleOrder = order.filter((id) => {
+    if (hidden.includes(id)) return false
+    if (SUPER_ADMIN_ONLY_ITEMS.includes(id) && !isSuperAdmin) return false
+    return true
+  })
   const itemsById = useMemo(() => new Map(navItems.map((item) => [item.id, item])), [])
 
   const groupedItems = useMemo(() => {
@@ -245,6 +276,8 @@ export default function Sidebar() {
             {order.map((id) => {
               const item = itemsById.get(id)
               if (!item) return null
+              // Hide super admin only items from customization panel for non-super admins
+              if (SUPER_ADMIN_ONLY_ITEMS.includes(id) && !isSuperAdmin) return null
               return (
                 <div
                   key={id}

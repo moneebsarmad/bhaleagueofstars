@@ -28,6 +28,7 @@ const navItems: NavItem[] = [
   { id: 'data-quality', name: 'Data Quality', href: '/dashboard/data-quality', icon: 'M9 12h6m2 9H7a2 2 0 01-2-2V5a2 2 0 012-2h6l4 4v12a2 2 0 01-2 2zM14 3v5h5' },
   { id: 'behaviour', name: 'Behaviour Insights', href: '/dashboard/behaviour', icon: 'M12 3l7 4v6c0 5-3.5 9.5-7 11-3.5-1.5-7-6-7-11V7l7-4zM9 12l2 2 4-4' },
   { id: 'reports', name: 'Reports', href: '/dashboard/reports', icon: 'M9 12h6m-6 4h6M7 8h10M5 20h14a2 2 0 002-2V7.414a2 2 0 00-.586-1.414l-3.414-3.414A2 2 0 0015.586 2H5a2 2 0 00-2 2v14a2 2 0 002 2z' },
+  { id: 'settings', name: 'Settings', href: '/dashboard/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
 ]
 
 const defaultOrder = navItems.map((item) => item.id)
@@ -43,6 +44,7 @@ const defaultGroups: Record<string, 'Primary' | 'Admin'> = {
   'data-quality': 'Admin',
   behaviour: 'Admin',
   reports: 'Admin',
+  settings: 'Admin',
 }
 
 const groupOptions = ['Primary', 'Admin'] as const

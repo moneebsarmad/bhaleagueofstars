@@ -4,32 +4,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { schoolConfig, canonicalHouseName } from "@/lib/school.config";
 
+// Background colors for each house (leaderboard-specific)
+const houseBgColors: Record<string, string> = {
+  "House of Abū Bakr": "#f6f1fb",
+  "House of ʿUmar": "#f2f3fb",
+  "House of ʿĀʾishah": "#fdf1f1",
+  "House of Khadījah": "#f1fbf6",
+};
+
+// Build house config from school config
 const houseConfig: Record<
   string,
   { color: string; bgColor: string; logo?: string | null }
-> = {
-  "House of Abu Bakr": {
-    color: "#2f0a61",
-    bgColor: "#f6f1fb",
-    logo: "/house_of_abubakr.png",
-  },
-  "House of 'Umar": {
-    color: "#000068",
-    bgColor: "#f2f3fb",
-    logo: "/house_of_umar.png",
-  },
-  "House of 'A'ishah": {
-    color: "#910000",
-    bgColor: "#fdf1f1",
-    logo: "/house_of_aishah.png",
-  },
-  "House of Khadijah": {
-    color: "#055437",
-    bgColor: "#f1fbf6",
-    logo: "/house_of_khadijah.png",
-  },
-};
+> = schoolConfig.houses.reduce((acc, house) => {
+  acc[house.name] = {
+    color: house.color,
+    bgColor: houseBgColors[house.name] || "#f5f5f5",
+    logo: house.logo,
+  };
+  return acc;
+}, {} as Record<string, { color: string; bgColor: string; logo?: string | null }>);
 
 interface StudentEntry {
   houseName: string;
@@ -38,35 +34,6 @@ interface StudentEntry {
   rank?: number | null;
 }
 
-function normalizeHouseName(raw: string): string {
-  const cleaned = raw
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[’‘`]/g, "'")
-    .trim();
-  if (!cleaned) {
-    return "Unknown House";
-  }
-  const key = cleaned
-    .toLowerCase()
-    .replace(/[^a-z\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  const compact = key.replace(/\s+/g, "");
-  if (key.includes("abu bakr") || compact.includes("abubakr")) {
-    return "House of Abu Bakr";
-  }
-  if (key.includes("umar")) {
-    return "House of 'Umar";
-  }
-  if (key.includes("aishah") || compact.includes("aishah")) {
-    return "House of 'A'ishah";
-  }
-  if (key.includes("khadijah")) {
-    return "House of Khadijah";
-  }
-  return cleaned;
-}
 
 export default function HouseMvpsPage() {
   const [students, setStudents] = useState<StudentEntry[]>([]);
@@ -127,7 +94,7 @@ export default function HouseMvpsPage() {
             const rankRaw =
               getRowValue(row, ["house_rank"]) ?? NaN;
 
-            const houseName = normalizeHouseName(
+            const houseName = canonicalHouseName(
               String(houseNameRaw ?? "")
             );
             const studentName =
@@ -227,10 +194,8 @@ export default function HouseMvpsPage() {
     return [...configured, ...extras.sort()];
   }, [grouped]);
 
-  const visibleHouses = useMemo(
-    () => houseOrder.filter((houseName) => (grouped[houseName] || []).length > 0),
-    [grouped, houseOrder]
-  );
+  // Always show all houses, even if empty
+  const visibleHouses = houseOrder;
 
   return (
     <div
@@ -250,8 +215,8 @@ export default function HouseMvpsPage() {
         <header className="text-center mb-6">
           <div className="flex justify-center mb-3">
             <Image
-              src="/crest.png"
-              alt="League of Stars Crest"
+              src={schoolConfig.crestLogo}
+              alt={`${schoolConfig.systemName} Crest`}
               width={90}
               height={90}
               className="drop-shadow-lg"

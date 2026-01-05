@@ -104,7 +104,7 @@ const demoConfig: SchoolConfig = {
       color: '#2f0a61',
       gradient: 'linear-gradient(135deg, #4a1a8a 0%, #2f0a61 50%, #1a0536 100%)',
       accentGradient: 'linear-gradient(135deg, #6b2fad 0%, #4a1a8a 100%)',
-      logo: '/houses/abu-bakr.png',
+      logo: '/house_of_abubakr.png',
       aliases: ['abu bakr', 'abubakr', 'abu-bakr', 'bakr'],
     },
     {
@@ -112,7 +112,7 @@ const demoConfig: SchoolConfig = {
       color: '#055437',
       gradient: 'linear-gradient(135deg, #0a7a50 0%, #055437 50%, #033320 100%)',
       accentGradient: 'linear-gradient(135deg, #0d9963 0%, #0a7a50 100%)',
-      logo: '/houses/khadijah.png',
+      logo: '/house_of_khadijah.png',
       aliases: ['khadijah', 'khadija', 'khad'],
     },
     {
@@ -120,7 +120,7 @@ const demoConfig: SchoolConfig = {
       color: '#000068',
       gradient: 'linear-gradient(135deg, #1a1a9a 0%, #000068 50%, #000040 100%)',
       accentGradient: 'linear-gradient(135deg, #2a2ab8 0%, #1a1a9a 100%)',
-      logo: '/houses/umar.png',
+      logo: '/house_of_umar.png',
       aliases: ['umar', 'omar'],
     },
     {
@@ -128,7 +128,7 @@ const demoConfig: SchoolConfig = {
       color: '#910000',
       gradient: 'linear-gradient(135deg, #c41a1a 0%, #910000 50%, #5a0000 100%)',
       accentGradient: 'linear-gradient(135deg, #e02d2d 0%, #c41a1a 100%)',
-      logo: '/houses/aishah.png',
+      logo: '/house_of_aishah.png',
       aliases: ['aishah', 'aisha', 'ayesha'],
     },
   ],

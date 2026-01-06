@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
+import { schoolConfig } from '@/lib/school.config'
 
 type ReportTemplate = {
   id: string
@@ -160,7 +161,7 @@ export default function ReportsPage() {
       </tr>
     `).join('')
 
-    const crestUrl = `${window.location.origin}/crest.png`
+    const crestUrl = `${window.location.origin}${schoolConfig.crestLogo}`
     const summaryHtml = options?.summaryHtml || summary.replace(/\n/g, '<br/>')
     const variant = options?.variant || 'default'
     const chartsHtml = options?.chartsHtml || ''
@@ -195,9 +196,9 @@ export default function ReportsPage() {
         <body>
           <div class="report ${variant === 'student' ? 'report-card' : ''}">
             <div class="header">
-              <img class="crest" src="${crestUrl}" alt="League of Stars Crest" />
+              <img class="crest" src="${crestUrl}" alt="${schoolConfig.systemName} Crest" />
               <div>
-                <div class="brand">League of Stars • Brighter Horizon Academy</div>
+                <div class="brand">${schoolConfig.systemName} • ${schoolConfig.schoolName}</div>
                 <div class="title">${title}</div>
               </div>
             </div>

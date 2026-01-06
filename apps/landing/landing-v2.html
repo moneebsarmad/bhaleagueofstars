@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>League of Stars | School Identity System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1a2e;
+      --ink-light: #4a4a68;
+      --ink-muted: #6b6b8a;
+      --cream: #fafaf8;
+      --warm: #f5f3ef;
+      --gold: #b8860b;
+      --gold-light: #d4a84b;
+      --border: #e8e6e1;
+      --card: #ffffff;
+
+      /* League colors */
+      --rise: #2d5a47;
+      --apex: #8b6914;
+      --champions: #4a3b6b;
+      --builders: #1e4a5f;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    /* ========== LAYOUT ========== */
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section {
+      padding: 80px 0;
+    }
+
+    section + section {
+      border-top: 1px solid var(--border);
+    }
+
+    /* ========== TYPOGRAPHY ========== */
+
+    h1, h2, h3 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      margin-bottom: 24px;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: var(--ink-light);
+      max-width: 600px;
+    }
+
+    .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: var(--ink-light);
+      margin-top: 16px;
+    }
+
+    /* ========== HERO ========== */
+
+    .hero {
+      padding: 100px 0 80px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--warm) 0%, var(--cream) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero h1 {
+      margin-bottom: 20px;
+    }
+
+    .hero-tagline {
+      font-size: 1.25rem;
+      color: var(--ink-light);
+      margin-bottom: 24px;
+    }
+
+    .hero-quote {
+      display: inline-block;
+      padding: 12px 24px;
+      background: var(--card);
+      border-left: 3px solid var(--gold);
+      font-style: italic;
+      color: var(--ink);
+      margin-top: 8px;
+    }
+
+    /* ========== WHAT THIS IS ========== */
+
+    .what-section {
+      background: var(--card);
+    }
+
+    .what-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .what-list {
+      list-style: none;
+    }
+
+    .what-list li {
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+      color: var(--ink);
+    }
+
+    .what-list li:last-child {
+      border-bottom: none;
+    }
+
+    .what-distinction {
+      padding: 20px 24px;
+      background: var(--warm);
+      border-radius: 8px;
+      margin-top: 24px;
+    }
+
+    .what-distinction p {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* ========== HOW IT WORKS (DIAGRAM) ========== */
+
+    .how-section {
+      text-align: center;
+    }
+
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 48px 0;
+    }
+
+    .flow-item {
+      padding: 16px 48px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-weight: 500;
+      position: relative;
+    }
+
+    .flow-arrow {
+      width: 2px;
+      height: 32px;
+      background: var(--border);
+      position: relative;
+    }
+
+    .flow-arrow::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--border);
+    }
+
+    .how-note {
+      max-width: 500px;
+      margin: 0 auto;
+      color: var(--ink-light);
+    }
+
+    /* ========== LEAGUE TYPE FORK ========== */
+
+    .fork-section {
+      background: var(--warm);
+    }
+
+    .fork-intro {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .fork-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .fork-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    .fork-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .fork-card .tagline {
+      font-style: italic;
+      color: var(--ink-muted);
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+
+    .fork-card p.label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+    }
+
+    .fork-card ul {
+      list-style: none;
+      margin-bottom: 24px;
+    }
+
+    .fork-card ul li {
+      padding: 6px 0;
+      color: var(--ink-light);
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .fork-card ul li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    .fork-leagues {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .fork-league-pill {
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: white;
+    }
+
+    .fork-league-pill.rise { background: var(--rise); }
+    .fork-league-pill.apex { background: var(--apex); }
+    .fork-league-pill.champions { background: var(--champions); }
+    .fork-league-pill.builders { background: var(--builders); }
+
+    /* ========== LEAGUE CARDS ========== */
+
+    .leagues-section h2 {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .league-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .league-card {
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .league-header {
+      padding: 24px 28px;
+      color: white;
+    }
+
+    .league-header.rise { background: var(--rise); }
+    .league-header.apex { background: var(--apex); }
+    .league-header.champions { background: var(--champions); }
+    .league-header.builders { background: var(--builders); }
+
+    .league-header h3 {
+      color: white;
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+
+    .league-header .tagline {
+      opacity: 0.85;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+
+    .league-body {
+      padding: 24px 28px;
+    }
+
+    .league-body .fit-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      margin-bottom: 8px;
+    }
+
+    .league-body .fit-list {
+      list-style: none;
+      margin-bottom: 24px;
+    }
+
+    .league-body .fit-list li {
+      padding: 5px 0;
+      color: var(--ink-light);
+      font-size: 0.95rem;
+    }
+
+    .houses-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      margin-bottom: 12px;
+    }
+
+    .houses-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .house-item {
+      padding: 12px 14px;
+      background: var(--warm);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .house-item .name {
+      font-weight: 600;
+      color: var(--ink);
+      display: block;
+    }
+
+    .house-item .virtue {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+    }
+
+    /* ========== MS TO HS ========== */
+
+    .span-section {
+      text-align: center;
+      background: var(--card);
+    }
+
+    .span-section h2 {
+      margin-bottom: 16px;
+    }
+
+    .span-section .note {
+      color: var(--ink-light);
+      margin-bottom: 40px;
+    }
+
+    .span-table {
+      max-width: 500px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .span-table th,
+    .span-table td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .span-table th {
+      font-weight: 600;
+      color: var(--ink);
+      background: var(--warm);
+    }
+
+    .span-table td {
+      color: var(--ink-light);
+    }
+
+    /* ========== HOUSES CLARIFICATION ========== */
+
+    .houses-section {
+      background: var(--warm);
+    }
+
+    .houses-section h2 {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .houses-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      max-width: 700px;
+      margin: 0 auto 40px;
+    }
+
+    .houses-box {
+      background: var(--card);
+      padding: 28px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .houses-box h3 {
+      margin-bottom: 16px;
+    }
+
+    .houses-box.are {
+      border-left: 3px solid var(--rise);
+    }
+
+    .houses-box.arent {
+      border-left: 3px solid var(--ink-muted);
+    }
+
+    .houses-box ul {
+      list-style: none;
+    }
+
+    .houses-box ul li {
+      padding: 8px 0;
+      color: var(--ink-light);
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .houses-box ul li:last-child {
+      border-bottom: none;
+    }
+
+    .houses-final {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--ink);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* ========== CLOSING ========== */
+
+    .closing-section {
+      text-align: center;
+      background: var(--ink);
+      color: white;
+    }
+
+    .closing-section h2 {
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .closing-section p {
+      color: rgba(255,255,255,0.75);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* ========== RESPONSIVE ========== */
+
+    @media (max-width: 768px) {
+      section {
+        padding: 60px 0;
+      }
+
+      .what-grid,
+      .fork-grid,
+      .league-grid,
+      .houses-compare {
+        grid-template-columns: 1fr;
+      }
+
+      .houses-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-item {
+        padding: 14px 32px;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">School-Wide Identity System</p>
+      <h1>One School. One League. Four Houses.</h1>
+      <p class="hero-tagline">A school-wide identity system<br>for Middle & High School — together.</p>
+      <div class="hero-quote">Built for character, responsibility, and leadership.</div>
+    </div>
+  </section>
+
+  <!-- WHAT THIS IS -->
+  <section class="what-section">
+    <div class="container">
+      <div class="what-grid">
+        <div>
+          <p class="eyebrow">What This Is</p>
+          <h2>A School-Wide Identity Framework</h2>
+          <ul class="what-list">
+            <li>One League per school</li>
+            <li>Four Houses per League</li>
+            <li>Same system across MS & HS</li>
+            <li>Expectations deepen with maturity</li>
+          </ul>
+        </div>
+        <div>
+          <div class="what-distinction">
+            <p><strong>Not rewards. Not rankings.</strong></p>
+            <p>This is <strong>formation</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="container">
+      <p class="eyebrow">How It Works</p>
+      <h2>Simple Structure</h2>
+
+      <div class="flow-diagram">
+        <div class="flow-item">School</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-item">One League</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-item">Four Houses</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-item">Shared Language for Growth</div>
+      </div>
+
+      <p class="how-note">
+        Houses are <strong>training areas</strong>, not labels.<br>
+        Students grow <em>within</em> them over time.
+      </p>
+    </div>
+  </section>
+
+  <!-- CHOOSE A LEAGUE TYPE -->
+  <section class="fork-section">
+    <div class="container">
+      <div class="fork-intro">
+        <p class="eyebrow">Step 1</p>
+        <h2>Choose a League Type</h2>
+        <p class="subtitle">Schools choose one direction for their culture.</p>
+      </div>
+
+      <div class="fork-grid">
+        <!-- Character & Formation -->
+        <div class="fork-card">
+          <h3>Character & Formation</h3>
+          <p class="tagline">How students grow and show up daily</p>
+
+          <p class="label">Best for schools focused on:</p>
+          <ul>
+            <li>Habits</li>
+            <li>Discipline</li>
+            <li>Consistency</li>
+            <li>Personal growth</li>
+          </ul>
+
+          <p class="label">Available Leagues</p>
+          <div class="fork-leagues">
+            <span class="fork-league-pill rise">League of Rise</span>
+            <span class="fork-league-pill apex">League of Apex</span>
+          </div>
+        </div>
+
+        <!-- Exemplars & Identity -->
+        <div class="fork-card">
+          <h3>Exemplars & Identity</h3>
+          <p class="tagline">Who students learn from and what they stand for</p>
+
+          <p class="label">Best for schools focused on:</p>
+          <ul>
+            <li>Values</li>
+            <li>Moral courage</li>
+            <li>Leadership</li>
+            <li>Contribution</li>
+          </ul>
+
+          <p class="label">Available Leagues</p>
+          <div class="fork-leagues">
+            <span class="fork-league-pill champions">League of Champions</span>
+            <span class="fork-league-pill builders">League of Builders</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHARACTER & FORMATION LEAGUES -->
+  <section class="leagues-section">
+    <div class="container">
+      <p class="eyebrow">Character & Formation</p>
+      <h2>Leagues for Growth & Discipline</h2>
+
+      <div class="league-grid">
+        <!-- League of Rise -->
+        <div class="league-card">
+          <div class="league-header rise">
+            <h3>League of Rise</h3>
+            <p class="tagline">Growth after setbacks</p>
+          </div>
+          <div class="league-body">
+            <p class="fit-label">Best for schools that are:</p>
+            <ul class="fit-list">
+              <li>Rebuilding confidence or morale</li>
+              <li>Supporting students through struggle</li>
+            </ul>
+
+            <p class="houses-label">Houses</p>
+            <div class="houses-grid">
+              <div class="house-item">
+                <span class="name">Resilient</span>
+                <span class="virtue">recovery</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Intentional</span>
+                <span class="virtue">direction</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Consistent</span>
+                <span class="virtue">habits</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Accountable</span>
+                <span class="virtue">ownership</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- League of Apex -->
+        <div class="league-card">
+          <div class="league-header apex">
+            <h3>League of Apex</h3>
+            <p class="tagline">Performance with integrity</p>
+          </div>
+          <div class="league-body">
+            <p class="fit-label">Best for schools that are:</p>
+            <ul class="fit-list">
+              <li>Strengthening standards</li>
+              <li>Preparing students for pressure</li>
+            </ul>
+
+            <p class="houses-label">Houses</p>
+            <div class="houses-grid">
+              <div class="house-item">
+                <span class="name">Steadfast</span>
+                <span class="virtue">endurance</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Precise</span>
+                <span class="virtue">excellence</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Stewards</span>
+                <span class="virtue">responsibility</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Upright</span>
+                <span class="virtue">integrity</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXEMPLARS & IDENTITY LEAGUES -->
+  <section class="leagues-section">
+    <div class="container">
+      <p class="eyebrow">Exemplars & Identity</p>
+      <h2>Leagues for Courage & Leadership</h2>
+
+      <div class="league-grid">
+        <!-- League of Champions -->
+        <div class="league-card">
+          <div class="league-header champions">
+            <h3>League of Champions</h3>
+            <p class="tagline">Standing for truth when it costs something</p>
+          </div>
+          <div class="league-body">
+            <p class="fit-label">Best for schools that are:</p>
+            <ul class="fit-list">
+              <li>Emphasizing belief and values</li>
+              <li>Helping students navigate pressure</li>
+            </ul>
+
+            <p class="houses-label">Houses</p>
+            <div class="houses-grid">
+              <div class="house-item">
+                <span class="name">Abū Bakr</span>
+                <span class="virtue">truthfulness</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Khadījah</span>
+                <span class="virtue">unwavering support</span>
+              </div>
+              <div class="house-item">
+                <span class="name">ʿUmar</span>
+                <span class="virtue">justice with strength</span>
+              </div>
+              <div class="house-item">
+                <span class="name">ʿĀʾishah</span>
+                <span class="virtue">integrity of knowledge</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- League of Builders -->
+        <div class="league-card">
+          <div class="league-header builders">
+            <h3>League of Builders</h3>
+            <p class="tagline">Constructing what lasts</p>
+          </div>
+          <div class="league-body">
+            <p class="fit-label">Best for schools that are:</p>
+            <ul class="fit-list">
+              <li>Developing leadership</li>
+              <li>Emphasizing contribution over competition</li>
+            </ul>
+
+            <p class="houses-label">Houses</p>
+            <div class="houses-grid">
+              <div class="house-item">
+                <span class="name">ʿUmar ibn ʿAbd al-ʿAzīz</span>
+                <span class="virtue">reform</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Ḥasan al-Baṣrī</span>
+                <span class="virtue">moral conscience</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Umm al-Dardāʾ</span>
+                <span class="virtue">mentorship</span>
+              </div>
+              <div class="house-item">
+                <span class="name">Ḥafṣah bint Sīrīn</span>
+                <span class="virtue">disciplined excellence</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONE SYSTEM MS → HS -->
+  <section class="span-section">
+    <div class="container">
+      <p class="eyebrow">Grades 6–12</p>
+      <h2>One System. MS → HS.</h2>
+      <p class="note">The League and Houses never change.<br>What changes is <strong>depth</strong>.</p>
+
+      <table class="span-table">
+        <thead>
+          <tr>
+            <th>Middle School</th>
+            <th>High School</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Practice</td>
+            <td>Ownership</td>
+          </tr>
+          <tr>
+            <td>Guidance</td>
+            <td>Independence</td>
+          </tr>
+          <tr>
+            <td>Awareness</td>
+            <td>Consistency</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- WHAT HOUSES ARE — AND AREN'T -->
+  <section class="houses-section">
+    <div class="container">
+      <h2>What Houses Are — And Aren't</h2>
+
+      <div class="houses-compare">
+        <div class="houses-box are">
+          <h3>Houses Are</h3>
+          <ul>
+            <li>Areas of growth</li>
+            <li>Shared language</li>
+            <li>Training grounds</li>
+          </ul>
+        </div>
+        <div class="houses-box arent">
+          <h3>Houses Are Not</h3>
+          <ul>
+            <li>Labels</li>
+            <li>Rankings</li>
+            <li>Personality types</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="houses-final">
+        Students don't earn Houses.<br>
+        They grow <em>within</em> them.
+      </p>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="closing-section">
+    <div class="container">
+      <h2>Culture Built Intentionally</h2>
+      <p>Strong culture doesn't happen by accident.<br>It's built — intentionally.</p>
+    </div>
+  </section>
+
+</body>
+</html>

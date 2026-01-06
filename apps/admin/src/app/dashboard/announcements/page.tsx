@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import CrestLoader from '@/components/CrestLoader'
+import { getHouseNames } from '@/lib/school.config'
 
 type Announcement = {
   id: string
@@ -32,12 +33,7 @@ export default function AnnouncementsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLive, setIsLive] = useState(false)
 
-  const houseOptions = [
-    'House of Abū Bakr',
-    'House of Khadījah',
-    'House of ʿUmar',
-    'House of ʿĀʾishah',
-  ]
+  const houseOptions = getHouseNames()
   const gradeOptions = [6, 7, 8, 9, 10, 11, 12]
 
   const fetchAnnouncements = useCallback(async () => {

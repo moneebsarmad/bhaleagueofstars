@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { schoolConfig } from '@/lib/school.config'
 
 type NavItem = {
   id: string
@@ -55,15 +56,15 @@ export default function Sidebar({ role, portalLabel }: SidebarProps) {
           {/* Crest Logo */}
           <div className="relative w-14 h-14 flex items-center justify-center">
             <img
-              src="/crest.png"
-              alt="League of Stars crest"
+              src={schoolConfig.crestLogo}
+              alt={`${schoolConfig.systemName} crest`}
               className="w-12 h-12 object-contain drop-shadow-md"
             />
             <div className="absolute inset-0 rounded-full bg-[#c9a227] blur-xl opacity-20 -z-10"></div>
           </div>
           <div>
             <h1 className="text-xl font-semibold text-white tracking-tight" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-              League of Stars
+              {schoolConfig.systemName}
             </h1>
             <p className="text-sm text-[#c9a227]/80 font-medium tracking-wide" style={{ fontFamily: 'var(--font-body), Cormorant Garamond, Georgia, serif' }}>{portalLabel}</p>
           </div>
@@ -112,10 +113,10 @@ export default function Sidebar({ role, portalLabel }: SidebarProps) {
       <div className="p-6 border-t border-white/5" style={{ fontFamily: 'var(--font-body), Cormorant Garamond, Georgia, serif' }}>
         <div className="px-4 py-3 rounded-xl bg-white/5">
           <p className="text-xs text-white/40 font-medium tracking-wide">
-            Brighter Horizon Academy
+            {schoolConfig.schoolName}
           </p>
           <p className="text-xs text-white/20 mt-1">
-            Excellence in Education
+            {schoolConfig.tagline}
           </p>
         </div>
       </div>

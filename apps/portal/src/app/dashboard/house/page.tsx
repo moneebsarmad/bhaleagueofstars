@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../providers'
 import { supabase } from '../../../lib/supabaseClient'
 import CrestLoader from '../../../components/CrestLoader'
+import { getHouseConfigRecord, canonicalHouseName } from '@/lib/school.config'
 
 interface StudentProfile {
   name: string
@@ -17,43 +18,7 @@ interface HouseStanding {
   total_points: number
 }
 
-const houseConfig: Record<string, { color: string; gradient: string; logo: string }> = {
-  'House of Abū Bakr': {
-    color: '#2f0a61',
-    gradient: 'linear-gradient(135deg, #4a1a8a 0%, #2f0a61 50%, #1a0536 100%)',
-    logo: '/House%20of%20Ab%C5%AB%20Bakr.png',
-  },
-  'House of Khadījah': {
-    color: '#055437',
-    gradient: 'linear-gradient(135deg, #0a7a50 0%, #055437 50%, #033320 100%)',
-    logo: '/House%20of%20Khad%C4%ABjah.png',
-  },
-  'House of ʿUmar': {
-    color: '#000068',
-    gradient: 'linear-gradient(135deg, #1a1a9a 0%, #000068 50%, #000040 100%)',
-    logo: '/House%20of%20%CA%BFUmar.png',
-  },
-  'House of ʿĀʾishah': {
-    color: '#910000',
-    gradient: 'linear-gradient(135deg, #c41a1a 0%, #910000 50%, #5a0000 100%)',
-    logo: '/House%20of%20%CA%BF%C4%80%CA%BEishah.png',
-  },
-}
-
-function canonicalHouse(value: string): string {
-  const normalized = value
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[''`]/g, "'")
-    .toLowerCase()
-    .trim()
-
-  if (normalized.includes('bakr') || normalized.includes('abu')) return 'House of Abū Bakr'
-  if (normalized.includes('khadijah') || normalized.includes('khad')) return 'House of Khadījah'
-  if (normalized.includes('umar')) return 'House of ʿUmar'
-  if (normalized.includes('aishah') || normalized.includes('aish')) return 'House of ʿĀʾishah'
-  return value
-}
+const houseConfig = getHouseConfigRecord()
 
 export default function MyHousePage() {
   const { user } = useAuth()
@@ -95,13 +60,13 @@ export default function MyHousePage() {
     loadData()
   }, [user])
 
-  const canonical = profile ? canonicalHouse(profile.house) : ''
+  const canonical = profile ? canonicalHouseName(profile.house) : ''
   const houseInfo = houseConfig[canonical]
 
   const rankInfo = useMemo(() => {
     if (!canonical) return { rank: null, totalPoints: 0, percentage: 0 }
     const ranked = standings.map((item) => ({
-      house: canonicalHouse(String(item.house ?? '')),
+      house: canonicalHouseName(String(item.house ?? '')),
       points: Number(item.total_points ?? 0),
     }))
     const sorted = ranked

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import CrestLoader from '../../../components/CrestLoader'
+import { getHouseColors, canonicalHouseName } from '@/lib/school.config'
 
 interface Student {
   id: string
@@ -24,30 +25,10 @@ interface MeritEntry {
   section: string
 }
 
-const houseColors: Record<string, string> = {
-  'House of Abū Bakr': '#2f0a61',
-  'House of Khadījah': '#055437',
-  'House of ʿUmar': '#000068',
-  'House of ʿĀʾishah': '#910000',
-}
-
-function canonicalHouse(value: string): string {
-  const normalized = value
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[''`]/g, "'")
-    .toLowerCase()
-    .trim()
-
-  if (normalized.includes('bakr') || normalized.includes('abu')) return 'House of Abū Bakr'
-  if (normalized.includes('khadijah') || normalized.includes('khad')) return 'House of Khadījah'
-  if (normalized.includes('umar')) return 'House of ʿUmar'
-  if (normalized.includes('aishah') || normalized.includes('aish')) return 'House of ʿĀʾishah'
-  return value
-}
+const houseColors = getHouseColors()
 
 function getHouseColor(house: string): string {
-  const canonical = canonicalHouse(house)
+  const canonical = canonicalHouseName(house)
   return houseColors[canonical] || '#1a1a2e'
 }
 
@@ -133,14 +114,14 @@ export default function StudentsPage() {
 
   const grades = [...new Set(students.map((s) => s.grade))].sort((a, b) => a - b)
   const sections = [...new Set(students.map((s) => s.section).filter(Boolean))].sort()
-  const houses = [...new Set(students.map((s) => canonicalHouse(s.house)))].filter(Boolean)
+  const houses = [...new Set(students.map((s) => canonicalHouseName(s.house)))].filter(Boolean)
 
   const filteredStudents = students
     .filter((s) => {
       if (searchText && !s.name.toLowerCase().includes(searchText.toLowerCase())) return false
       if (selectedGrade && s.grade !== parseInt(selectedGrade)) return false
       if (selectedSection && s.section !== selectedSection) return false
-      if (selectedHouse && canonicalHouse(s.house) !== selectedHouse) return false
+      if (selectedHouse && canonicalHouseName(s.house) !== selectedHouse) return false
       return true
     })
     .sort((a, b) => {
@@ -277,7 +258,7 @@ export default function StudentsPage() {
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: houseColor }}
                           />
-                          <span>{canonicalHouse(student.house)?.replace('House of ', '')}</span>
+                          <span>{canonicalHouseName(student.house)?.replace('House of ', '')}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -348,10 +329,10 @@ export default function StudentsPage() {
                     <span className="text-[#1a1a2e]/20"> • </span>
                     <button
                       type="button"
-                      onClick={() => setSelectedHouse(canonicalHouse(selectedStudent.house))}
+                      onClick={() => setSelectedHouse(canonicalHouseName(selectedStudent.house))}
                       className="text-[#2f0a61] underline underline-offset-2 decoration-[#c9a227] decoration-2 hover:text-[#1a1a2e] transition-colors"
                     >
-                      {canonicalHouse(selectedStudent.house)}
+                      {canonicalHouseName(selectedStudent.house)}
                     </button>
                   </p>
                 </div>

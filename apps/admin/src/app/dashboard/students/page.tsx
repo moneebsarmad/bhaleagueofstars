@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
+import { getHouseColors } from '@/lib/school.config'
 
 interface Student {
   id: string
@@ -27,12 +28,7 @@ interface MeritEntry {
   section: string
 }
 
-const houseColors: Record<string, string> = {
-  'House of Abū Bakr': '#2f0a61',
-  'House of Khadījah': '#055437',
-  'House of ʿUmar': '#000068',
-  'House of ʿĀʾishah': '#910000',
-}
+const houseColors = getHouseColors()
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([])

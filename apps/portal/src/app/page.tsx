@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./providers";
+import { schoolConfig } from "@/lib/school.config";
 
 const roles = [
   {
@@ -71,11 +72,11 @@ export default function Home() {
           <div className="auth-header">
             <div className="auth-logo">
               <div className="auth-logo-inner">
-                <img src="/crest.png" alt="League of Stars crest" />
+                <img src={schoolConfig.crestLogo} alt={`${schoolConfig.systemName} crest`} />
               </div>
               <span className="auth-logo-glow"></span>
             </div>
-            <h1>League of Stars</h1>
+            <h1>{schoolConfig.systemName}</h1>
             <p>{selectedRole.title} Portal</p>
           </div>
 
@@ -130,7 +131,7 @@ export default function Home() {
 
           <div className="auth-footer">
             <span className="auth-dot"></span>
-            Brighter Horizon Academy
+            {schoolConfig.schoolName}
           </div>
         </div>
         <div className="auth-line"></div>

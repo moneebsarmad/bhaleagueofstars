@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import CrestLoader from '@/components/CrestLoader'
+import { getHouseNames } from '@/lib/school.config'
 
 interface StaffMember {
   rank: number
@@ -27,7 +28,7 @@ const tierColors = {
 }
 
 const pieColors = ['#0f766e', '#b45309', '#9f1239']
-const houses = ['House of Abū Bakr', 'House of Khadījah', 'House of ʿUmar', 'House of ʿĀʾishah']
+const houses = getHouseNames()
 
 interface StaffMeritEntry {
   staffName: string

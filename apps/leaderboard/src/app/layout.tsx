@@ -16,8 +16,10 @@ const playfair = Playfair_Display({
   style: ["normal", "italic"],
 });
 
+const systemName = process.env.NEXT_PUBLIC_SYSTEM_NAME || 'League of Stars'
+
 export const metadata: Metadata = {
-  title: "League of Stars Leaderboard",
+  title: `${systemName} Leaderboard`,
   description: "Where Stars Are Made",
 };
 

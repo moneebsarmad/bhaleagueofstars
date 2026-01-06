@@ -7,6 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import type { BarProps } from 'recharts'
 import CrestLoader from '@/components/CrestLoader'
 import { useSearchParams } from 'next/navigation'
+import { getHouseColors } from '@/lib/school.config'
 
 interface MeritEntry {
   studentName: string
@@ -31,12 +32,7 @@ interface Filters {
   endDate: string
 }
 
-const houseColors: Record<string, string> = {
-  'House of Abū Bakr': '#2f0a61',
-  'House of Khadījah': '#055437',
-  'House of ʿUmar': '#000068',
-  'House of ʿĀʾishah': '#910000',
-}
+const houseColors = getHouseColors()
 
 const categoryColors = [
   '#2f0a61', '#055437', '#000068', '#910000', '#c9a227', '#1a1a2e', '#4a1a8a', '#0a7a50'

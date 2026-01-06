@@ -2,11 +2,17 @@
   --ink: #1f2a3d;
   --ink-soft: #3b4b63;
   --cream: #f6efe3;
-  --sun: #f2b34a;
+  --sun: #c9a227;
   --sky: #2f4159;
   --coral: #e7c391;
   --mint: #d9e5f2;
   --shadow: rgba(31, 42, 61, 0.15);
+
+  /* League colors */
+  --rise: #4a7c59;
+  --apex: #8b5a2b;
+  --champions: #5a4a7c;
+  --builders: #2f5a7c;
 }
 
 * {
@@ -27,8 +33,6 @@ body {
   overflow-x: hidden;
 }
 
-
-
 .noise {
   position: fixed;
   inset: 0;
@@ -38,12 +42,16 @@ body {
   z-index: 0;
 }
 
+/* ========================================
+   HERO SECTION
+   ======================================== */
+
 .hero {
   position: relative;
   padding: 40px 80px 120px;
   z-index: 1;
   background:
-    radial-gradient(circle at 20% 20%, rgba(242, 179, 74, 0.2), transparent 50%),
+    radial-gradient(circle at 20% 20%, rgba(201, 162, 39, 0.15), transparent 50%),
     radial-gradient(circle at 80% 0%, rgba(217, 229, 242, 0.15), transparent 55%),
     linear-gradient(145deg, #1c2736 0%, #24354b 60%, #2f4159 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -60,6 +68,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #f7f1e7;
+  font-size: 1.1rem;
 }
 
 .nav-links a {
@@ -67,6 +76,7 @@ body {
   text-decoration: none;
   margin-left: 28px;
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .nav-links a:hover {
@@ -80,13 +90,32 @@ body {
   align-items: center;
 }
 
+.hero-content--centered {
+  grid-template-columns: 1fr;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .hero-text h1 {
   font-family: "Cormorant Garamond", "Georgia", serif;
   font-weight: 600;
   font-size: clamp(2.6rem, 4vw, 4.2rem);
-  line-height: 1.05;
+  line-height: 1.1;
   margin: 0 0 20px;
   color: #f7f1e7;
+}
+
+.hero-text--centered {
+  text-align: center;
+}
+
+.hero-text--centered .lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-text--centered .hero-actions {
+  justify-content: center;
 }
 
 .eyebrow {
@@ -98,36 +127,37 @@ body {
 }
 
 .lede {
-  font-size: 1.1rem;
-  color: rgba(247, 241, 231, 0.78);
-  line-height: 1.6;
+  font-size: 1.15rem;
+  color: rgba(247, 241, 231, 0.85);
+  line-height: 1.7;
   max-width: 560px;
 }
 
 .hero-actions {
-  margin-top: 28px;
+  margin-top: 32px;
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
 }
 
 .btn {
-  padding: 12px 22px;
+  padding: 14px 26px;
   border-radius: 999px;
   text-decoration: none;
   font-weight: 600;
   border: 1px solid transparent;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.95rem;
 }
 
 .btn.primary {
-  background: var(--sky);
-  color: #fff;
+  background: var(--sun);
+  color: var(--ink);
   box-shadow: 0 10px 20px var(--shadow);
 }
 
 .btn.ghost {
-  border-color: var(--sky);
+  border-color: rgba(247, 241, 231, 0.4);
   color: #f7f1e7;
   background: rgba(28, 39, 54, 0.4);
 }
@@ -137,41 +167,9 @@ body {
   box-shadow: 0 16px 30px rgba(15, 26, 43, 0.2);
 }
 
-.hero-card {
-  background: #f8f3ea;
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 20px 40px rgba(15, 26, 43, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-}
-
-.card-title {
-  font-weight: 600;
-  color: var(--ink-soft);
-  margin-bottom: 18px;
-}
-
-.stat {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.stat-number {
-  font-family: "Cormorant Garamond", "Georgia", serif;
-  font-weight: 700;
-  font-size: 2rem;
-}
-
-.stat-label {
-  color: var(--ink-soft);
-}
-
-.card-note {
-  margin-top: 18px;
-  color: var(--ink-soft);
-}
+/* ========================================
+   SECTIONS BASE
+   ======================================== */
 
 .section {
   padding: 100px 80px;
@@ -179,165 +177,600 @@ body {
   z-index: 1;
 }
 
+.section-heading {
+  margin-bottom: 40px;
+}
+
 .section-heading h2,
-.vision-copy h2,
-.contact-card h2 {
+.closing-card h2 {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-weight: 600;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+
+.section-heading .eyebrow {
+  color: var(--ink-soft);
+}
+
+.section-lede {
+  color: var(--ink-soft);
+  max-width: 640px;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+/* ========================================
+   ANCHOR SECTION (What This Is)
+   ======================================== */
+
+.anchor-section {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(242, 179, 74, 0.08));
+}
+
+.anchor-content {
+  max-width: 700px;
+}
+
+.anchor-intro {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.anchor-points {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.anchor-point {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.anchor-number {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--sun);
+  line-height: 1;
+}
+
+.anchor-icon {
+  font-size: 1.5rem;
+  color: var(--sun);
+}
+
+.anchor-note {
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.anchor-distinction {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  padding: 20px 24px;
+  background: rgba(47, 65, 89, 0.06);
+  border-left: 3px solid var(--sky);
+  border-radius: 0 8px 8px 0;
+}
+
+/* ========================================
+   SYSTEM SECTION (How It Works)
+   ======================================== */
+
+.system-section {
+  background: linear-gradient(120deg, rgba(47, 65, 89, 0.08), rgba(201, 162, 39, 0.06));
+  border-top: 1px solid rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.system-grid {
+  display: grid;
+  gap: 16px;
+  max-width: 600px;
+}
+
+.system-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1.05rem;
+}
+
+.system-bullet {
+  width: 8px;
+  height: 8px;
+  background: var(--sun);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.system-goal {
+  margin-top: 40px;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+/* ========================================
+   TYPES SECTION (Decision Point)
+   ======================================== */
+
+.types-section {
+  background: linear-gradient(180deg, rgba(47, 65, 89, 0.04), rgba(255, 255, 255, 0.8));
+}
+
+.types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.type-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: 0 20px 40px rgba(15, 26, 43, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+.type-header {
+  padding: 24px 28px;
+  color: #fff;
+}
+
+.type-header--formation {
+  background: linear-gradient(135deg, var(--rise), #3d6b4a);
+}
+
+.type-header--exemplars {
+  background: linear-gradient(135deg, var(--champions), #4a3d6b);
+}
+
+.type-label {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  opacity: 0.85;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.type-header h3 {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.type-description {
+  padding: 24px 28px 0;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.type-emphasis {
+  padding: 20px 28px;
+}
+
+.type-emphasis p {
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+
+.type-emphasis ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.type-emphasis li {
+  padding: 6px 0;
+  padding-left: 20px;
+  position: relative;
+}
+
+.type-emphasis li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--sun);
+}
+
+.type-best {
+  padding: 0 28px;
+  color: var(--ink);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.type-leagues {
+  padding: 20px 28px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.league-pill {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.league-pill--rise {
+  background: var(--rise);
+}
+
+.league-pill--apex {
+  background: var(--apex);
+}
+
+.league-pill--champions {
+  background: var(--champions);
+}
+
+.league-pill--builders {
+  background: var(--builders);
+}
+
+.type-link {
+  display: block;
+  padding: 18px 28px;
+  text-align: center;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  border-top: 1px solid rgba(47, 65, 89, 0.1);
+  transition: background 0.2s ease;
+}
+
+.type-link:hover {
+  background: rgba(47, 65, 89, 0.04);
+}
+
+.type-link::after {
+  content: " →";
+}
+
+/* ========================================
+   LEAGUES SECTION
+   ======================================== */
+
+.leagues-section {
+  background: linear-gradient(180deg, rgba(74, 124, 89, 0.06), rgba(255, 255, 255, 0.8));
+}
+
+.leagues-section--alt {
+  background: linear-gradient(180deg, rgba(90, 74, 124, 0.06), rgba(255, 255, 255, 0.8));
+}
+
+.leagues-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.league-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(15, 26, 43, 0.1);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.league-header {
+  padding: 28px 28px 20px;
+  border-bottom: 1px solid rgba(47, 65, 89, 0.08);
+}
+
+.league-card--rise .league-header {
+  border-left: 4px solid var(--rise);
+}
+
+.league-card--apex .league-header {
+  border-left: 4px solid var(--apex);
+}
+
+.league-card--champions .league-header {
+  border-left: 4px solid var(--champions);
+}
+
+.league-card--builders .league-header {
+  border-left: 4px solid var(--builders);
+}
+
+.league-header h3 {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.league-tagline {
+  color: var(--ink-soft);
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.league-body {
+  padding: 24px 28px 28px;
+}
+
+.league-fit {
+  margin-bottom: 24px;
+}
+
+.league-fit-label {
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+
+.league-fit ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.league-fit li {
+  padding: 6px 0;
+  padding-left: 20px;
+  position: relative;
+}
+
+.league-fit li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--sun);
+}
+
+.league-question {
+  background: rgba(47, 65, 89, 0.04);
+  padding: 16px 20px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.question-label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.question-text {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--ink);
+}
+
+.league-focus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.league-focus span {
+  background: rgba(201, 162, 39, 0.15);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+/* ========================================
+   SPAN SECTION (MS Through HS)
+   ======================================== */
+
+.span-section {
+  background: linear-gradient(180deg, rgba(47, 65, 89, 0.08), rgba(255, 255, 255, 0.6));
+  border-top: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.span-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.span-content h2 {
   font-family: "Cormorant Garamond", "Georgia", serif;
   font-weight: 600;
   font-size: clamp(2rem, 3vw, 2.8rem);
   margin: 0 0 16px;
 }
 
-.section-lede {
+.span-content .eyebrow {
   color: var(--ink-soft);
-  max-width: 560px;
-  line-height: 1.6;
 }
 
-.apps {
-  background: linear-gradient(120deg, rgba(47, 65, 89, 0.22), rgba(242, 179, 74, 0.14));
-  border-top: 1px solid rgba(255, 255, 255, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+.span-intro {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: 40px;
 }
 
-.card-grid {
+.span-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.span-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.span-label {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.span-desc {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.span-divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sun), transparent);
+}
+
+.span-note {
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+/* ========================================
+   HOUSES SECTION
+   ======================================== */
+
+.houses-section {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(201, 162, 39, 0.08));
+}
+
+.houses-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   margin-top: 40px;
+  max-width: 700px;
 }
 
-.app-card {
+.houses-card {
   background: #fff;
-  border-radius: 20px;
-  padding: 26px;
-  box-shadow: 0 18px 30px rgba(15, 26, 43, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  display: grid;
-  gap: 14px;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 16px 32px rgba(15, 26, 43, 0.08);
 }
 
-.app-card ul {
+.houses-card h3 {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.houses-card--are {
+  border-left: 4px solid var(--rise);
+}
+
+.houses-card--arent {
+  border-left: 4px solid rgba(47, 65, 89, 0.3);
+}
+
+.houses-card ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  gap: 8px;
   color: var(--ink-soft);
 }
 
-.app-card ul li::before {
-  content: "★";
-  margin-right: 8px;
-  color: var(--sun);
+.houses-card li {
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(47, 65, 89, 0.15);
 }
 
-.link {
-  color: var(--ink);
-  font-weight: 600;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.link::after {
-  content: "→";
-  transition: transform 0.2s ease;
-}
-
-.link:hover::after {
-  transform: translateX(4px);
-}
-
-.vision-grid {
-  display: grid;
-  gap: 40px;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  align-items: center;
-}
-
-.vision-panel {
-  background: linear-gradient(150deg, #fff, #fbf1df);
-  border-radius: 24px;
-  padding: 26px;
-  box-shadow: 0 20px 40px rgba(15, 26, 43, 0.12);
-}
-
-.pillar {
-  padding: 16px 0;
-  border-bottom: 1px dashed rgba(15, 26, 43, 0.2);
-}
-
-.pillar:last-child {
+.houses-card li:last-child {
   border-bottom: none;
 }
 
-.pill-list {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+.houses-note {
+  margin-top: 40px;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: var(--ink);
+  max-width: 700px;
 }
 
-.pill-list span {
-  background: rgba(242, 179, 74, 0.18);
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 0.9rem;
-}
+/* ========================================
+   CLOSING SECTION
+   ======================================== */
 
-.team {
-  background: linear-gradient(180deg, rgba(242, 179, 74, 0.12), rgba(255, 255, 255, 0.6));
-}
-
-.team-grid {
-  margin-top: 36px;
-  display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-}
-
-.team-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 16px 30px rgba(15, 26, 43, 0.08);
-}
-
-.team-name {
-  font-weight: 600;
-  font-size: 1.05rem;
-  margin: 6px 0 8px;
-}
-
-.contact {
+.closing-section {
   padding-bottom: 120px;
 }
 
-.contact-card {
-  background: linear-gradient(120deg, rgba(242, 179, 74, 0.3), rgba(47, 65, 89, 0.22));
+.closing-card {
+  background: linear-gradient(135deg, rgba(47, 65, 89, 0.95), rgba(28, 39, 54, 0.98));
   border-radius: 28px;
-  padding: 32px;
+  padding: 48px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 24px;
-  box-shadow: 0 20px 40px rgba(15, 26, 43, 0.15);
+  gap: 40px;
+  box-shadow: 0 24px 48px rgba(15, 26, 43, 0.2);
 }
 
-.contact-actions {
+.closing-text {
+  color: #f7f1e7;
+}
+
+.closing-text h2 {
+  color: #f7f1e7;
+  margin-bottom: 20px;
+}
+
+.closing-text p {
+  color: rgba(247, 241, 231, 0.8);
+  line-height: 1.7;
+  margin: 0 0 16px;
+}
+
+.closing-cta-text {
+  font-size: 1.1rem;
+  color: rgba(247, 241, 231, 0.9) !important;
+}
+
+.closing-actions {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
+
+/* ========================================
+   FOOTER
+   ======================================== */
 
 .footer {
   padding: 40px 80px 60px;
   color: var(--ink-soft);
   font-size: 0.95rem;
 }
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
 
 .reveal {
   animation: rise 0.8s ease both;
@@ -354,6 +787,10 @@ body {
   }
 }
 
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
 @media (max-width: 980px) {
   .hero {
     padding: 32px 28px 80px;
@@ -364,23 +801,41 @@ body {
     gap: 16px;
   }
 
-  .hero-content {
-    grid-template-columns: 1fr;
-  }
-
   .section {
     padding: 80px 28px;
   }
 
-  .vision-grid,
-  .contact-card {
+  .types-grid {
     grid-template-columns: 1fr;
+  }
+
+  .leagues-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .closing-card {
     flex-direction: column;
-    align-items: flex-start;
+    text-align: center;
+    padding: 36px 28px;
+  }
+
+  .closing-actions {
+    justify-content: center;
   }
 
   .footer {
     padding: 32px 28px 40px;
+  }
+
+  .span-grid {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .span-divider {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(180deg, transparent, var(--sun), transparent);
   }
 }
 
@@ -398,6 +853,15 @@ body {
 
   .hero-actions {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+  }
+
+  .anchor-points {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .houses-grid {
+    grid-template-columns: 1fr;
   }
 }

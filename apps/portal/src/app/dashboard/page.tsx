@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import CrestLoader from '../../components/CrestLoader'
 import { useAuth } from '../providers'
+import { getHouseConfigRecord, canonicalHouseName } from '@/lib/school.config'
 
 type LeaderboardEntry = {
   house: string
@@ -19,44 +20,7 @@ interface HouseData {
   percentage: number
 }
 
-const houseConfig: Record<string, { color: string; gradient: string; logo: string }> = {
-  'House of Abu Bakr': {
-    color: '#2f0a61',
-    gradient: 'linear-gradient(135deg, #4a1a8a 0%, #2f0a61 50%, #1a0536 100%)',
-    logo: '/House%20of%20Ab%C5%AB%20Bakr.png',
-  },
-  'House of Khadijah': {
-    color: '#055437',
-    gradient: 'linear-gradient(135deg, #0a7a50 0%, #055437 50%, #033320 100%)',
-    logo: '/House%20of%20Khad%C4%ABjah.png',
-  },
-  'House of Umar': {
-    color: '#000068',
-    gradient: 'linear-gradient(135deg, #1a1a9a 0%, #000068 50%, #000040 100%)',
-    logo: '/House%20of%20%CA%BFUmar.png',
-  },
-  'House of Aishah': {
-    color: '#910000',
-    gradient: 'linear-gradient(135deg, #c41a1a 0%, #910000 50%, #5a0000 100%)',
-    logo: '/House%20of%20%CA%BF%C4%80%CA%BEishah.png',
-  },
-}
-
-function canonicalHouse(value: string): string {
-  const normalized = value
-    .normalize('NFKD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[''`]/g, "'")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, ' ')
-
-  if (normalized.includes('bakr') || normalized.includes('abu')) return 'House of Abu Bakr'
-  if (normalized.includes('khadijah') || normalized.includes('khad')) return 'House of Khadijah'
-  if (normalized.includes('umar')) return 'House of Umar'
-  if (normalized.includes('aishah') || normalized.includes('aish')) return 'House of Aishah'
-  return value
-}
+const houseConfig = getHouseConfigRecord()
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -96,7 +60,7 @@ export default function DashboardPage() {
     const totalPoints = leaderboard.reduce((sum, item) => sum + (item.totalPoints ?? 0), 0)
 
     return leaderboard.map((entry) => {
-      const canonicalName = canonicalHouse(entry.house)
+      const canonicalName = canonicalHouseName(entry.house)
       const config = houseConfig[canonicalName] ?? {
         color: '#1a1a2e',
         gradient: 'linear-gradient(135deg, #2a2a4e 0%, #1a1a2e 100%)',

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CrestLoader from '@/components/CrestLoader'
+import { schoolConfig } from '@/lib/school.config'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -66,11 +67,11 @@ export default function LoginPage() {
           <div className="auth-header">
             <div className="auth-logo">
               <div className="auth-logo-inner">
-                <img src="/crest.png" alt="League of Stars crest" />
+                <img src={schoolConfig.crestLogo} alt={`${schoolConfig.systemName} crest`} />
               </div>
               <span className="auth-logo-glow"></span>
             </div>
-            <h1>League of Stars</h1>
+            <h1>{schoolConfig.systemName}</h1>
             <p>Admin Portal</p>
           </div>
 
@@ -116,7 +117,7 @@ export default function LoginPage() {
 
           <div className="auth-footer">
             <span className="auth-dot"></span>
-            Brighter Horizon Academy
+            {schoolConfig.schoolName}
           </div>
         </div>
         <div className="auth-line"></div>

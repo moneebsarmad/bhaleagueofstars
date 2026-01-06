@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import HouseCard from "@/components/HouseCard";
+import { schoolConfig, canonicalHouseName } from "@/lib/school.config";
 
 interface House {
     rank: number;
@@ -17,60 +18,42 @@ interface House {
     logo?: string | null;
   }
 
-function canonicalHouse(value: string): string {
-  const normalized = value
-    .normalize("NFKD")
-    .replace(/\p{Diacritic}/gu, "")
-    .replace(/[’‘`]/g, "'")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, " ");
+// Build house config from school config with leaderboard-specific properties
+const houseVirtues: Record<string, { virtue: string; description: string; bgColor: string }> = {
+  "House of Abū Bakr": {
+    virtue: "Loyalty",
+    description: "Rooted in honesty, unwavering in loyalty to faith and community.",
+    bgColor: "#f6f1fb",
+  },
+  "House of ʿUmar": {
+    virtue: "Moral Courage",
+    description: "Living with fairness, speaking truth, and acting with courage.",
+    bgColor: "#f2f3fb",
+  },
+  "House of ʿĀʾishah": {
+    virtue: "Creativity",
+    description: "Igniting creativity that inspires hearts and serves Allah.",
+    bgColor: "#fdf1f1",
+  },
+  "House of Khadījah": {
+    virtue: "Wisdom",
+    description: "Guided by wisdom, leading with grace and strength.",
+    bgColor: "#f1fbf6",
+  },
+};
 
-  if (normalized.includes("bakr") || normalized.includes("abu")) {
-    return "House of Abu Bakr";
-  }
-  if (normalized.includes("khadijah") || normalized.includes("khad")) {
-    return "House of Khadijah";
-  }
-  if (normalized.includes("umar")) {
-    return "House of 'Umar";
-  }
-  if (normalized.includes("aishah") || normalized.includes("aish")) {
-    return "House of 'A'ishah";
-  }
-  return value.trim();
-}
-
-const houseConfig: Record<string, Omit<House, "rank" | "points" | "name">> = {
-    "House of Abu Bakr": {
-      virtue: "Loyalty",
-      description: "Rooted in honesty, unwavering in loyalty to faith and community.",
-      color: "#2f0a61",
-      bgColor: "#f6f1fb",
-      logo: "/house_of_abubakr.png",
-    },
-    "House of 'Umar": {
-      virtue: "Moral Courage",
-      description: "Living with fairness, speaking truth, and acting with courage.",
-      color: "#000068",
-      bgColor: "#f2f3fb",
-      logo: "/house_of_umar.png",
-    },
-    "House of 'A'ishah": {
-      virtue: "Creativity",
-      description: "Igniting creativity that inspires hearts and serves Allah.",
-      color: "#910000",
-      bgColor: "#fdf1f1",
-      logo: "/house_of_aishah.png",
-    },
-    "House of Khadijah": {
-      virtue: "Wisdom",
-      description: "Guided by wisdom, leading with grace and strength.",
-      color: "#055437",
-      bgColor: "#f1fbf6",
-      logo: "/house_of_khadijah.png",
-    },
-  };
+const houseConfig: Record<string, Omit<House, "rank" | "points" | "name">> =
+  schoolConfig.houses.reduce((acc, house) => {
+    const virtueInfo = houseVirtues[house.name] || { virtue: "", description: "", bgColor: "#f5f5f5" };
+    acc[house.name] = {
+      virtue: virtueInfo.virtue,
+      description: virtueInfo.description,
+      color: house.color,
+      bgColor: virtueInfo.bgColor,
+      logo: house.logo,
+    };
+    return acc;
+  }, {} as Record<string, Omit<House, "rank" | "points" | "name">>);
 
 const fallbackHouses: House[] = [
     {
@@ -125,7 +108,7 @@ export default function Home() {
         const mapped =
           data?.map((row: Record<string, unknown>, index: number) => {
             const houseNameRaw = row.house_name ?? row.house ?? row.name ?? "";
-            const houseName = canonicalHouse(String(houseNameRaw ?? ""));
+            const houseName = canonicalHouseName(String(houseNameRaw ?? ""));
             const config = houseConfig[houseName];
             if (!config) {
               return null;
@@ -196,7 +179,7 @@ export default function Home() {
           fontFamily: "var(--font-cinzel), 'Cinzel', sans-serif"
         }}
       >
-        Brighter Horizon Academy
+        {schoolConfig.schoolName}
       </div>
       <div className="absolute top-4 right-6 flex items-center gap-2">
         <Link
@@ -221,8 +204,8 @@ export default function Home() {
           {/* Crest */}
           <div className="flex justify-center mb-2">
             <Image
-              src="/crest.png"
-              alt="League of Stars Crest"
+              src={schoolConfig.crestLogo}
+              alt={`${schoolConfig.systemName} Crest`}
               width={100}
               height={100}
               className="drop-shadow-lg"
@@ -235,7 +218,7 @@ export default function Home() {
             className="italic text-3xl sm:text-4xl md:text-5xl text-white mb-2 gold-underline pb-1"
             style={{ fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif" }}
           >
-            League of Stars Leaderboard
+            {schoolConfig.systemName} Leaderboard
           </h1>
 
           {/* Tagline */}
@@ -246,7 +229,7 @@ export default function Home() {
               fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif"
             }}
           >
-            Where Stars Are Made
+            {schoolConfig.tagline}
           </p>
 
         </header>

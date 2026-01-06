@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { schoolConfig } from "@/lib/school.config";
 
 interface HallEntry {
   studentName: string;
@@ -182,8 +183,8 @@ export default function HallOfFamePage() {
         <header className="text-center mb-6">
           <div className="flex justify-center mb-3">
             <Image
-              src="/crest.png"
-              alt="League of Stars Crest"
+              src={schoolConfig.crestLogo}
+              alt={`${schoolConfig.systemName} Crest`}
               width={90}
               height={90}
               className="drop-shadow-lg"

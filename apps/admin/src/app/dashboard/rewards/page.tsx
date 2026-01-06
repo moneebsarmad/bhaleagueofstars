@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
+import { schoolConfig } from '@/lib/school.config'
 
 interface Student {
   name: string
@@ -107,12 +108,11 @@ const quarterOptions = [
   { id: 'q2', label: 'Q2 (Mar 9 – May 21)' },
 ] as const
 
-const houseLogos: Record<string, string> = {
-  'House of Abū Bakr': '/houses/abu-bakr.png',
-  'House of Khadījah': '/houses/khadijah.png',
-  'House of ʿUmar': '/houses/umar.png',
-  'House of ʿĀʾishah': '/houses/aishah.png',
-}
+// Get house logos from config
+const houseLogos: Record<string, string> = schoolConfig.houses.reduce((acc, house) => {
+  acc[house.name] = house.logo
+  return acc
+}, {} as Record<string, string>)
 
 export default function RewardsPage() {
   const [students, setStudents] = useState<Student[]>([])

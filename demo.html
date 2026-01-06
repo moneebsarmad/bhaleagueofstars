@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>School-Wide Tarbiyah Framework</title>
+    <meta
+      name="description"
+      content="A school-wide tarbiyah framework for forming Muslim character, identity, and leadership from Middle School through High School."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #181824;
+        --ink-soft: #5a5a6b;
+        --paper: #f7f4ee;
+        --panel: #ffffff;
+        --line: rgba(24, 24, 36, 0.08);
+        --formation: #7a6a4f;
+        --identity: #2f3e5c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at 20% 0%, #f1ede4, transparent 55%),
+          radial-gradient(circle at 90% 20%, #eef1f7, transparent 45%),
+          linear-gradient(180deg, #fbfaf7 0%, var(--paper) 100%);
+        line-height: 1.6;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 80px 24px 120px;
+        display: flex;
+        flex-direction: column;
+        gap: 96px;
+      }
+
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 0.72rem;
+        color: var(--ink-soft);
+      }
+
+      .hero {
+        display: grid;
+        gap: 24px;
+        text-align: left;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.4rem, 4vw, 3.8rem);
+        line-height: 1.1;
+        margin: 0;
+      }
+
+      .hero p {
+        font-size: 1.15rem;
+        color: var(--ink-soft);
+        margin: 0;
+        max-width: 720px;
+      }
+
+      .cta-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border-radius: 999px;
+        padding: 12px 24px;
+        border: 1px solid var(--line);
+        text-decoration: none;
+        font-weight: 600;
+        color: var(--ink);
+        background: var(--panel);
+      }
+
+      .btn.primary {
+        border-color: transparent;
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .section {
+        display: grid;
+        gap: 24px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border-radius: 20px;
+        padding: 28px;
+        border: 1px solid var(--line);
+        box-shadow: 0 14px 34px rgba(24, 24, 36, 0.06);
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--ink-soft);
+      }
+
+      .list li::before {
+        content: "•";
+        margin-right: 10px;
+        color: var(--ink);
+      }
+
+      .grid-2 {
+        display: grid;
+        gap: 24px;
+      }
+
+      .grid-3 {
+        display: grid;
+        gap: 20px;
+      }
+
+      .comparison {
+        display: grid;
+        gap: 18px;
+      }
+
+      .comparison-row {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 140px 1fr;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .comparison-row:last-child {
+        border-bottom: none;
+      }
+
+      .comparison-label {
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      .type-card {
+        border-radius: 24px;
+        padding: 28px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      .type-card h3 {
+        margin-top: 0;
+      }
+
+      .type-card.formation {
+        border-left: 4px solid var(--formation);
+      }
+
+      .type-card.identity {
+        border-left: 4px solid var(--identity);
+      }
+
+      .type-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+
+      .type-pill.formation {
+        background: rgba(122, 106, 79, 0.14);
+        color: var(--formation);
+      }
+
+      .type-pill.identity {
+        background: rgba(47, 62, 92, 0.14);
+        color: var(--identity);
+      }
+
+      .league-card {
+        background: var(--panel);
+        border-radius: 20px;
+        padding: 24px;
+        border: 1px solid var(--line);
+      }
+
+      .league-card h4 {
+        margin: 0 0 8px;
+      }
+
+      .house-tiles {
+        display: grid;
+        gap: 16px;
+      }
+
+      .tile {
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 24px;
+      }
+
+      .timeline-item {
+        display: grid;
+        gap: 8px;
+        padding: 18px 20px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      .closing {
+        text-align: left;
+        padding: 28px;
+        border-radius: 24px;
+        background: #111320;
+        color: #f8f6f1;
+      }
+
+      .closing p {
+        color: rgba(248, 246, 241, 0.75);
+      }
+
+      @media (min-width: 900px) {
+        .grid-2 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .grid-3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .house-tiles {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .timeline {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <p class="eyebrow">School-Wide Identity System</p>
+        <h1>A School-Wide Tarbiyah Framework for Intentional Culture</h1>
+        <p>Forming Muslim character, identity, and leadership — consistently, from Middle School through High School.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="#framework">Explore the Framework</a>
+          <a class="btn" href="#why">Why This Matters</a>
+        </div>
+      </section>
+
+      <section id="why" class="section">
+        <h2>Most Islamic schools have tarbiyah activities. Few have a tarbiyah system.</h2>
+        <p>Across many schools, tarbiyah exists — but often in fragments. Assemblies, rules, reminders, consequences, and rewards operate side by side, without a shared structure or language.</p>
+        <div class="panel comparison">
+          <div class="comparison-row">
+            <span class="comparison-label">Observed</span>
+            <span>Character taught occasionally, not lived daily</span>
+          </div>
+          <div class="comparison-row">
+            <span class="comparison-label">Observed</span>
+            <span>Expectations shift from class to class</span>
+          </div>
+          <div class="comparison-row">
+            <span class="comparison-label">Observed</span>
+            <span>Discipline manages behavior but doesn’t form identity</span>
+          </div>
+          <div class="comparison-row">
+            <span class="comparison-label">Observed</span>
+            <span>Students comply — but don’t internalize</span>
+          </div>
+        </div>
+        <p><strong>What’s missing is not effort. What’s missing is a coherent framework.</strong></p>
+      </section>
+
+      <section id="framework" class="section">
+        <h2>A Framework for School-Wide Formation</h2>
+        <p>This is a school-wide tarbiyah framework designed to shape culture intentionally — not occasionally.</p>
+        <ul class="list">
+          <li>One shared moral language</li>
+          <li>One identity framework used across grades</li>
+          <li>One system that matures with students over time</li>
+        </ul>
+        <p><strong>This is not a program. It is a formation system.</strong></p>
+      </section>
+
+      <section class="section">
+        <h2>Culture Is Always Being Formed</h2>
+        <div class="grid-3">
+          <div class="panel">Every school already has a culture</div>
+          <div class="panel">Culture forms students more than rules do</div>
+          <div class="panel">Culture must be shaped intentionally</div>
+        </div>
+        <p>This framework shapes culture through something called a <strong>League</strong>.</p>
+      </section>
+
+      <section class="section">
+        <h2>Two Different Approaches to School Culture</h2>
+        <p>Schools choose one League Type, based on the kind of culture they want to build. This decision shapes everything that follows.</p>
+        <div class="grid-2">
+          <div class="type-card formation">
+            <span class="type-pill formation">Character &amp; Formation Leagues</span>
+            <h3>Who the student is becoming internally.</h3>
+            <p>This culture emphasizes:</p>
+            <ul class="list">
+              <li>Habits and consistency</li>
+              <li>Discipline and self-regulation</li>
+              <li>Growth after mistakes</li>
+            </ul>
+            <p><strong>The school culture feels:</strong> Steady, Structured, Developmental</p>
+            <p><strong>Guiding question:</strong> How do students grow — especially after failure?</p>
+            <p><strong>Best fit for schools that want:</strong> Daily character formation and consistent expectations.</p>
+          </div>
+          <div class="type-card identity">
+            <span class="type-pill identity">Exemplars &amp; Identity Leagues</span>
+            <h3>What the student stands for publicly.</h3>
+            <p>This culture emphasizes:</p>
+            <ul class="list">
+              <li>Values and moral courage</li>
+              <li>Leadership and responsibility</li>
+              <li>Contribution beyond the self</li>
+            </ul>
+            <p><strong>The school culture feels:</strong> Principled, Purpose-driven, Legacy-focused</p>
+            <p><strong>Guiding question:</strong> What do students stand for — even when it costs them?</p>
+            <p><strong>Best fit for schools that want:</strong> Clear identity, leadership formation, and moral clarity.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Choosing the Right League</h2>
+        <div class="grid-2">
+          <div class="league-card">
+            <h4>League of Rise</h4>
+            <p><em>How do students recover, grow, and rebuild after struggle?</em></p>
+            <p>Focus: Resilience · Growth · Accountability</p>
+          </div>
+          <div class="league-card">
+            <h4>League of Apex</h4>
+            <p><em>How do students show up when expectations are high?</em></p>
+            <p>Focus: Discipline · Consistency · Responsibility</p>
+          </div>
+          <div class="league-card">
+            <h4>League of Champions</h4>
+            <p><em>What do students stand for when truth is pressured?</em></p>
+            <p>Focus: Truth · Justice · Moral Courage</p>
+          </div>
+          <div class="league-card">
+            <h4>League of Builders</h4>
+            <p><em>What do students build that others rely on?</em></p>
+            <p>Focus: Contribution · Leadership · Legacy</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Houses Are Training Grounds — Not Labels</h2>
+        <p>Within each League, students belong to a House. Houses represent areas of focused growth, not personality types or rankings.</p>
+        <div class="house-tiles">
+          <div class="tile">
+            <h3>Houses provide:</h3>
+            <ul class="list">
+              <li>Shared language for encouragement</li>
+              <li>Daily reinforcement of values</li>
+              <li>A sense of belonging with purpose</li>
+            </ul>
+          </div>
+          <div class="tile">
+            <h3>Important distinction</h3>
+            <p><strong>Students don’t earn Houses. They grow within them.</strong></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>One Framework. Grades 6–12.</h2>
+        <p>The League and Houses stay the same from Middle School through High School. What changes is the depth of expectation.</p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <h3>Middle School</h3>
+            <p>Awareness, practice, habit-building</p>
+          </div>
+          <div class="timeline-item">
+            <h3>High School</h3>
+            <p>Ownership, leadership, consistency</p>
+          </div>
+        </div>
+        <p><strong>No resets. No reinvention every year. Just deepening formation.</strong></p>
+      </section>
+
+      <section class="section closing">
+        <h2>Culture Must Be Built — Not Hoped For</h2>
+        <p>Strong school cultures are not created by rules alone. They are built through shared language, shared expectations, and intentional formation.</p>
+        <p>This framework gives schools a way to do that — clearly and coherently.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="#framework">Start a Conversation</a>
+          <a class="btn" href="#framework">Revisit League Types</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

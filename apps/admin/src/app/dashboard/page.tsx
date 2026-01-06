@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
+import { getHouseConfigRecord, canonicalHouseName, getHouseNames } from '@/lib/school.config'
 
 interface MeritEntry {
   studentName: string
@@ -25,32 +26,7 @@ interface HouseData {
   topStudents: { name: string; points: number }[]
 }
 
-const houseConfig: Record<string, { color: string; gradient: string; accentGradient: string; logo: string }> = {
-  'House of Abū Bakr': {
-    color: '#2f0a61',
-    gradient: 'linear-gradient(135deg, #4a1a8a 0%, #2f0a61 50%, #1a0536 100%)',
-    accentGradient: 'linear-gradient(135deg, #6b2fad 0%, #4a1a8a 100%)',
-    logo: '/houses/abu-bakr.png',
-  },
-  'House of Khadījah': {
-    color: '#055437',
-    gradient: 'linear-gradient(135deg, #0a7a50 0%, #055437 50%, #033320 100%)',
-    accentGradient: 'linear-gradient(135deg, #0d9963 0%, #0a7a50 100%)',
-    logo: '/houses/khadijah.png',
-  },
-  'House of ʿUmar': {
-    color: '#000068',
-    gradient: 'linear-gradient(135deg, #1a1a9a 0%, #000068 50%, #000040 100%)',
-    accentGradient: 'linear-gradient(135deg, #2a2ab8 0%, #1a1a9a 100%)',
-    logo: '/houses/umar.png',
-  },
-  'House of ʿĀʾishah': {
-    color: '#910000',
-    gradient: 'linear-gradient(135deg, #c41a1a 0%, #910000 50%, #5a0000 100%)',
-    accentGradient: 'linear-gradient(135deg, #e02d2d 0%, #c41a1a 100%)',
-    logo: '/houses/aishah.png',
-  },
-}
+const houseConfig = getHouseConfigRecord()
 
 export default function DashboardPage() {
   const [houses, setHouses] = useState<HouseData[]>([])
@@ -108,33 +84,10 @@ export default function DashboardPage() {
           staffName: String(m.staff_name ?? ''),
         }))
 
-        const normalizeHouse = (value: string) =>
-          value
-            .normalize('NFKD')
-            .replace(/\p{Diacritic}/gu, '')
-            .replace(/[‘’`ʿʾ]/g, "'")
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, ' ')
-        const houseKeys = Object.keys(houseConfig)
-        const houseKeyMap = new Map(
-          houseKeys.map((key) => [normalizeHouse(key), key])
-        )
-        const canonicalHouse = (value: string) => {
-          const normalized = normalizeHouse(value)
-          const direct = houseKeyMap.get(normalized)
-          if (direct) return direct
-          if (normalized.includes('bakr')) return 'House of Abū Bakr'
-          if (normalized.includes('khadijah')) return 'House of Khadījah'
-          if (normalized.includes('umar')) return 'House of ʿUmar'
-          if (normalized.includes('aishah')) return 'House of ʿĀʾishah'
-          return ''
-        }
-
         // Calculate house points directly from merit entries
         const housePoints: Record<string, number> = {}
         entries.forEach((e) => {
-          const house = e.house ? canonicalHouse(e.house) : ''
+          const house = e.house ? canonicalHouseName(e.house) : ''
           if (!house) return
           housePoints[house] = (housePoints[house] || 0) + e.points
         })
@@ -172,7 +125,7 @@ export default function DashboardPage() {
           const studentRaw = getRowValue(row, ['student_name', 'student', 'name'])
           const pointsRaw = getRowValue(row, ['total_points', 'points'])
           const rankRaw = getRowValue(row, ['house_rank', 'rank'])
-          const house = houseRaw ? canonicalHouse(String(houseRaw)) : ''
+          const house = houseRaw ? canonicalHouseName(String(houseRaw)) : ''
           if (!house) return
           const studentName = String(studentRaw ?? '').trim() || 'Unnamed Student'
           const points = Number(pointsRaw) || 0

@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { schoolConfig } from '@/lib/school.config'
 
 type DashboardHeaderProps = {
   adminName: string
@@ -27,17 +26,8 @@ export default function DashboardHeader({ adminName }: DashboardHeaderProps) {
     <header className="bg-white/80 backdrop-blur-md border-b border-[#c9a227]/10 sticky top-0 z-10">
       <div className="px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#1a1a2e]/5 border border-[#c9a227]/20 flex items-center justify-center">
-            <img
-              src={schoolConfig.crestLogo}
-              alt={`${schoolConfig.systemName} crest`}
-              className="w-7 h-7 object-contain"
-            />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-[#1a1a2e]">{schoolConfig.systemName}</p>
-            <p className="text-xs text-[#1a1a2e]/50">{todayLabel}</p>
-          </div>
+          <div className="w-2 h-2 rounded-full bg-[#c9a227]"></div>
+          <span className="text-sm text-[#1a1a2e]/50 font-medium">{todayLabel}</span>
         </div>
 
         <div className="flex items-center gap-6">

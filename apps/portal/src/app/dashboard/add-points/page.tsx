@@ -51,6 +51,11 @@ export default function AddPointsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
+  // Bulk selection filters
+  const [filterGrade, setFilterGrade] = useState<string>('')
+  const [filterSection, setFilterSection] = useState<string>('')
+  const [filterHouse, setFilterHouse] = useState<string>('')
+
   useEffect(() => {
     fetchData()
     fetchStaffName()
@@ -115,6 +120,39 @@ export default function AddPointsPage() {
 
   const rOptions = [...new Set(categories.map((c) => c.r))].filter(Boolean)
   const subcategories = selectedR ? categories.filter((c) => c.r === selectedR) : []
+
+  // Get unique values for filters
+  const availableGrades = [...new Set(students.map((s) => s.grade))].sort((a, b) => a - b)
+  const availableSections = [...new Set(
+    students
+      .filter((s) => !filterGrade || s.grade === Number(filterGrade))
+      .map((s) => s.section)
+  )].filter(Boolean).sort()
+  const availableHouses = [...new Set(students.map((s) => s.house))].filter(Boolean).sort()
+
+  // Get students matching bulk filters
+  const bulkFilteredStudents = students.filter((s) => {
+    if (selectedStudentIds.has(s.id)) return false
+    if (filterGrade && s.grade !== Number(filterGrade)) return false
+    if (filterSection && s.section !== filterSection) return false
+    if (filterHouse && canonicalHouseName(s.house) !== filterHouse) return false
+    return true
+  })
+
+  const hasActiveFilters = filterGrade || filterSection || filterHouse
+
+  const handleAddAllFiltered = () => {
+    setSelectedStudents((prev) => [...prev, ...bulkFilteredStudents])
+    setFilterGrade('')
+    setFilterSection('')
+    setFilterHouse('')
+  }
+
+  const clearFilters = () => {
+    setFilterGrade('')
+    setFilterSection('')
+    setFilterHouse('')
+  }
 
   const handleSubmit = async () => {
     if (selectedStudents.length === 0 || !selectedCategory) return
@@ -252,6 +290,76 @@ export default function AddPointsPage() {
               </div>
             </div>
           )}
+
+          {/* Bulk Selection Filters */}
+          <div className="mb-4 p-4 bg-[#faf9f7] rounded-xl border border-[#1a1a2e]/5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-[#1a1a2e]/70">Bulk Select</p>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="text-[#c9a227] hover:text-[#9a7b1a] font-medium text-xs transition-colors"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <select
+                value={filterGrade}
+                onChange={(e) => {
+                  setFilterGrade(e.target.value)
+                  setFilterSection('')
+                }}
+                className="px-3 py-2 border border-[#1a1a2e]/10 rounded-lg text-sm focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white"
+              >
+                <option value="">All Grades</option>
+                {availableGrades.map((grade) => (
+                  <option key={grade} value={grade}>Grade {grade}</option>
+                ))}
+              </select>
+              <select
+                value={filterSection}
+                onChange={(e) => setFilterSection(e.target.value)}
+                className="px-3 py-2 border border-[#1a1a2e]/10 rounded-lg text-sm focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white"
+              >
+                <option value="">All Sections</option>
+                {availableSections.map((section) => (
+                  <option key={section} value={section}>Section {section}</option>
+                ))}
+              </select>
+              <select
+                value={filterHouse}
+                onChange={(e) => setFilterHouse(e.target.value)}
+                className="px-3 py-2 border border-[#1a1a2e]/10 rounded-lg text-sm focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white"
+              >
+                <option value="">All Houses</option>
+                {availableHouses.map((house) => (
+                  <option key={house} value={canonicalHouseName(house)}>{canonicalHouseName(house)?.replace('House of ', '')}</option>
+                ))}
+              </select>
+            </div>
+            {hasActiveFilters && (
+              <button
+                onClick={handleAddAllFiltered}
+                disabled={bulkFilteredStudents.length === 0}
+                className="w-full py-2 px-4 bg-[#c9a227]/10 hover:bg-[#c9a227]/20 text-[#9a7b1a] rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add {bulkFilteredStudents.length} student{bulkFilteredStudents.length === 1 ? '' : 's'}
+              </button>
+            )}
+          </div>
+
+          {/* Or search individually */}
+          <div className="relative mb-3">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#1a1a2e]/10"></div>
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-2 bg-white text-[#1a1a2e]/40">or search individually</span>
+            </div>
+          </div>
+
           <input
             type="text"
             placeholder="Search for a student..."

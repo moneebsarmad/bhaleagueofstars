@@ -18,6 +18,7 @@ const ADMINS = [
   { email: 'smoussa@bhaprep.org', name: 'Sami Moussa', needsPassword: true },
   { email: 'einas.alabd@bhaprep.org', name: 'Einas Alabd', needsPassword: true },
   { email: 'sonya.badr@bhaprep.org', name: 'Sonya Badr', needsPassword: true },
+  { email: 'sundus.khan@bhaprep.org', name: 'Sundus Khan', needsPassword: true, setProfileRole: true },
 ]
 
 function generatePassword(): string {
@@ -73,8 +74,63 @@ async function main() {
     const user = allUsers.find(u => u.email?.toLowerCase() === admin.email.toLowerCase())
 
     if (!user) {
-      console.log(`  ❌ No auth account found for ${admin.email}`)
+      if (!admin.needsPassword) {
+        console.log(`  ❌ No auth account found for ${admin.email}`)
+        continue
+      }
+
+      const password = generatePassword()
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+        email: admin.email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: admin.name }
+      })
+
+      if (createError || !newUser?.user) {
+        console.log(`  ❌ Failed to create auth account: ${createError?.message || 'Unknown error'}`)
+        continue
+      }
+
+      console.log(`  ✅ Created auth account`)
+      allUsers.push({ id: newUser.user.id, email: admin.email })
+      credentials.push({ email: admin.email, password, name: admin.name })
+      await supabase
+        .from('admins')
+        .upsert({
+          auth_user_id: newUser.user.id,
+          staff_name: admin.name,
+          email: admin.email,
+          is_super_admin: false
+        }, { onConflict: 'auth_user_id' })
+      console.log(`  ✅ Added to admins table`)
+      if (admin.setProfileRole) {
+        await supabase
+          .from('profiles')
+          .update({ role: 'admin' })
+          .eq('email', admin.email)
+        console.log(`  ✅ Profile role set to admin`)
+      }
+      console.log('')
       continue
+    }
+
+    await supabase
+      .from('admins')
+      .upsert({
+        auth_user_id: user.id,
+        staff_name: admin.name,
+        email: admin.email,
+        is_super_admin: false
+      }, { onConflict: 'auth_user_id' })
+    console.log(`  ✅ Added to admins table`)
+
+    if (admin.setProfileRole) {
+      await supabase
+        .from('profiles')
+        .update({ role: 'admin' })
+        .eq('email', admin.email)
+      console.log(`  ✅ Profile role set to admin`)
     }
 
     // Update display name

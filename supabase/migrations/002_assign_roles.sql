@@ -16,7 +16,8 @@ WHERE email IN (
   'smoussa@bhaprep.org',
   'bayanne.elkhatib@bhaprep.org',
   'sonya.badr@bhaprep.org',
-  'einas.alabd@bhaprep.org'
+  'einas.alabd@bhaprep.org',
+  'sundus.khan@bhaprep.org'
 );
 
 -- 3. HOUSE MENTORS (with assigned houses)
@@ -26,7 +27,7 @@ WHERE email = 'hanan.dabaja@bhaprep.org';
 
 UPDATE profiles
 SET role = 'house_mentor', assigned_house = 'House of Khadījah'
-WHERE email = 'msolis@bhaprep.org';
+WHERE email = 'michelle.solis@bhaprep.org';
 
 UPDATE profiles
 SET role = 'house_mentor', assigned_house = 'House of ʿĀʾishah'

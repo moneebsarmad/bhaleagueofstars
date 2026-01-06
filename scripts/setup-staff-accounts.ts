@@ -74,7 +74,7 @@ const DEFAULT_ROLE = 'teacher'
 // House mentors with their assigned houses
 const HOUSE_MENTORS: Record<string, string> = {
   'hanan.dabaja@bhaprep.org': 'House of ʿUmar',
-  'msolis@bhaprep.org': 'House of Khadījah',
+  'michelle.solis@bhaprep.org': 'House of Khadījah',
   'nora.hamed@bhaprep.org': 'House of ʿĀʾishah',
   'fauzan.plasticwala@bhaprep.org': 'House of Abū Bakr',
 }
@@ -87,6 +87,7 @@ const ADMINS = [
   'bayanne.elkhatib@bhaprep.org',
   'sonya.badr@bhaprep.org',
   'einas.alabd@bhaprep.org',
+  'sundus.khan@bhaprep.org',
 ]
 
 // Generate temporary password

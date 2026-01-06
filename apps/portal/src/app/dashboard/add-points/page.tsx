@@ -166,7 +166,7 @@ export default function AddPointsPage() {
         student_name: student.name,
         grade: student.grade,
         section: student.section,
-        house: student.house,
+        house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
         r: selectedR,
         subcategory: selectedCategory.subcategory,
         points: selectedCategory.points,

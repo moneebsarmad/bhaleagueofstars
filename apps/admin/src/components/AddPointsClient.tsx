@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
-import { getHouseColors } from '@/lib/school.config'
+import { getHouseColors, canonicalHouseName } from '@/lib/school.config'
 
 interface Student {
   id: string
@@ -212,7 +212,7 @@ export default function AddPointsClient() {
         student_name: student.name,
         grade: student.grade,
         section: student.section,
-        house: student.house,
+        house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
         r: `${selectedCategory.name} – ${selectedCategory.description}`,
         subcategory: selectedSubcategory.name,
         points: selectedSubcategory.points,

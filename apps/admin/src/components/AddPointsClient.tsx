@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
+import { getHouseColors } from '@/lib/school.config'
 
 interface Student {
   id: string
@@ -28,12 +29,7 @@ interface MeritSubcategory {
   points: number
 }
 
-const houseColors: Record<string, string> = {
-  'House of Abū Bakr': '#2f0a61',
-  'House of Khadījah': '#055437',
-  'House of ʿUmar': '#000068',
-  'House of ʿĀʾishah': '#910000',
-}
+const houseColors = getHouseColors()
 
 const meritCategories: MeritCategory[] = [
   {
@@ -77,7 +73,7 @@ const meritCategories: MeritCategory[] = [
 export default function AddPointsClient() {
   const [students, setStudents] = useState<Student[]>([])
   const [searchText, setSearchText] = useState('')
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const [selectedStudents, setSelectedStudents] = useState<Student[]>([])
   const [selectedCategory, setSelectedCategory] = useState<MeritCategory | null>(null)
   const [selectedSubcategory, setSelectedSubcategory] = useState<MeritSubcategory | null>(null)
   const [notes, setNotes] = useState('')
@@ -149,8 +145,10 @@ export default function AddPointsClient() {
     }
   }
 
+  const selectedStudentIds = new Set(selectedStudents.map((student) => student.id))
+
   const filteredStudents = students
-    .filter((s) => searchText && s.name.toLowerCase().includes(searchText.toLowerCase()))
+    .filter((s) => searchText && s.name.toLowerCase().includes(searchText.toLowerCase()) && !selectedStudentIds.has(s.id))
     .sort((a, b) => a.name.localeCompare(b.name))
     .slice(0, 10)
 
@@ -163,26 +161,27 @@ export default function AddPointsClient() {
   }
 
   const handleSubmit = async () => {
-    if (!selectedStudent || !selectedCategory || !selectedSubcategory) return
+    if (selectedStudents.length === 0 || !selectedCategory || !selectedSubcategory) return
 
     setIsSubmitting(true)
     try {
-      const meritEntry = {
-        merit_id: `MERIT-${Date.now()}`,
-        timestamp: new Date().toISOString(),
+      const now = new Date().toISOString()
+      const meritEntries = selectedStudents.map((student) => ({
+        merit_id: `MERIT-${Date.now()}-${student.id}`,
+        timestamp: now,
         date_of_event: eventDate || new Date().toISOString().split('T')[0],
-        student_name: selectedStudent.name,
-        grade: selectedStudent.grade,
-        section: selectedStudent.section,
-        house: selectedStudent.house,
+        student_name: student.name,
+        grade: student.grade,
+        section: student.section,
+        house: student.house,
         r: `${selectedCategory.name} – ${selectedCategory.description}`,
         subcategory: selectedSubcategory.name,
         points: selectedSubcategory.points,
         notes: notes,
         staff_name: adminName,
-      }
+      }))
 
-      const { error } = await supabase.from(Tables.meritLog).insert([meritEntry])
+      const { error } = await supabase.from(Tables.meritLog).insert(meritEntries)
 
       if (error) {
         console.error('Error adding merit:', error)
@@ -203,12 +202,22 @@ export default function AddPointsClient() {
   }
 
   const resetForm = () => {
-    setSelectedStudent(null)
+    setSelectedStudents([])
     setSelectedCategory(null)
     setSelectedSubcategory(null)
     setNotes('')
     setEventDate(new Date().toISOString().split('T')[0])
     setSearchText('')
+  }
+
+  const handleAddStudent = (student: Student) => {
+    if (selectedStudentIds.has(student.id)) return
+    setSelectedStudents((prev) => [...prev, student])
+    setSearchText('')
+  }
+
+  const handleRemoveStudent = (studentId: string) => {
+    setSelectedStudents((prev) => prev.filter((student) => student.id !== studentId))
   }
 
   if (isLoading) {
@@ -234,83 +243,92 @@ export default function AddPointsClient() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <span className="font-medium">Points awarded successfully!</span>
+          <span className="font-medium">
+            Points awarded to {selectedStudents.length || 'selected'} student{selectedStudents.length === 1 ? '' : 's'}!
+          </span>
         </div>
       )}
 
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
         <div className="flex items-center gap-3 mb-5">
           <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">1</span>
-          <h2 className="text-lg font-semibold text-[#1a1a2e]">Select Student</h2>
+          <h2 className="text-lg font-semibold text-[#1a1a2e]">Select Students</h2>
         </div>
 
-        {selectedStudent ? (
-          <div className="flex items-center gap-4 p-4 bg-[#faf9f7] rounded-xl border border-[#c9a227]/10">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold"
-              style={{
-                backgroundColor: `${houseColors[selectedStudent.house]}20`,
-                color: houseColors[selectedStudent.house],
-              }}
-            >
-              {getInitials(selectedStudent.name)}
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-[#1a1a2e]">{selectedStudent.name}</p>
-              <p className="text-sm text-[#1a1a2e]/50">
-                Grade {selectedStudent.grade}{selectedStudent.section} • {selectedStudent.house}
-              </p>
-            </div>
-            <button
-              onClick={() => setSelectedStudent(null)}
-              className="text-[#c9a227] hover:text-[#9a7b1a] font-medium text-sm transition-colors"
-            >
-              Change
-            </button>
-          </div>
-        ) : (
-          <div>
-            <input
-              type="text"
-              placeholder="Search for a student..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="w-full px-4 py-3 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none mb-3 transition-all"
-            />
-            {filteredStudents.length > 0 && (
-              <div className="border border-[#1a1a2e]/10 rounded-xl overflow-hidden">
-                {filteredStudents.map((student, index) => (
+        <div>
+          {selectedStudents.length > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-[#1a1a2e]/70">
+                  Selected ({selectedStudents.length})
+                </p>
+                <button
+                  onClick={() => setSelectedStudents([])}
+                  className="text-[#c9a227] hover:text-[#9a7b1a] font-medium text-sm transition-colors"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedStudents.map((student) => (
                   <button
                     key={student.id}
-                    onClick={() => {
-                      setSelectedStudent(student)
-                      setSearchText('')
-                    }}
-                    className={`w-full flex items-center gap-4 p-3.5 hover:bg-[#faf9f7] transition-colors ${
-                      index !== filteredStudents.length - 1 ? 'border-b border-[#1a1a2e]/5' : ''
-                    }`}
+                    onClick={() => handleRemoveStudent(student.id)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#faf9f7] border border-[#c9a227]/20 text-sm text-[#1a1a2e] hover:border-[#c9a227]/50 transition-colors"
                   >
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold"
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
                       style={{
                         backgroundColor: `${houseColors[student.house]}20`,
                         color: houseColors[student.house],
                       }}
                     >
                       {getInitials(student.name)}
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-[#1a1a2e]">{student.name}</p>
-                      <p className="text-sm text-[#1a1a2e]/50">
-                        Grade {student.grade}{student.section} • {student.house?.replace('House of ', '')}
-                      </p>
-                    </div>
+                    </span>
+                    <span>{student.name}</span>
+                    <span className="text-[#1a1a2e]/30">×</span>
                   </button>
                 ))}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+          <input
+            type="text"
+            placeholder="Search for a student..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full px-4 py-3 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none mb-3 transition-all"
+          />
+          {filteredStudents.length > 0 && (
+            <div className="border border-[#1a1a2e]/10 rounded-xl overflow-hidden">
+              {filteredStudents.map((student, index) => (
+                <button
+                  key={student.id}
+                  onClick={() => handleAddStudent(student)}
+                  className={`w-full flex items-center gap-4 p-3.5 hover:bg-[#faf9f7] transition-colors ${
+                    index !== filteredStudents.length - 1 ? 'border-b border-[#1a1a2e]/5' : ''
+                  }`}
+                >
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold"
+                    style={{
+                      backgroundColor: `${houseColors[student.house]}20`,
+                      color: houseColors[student.house],
+                    }}
+                  >
+                    {getInitials(student.name)}
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-[#1a1a2e]">{student.name}</p>
+                    <p className="text-sm text-[#1a1a2e]/50">
+                      Grade {student.grade}{student.section} • {student.house?.replace('House of ', '')}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
@@ -419,7 +437,7 @@ export default function AddPointsClient() {
         </div>
       )}
 
-      {selectedStudent && selectedCategory && selectedSubcategory && (
+      {selectedStudents.length > 0 && selectedCategory && selectedSubcategory && (
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
@@ -432,7 +450,9 @@ export default function AddPointsClient() {
             </>
           ) : (
             <>
-              <span>Award {selectedSubcategory.points} points to {selectedStudent.name}</span>
+              <span>
+                Award {selectedSubcategory.points} points to {selectedStudents.length} student{selectedStudents.length === 1 ? '' : 's'}
+              </span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

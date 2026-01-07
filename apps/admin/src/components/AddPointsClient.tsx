@@ -205,33 +205,42 @@ export default function AddPointsClient() {
     setIsSubmitting(true)
     try {
       const now = new Date().toISOString()
-      const meritEntries = selectedStudents.map((student) => ({
-        merit_id: `MERIT-${Date.now()}-${student.id}`,
-        timestamp: now,
-        date_of_event: eventDate || new Date().toISOString().split('T')[0],
-        student_name: student.name,
-        grade: student.grade,
-        section: student.section,
-        house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
-        r: `${selectedCategory.name} – ${selectedCategory.description}`,
-        subcategory: selectedSubcategory.name,
-        points: selectedSubcategory.points,
-        notes: notes,
-        staff_name: adminName,
-      }))
+      const batchId = Date.now()
+      const errors: { student: Student; message: string }[] = []
 
-      const { error } = await supabase.from(Tables.meritLog).insert(meritEntries)
+      for (const student of selectedStudents) {
+        const meritEntry = {
+          merit_id: `MERIT-${batchId}-${student.id}`,
+          timestamp: now,
+          date_of_event: eventDate || new Date().toISOString().split('T')[0],
+          student_name: student.name,
+          grade: student.grade,
+          section: student.section,
+          house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
+          r: `${selectedCategory.name} – ${selectedCategory.description}`,
+          subcategory: selectedSubcategory.name,
+          points: selectedSubcategory.points,
+          notes: notes,
+          staff_name: adminName,
+        }
 
-      if (error) {
-        console.error('Error adding merit:', error)
-        alert('Failed to add points. Please try again.')
-      } else {
-        setShowSuccess(true)
-        setTimeout(() => {
-          setShowSuccess(false)
-          resetForm()
-        }, 2000)
+        const { error } = await supabase.from(Tables.meritLog).insert([meritEntry])
+        if (error) {
+          errors.push({ student, message: error.message })
+        }
       }
+
+      if (errors.length > 0) {
+        console.error('Error adding merit:', errors)
+        alert(`Failed to add points for ${errors.length} student${errors.length === 1 ? '' : 's'}. Please try again.`)
+        return
+      }
+
+      setShowSuccess(true)
+      setTimeout(() => {
+        setShowSuccess(false)
+        resetForm()
+      }, 2000)
     } catch (error) {
       console.error('Error:', error)
       alert('Failed to add points. Please try again.')
@@ -573,4 +582,3 @@ export default function AddPointsClient() {
   )
 }
 // Force rebuild 1767720451
-

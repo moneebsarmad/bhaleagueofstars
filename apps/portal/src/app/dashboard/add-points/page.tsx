@@ -160,32 +160,40 @@ export default function AddPointsPage() {
     setIsSubmitting(true)
     try {
       const now = new Date().toISOString()
-      const meritEntries = selectedStudents.map((student) => ({
-        timestamp: now,
-        date_of_event: eventDate || new Date().toISOString().split('T')[0],
-        student_name: student.name,
-        grade: student.grade,
-        section: student.section,
-        house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
-        r: selectedR,
-        subcategory: selectedCategory.subcategory,
-        points: selectedCategory.points,
-        notes: notes,
-        staff_name: staffName,
-      }))
+      const errors: { student: Student; message: string }[] = []
 
-      const { error } = await supabase.from('merit_log').insert(meritEntries)
+      for (const student of selectedStudents) {
+        const meritEntry = {
+          timestamp: now,
+          date_of_event: eventDate || new Date().toISOString().split('T')[0],
+          student_name: student.name,
+          grade: student.grade,
+          section: student.section,
+          house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
+          r: selectedR,
+          subcategory: selectedCategory.subcategory,
+          points: selectedCategory.points,
+          notes: notes,
+          staff_name: staffName,
+        }
 
-      if (error) {
-        console.error('Error adding merit:', error)
-        alert('Failed to add points. Please try again.')
-      } else {
-        setShowSuccess(true)
-        setTimeout(() => {
-          setShowSuccess(false)
-          resetForm()
-        }, 2000)
+        const { error } = await supabase.from('merit_log').insert([meritEntry])
+        if (error) {
+          errors.push({ student, message: error.message })
+        }
       }
+
+      if (errors.length > 0) {
+        console.error('Error adding merit:', errors)
+        alert(`Failed to add points for ${errors.length} student${errors.length === 1 ? '' : 's'}. Please try again.`)
+        return
+      }
+
+      setShowSuccess(true)
+      setTimeout(() => {
+        setShowSuccess(false)
+        resetForm()
+      }, 2000)
     } catch (error) {
       console.error('Error:', error)
       alert('Failed to add points. Please try again.')
@@ -548,4 +556,3 @@ export default function AddPointsPage() {
   )
 }
 // Force rebuild 1767720489
-

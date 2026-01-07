@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import { useAuth } from '../../providers'
 import CrestLoader from '../../../components/CrestLoader'
@@ -50,6 +50,8 @@ export default function AddPointsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Bulk selection filters
   const [filterGrade, setFilterGrade] = useState<string>('')
@@ -154,10 +156,21 @@ export default function AddPointsPage() {
     setFilterHouse('')
   }
 
+  const showToast = (message: string, type: 'info' | 'success' | 'error', duration = 2500) => {
+    setToast({ message, type })
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current)
+    }
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null)
+    }, duration)
+  }
+
   const handleSubmit = async () => {
     if (selectedStudents.length === 0 || !selectedCategory) return
 
     setIsSubmitting(true)
+    showToast('Submitting points...', 'info', 4000)
     try {
       const now = new Date().toISOString()
       const errors: { student: Student; message: string }[] = []
@@ -186,18 +199,23 @@ export default function AddPointsPage() {
 
       if (errors.length > 0) {
         console.error('Error adding merit:', errors)
-        alert(`Failed to add points for ${errors.length} student${errors.length === 1 ? '' : 's'}.\n${errors[0].student.name}: ${errors[0].message}`)
+        showToast(
+          `Failed for ${errors.length} student${errors.length === 1 ? '' : 's'} — ${errors[0].student.name}: ${errors[0].message}`,
+          'error',
+          5000
+        )
         return
       }
 
       setShowSuccess(true)
+      showToast('Points submitted!', 'success')
       setTimeout(() => {
         setShowSuccess(false)
         resetForm()
       }, 2000)
     } catch (error) {
       console.error('Error:', error)
-      alert('Failed to add points. Please try again.')
+      showToast('Failed to add points. Please try again.', 'error', 5000)
     } finally {
       setIsSubmitting(false)
     }
@@ -252,6 +270,20 @@ export default function AddPointsPage() {
           <span className="font-medium">
             Points awarded to {selectedStudents.length || 'selected'} student{selectedStudents.length === 1 ? '' : 's'}!
           </span>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 rounded-xl px-4 py-3 text-sm font-medium shadow-lg border ${
+            toast.type === 'success'
+              ? 'bg-[#055437] text-white border-[#055437]/80'
+              : toast.type === 'error'
+              ? 'bg-[#910000] text-white border-[#910000]/80'
+              : 'bg-[#1a1a2e] text-white border-[#1a1a2e]/80'
+          }`}
+        >
+          {toast.message}
         </div>
       )}
 
@@ -531,35 +563,27 @@ export default function AddPointsPage() {
 
       {/* Submit Button */}
       {selectedStudents.length > 0 && selectedCategory && (
-        <div>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="w-full bg-gradient-to-r from-[#c9a227] to-[#9a7b1a] text-white py-4 px-6 rounded-xl font-medium hover:from-[#9a7b1a] hover:to-[#7a5f14] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Submitting...</span>
-              </>
-            ) : (
-              <>
-                <span>
-                  Award {selectedCategory.points} points to {selectedStudents.length} student{selectedStudents.length === 1 ? '' : 's'}
-                </span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </>
-            )}
-          </button>
-          {isSubmitting && (
-            <p className="mt-3 text-sm text-[#1a1a2e]/60 text-center">Submitting points...</p>
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="w-full bg-gradient-to-r from-[#c9a227] to-[#9a7b1a] text-white py-4 px-6 rounded-xl font-medium hover:from-[#9a7b1a] hover:to-[#7a5f14] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
+        >
+          {isSubmitting ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Submitting...</span>
+            </>
+          ) : (
+            <>
+              <span>
+                Award {selectedCategory.points} points to {selectedStudents.length} student{selectedStudents.length === 1 ? '' : 's'}
+              </span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </>
           )}
-          {showSuccess && !isSubmitting && (
-            <p className="mt-3 text-sm text-[#055437] text-center font-medium">Points submitted!</p>
-          )}
-        </div>
+        </button>
       )}
     </div>
   )

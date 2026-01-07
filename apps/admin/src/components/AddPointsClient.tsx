@@ -205,12 +205,10 @@ export default function AddPointsClient() {
     setIsSubmitting(true)
     try {
       const now = new Date().toISOString()
-      const batchId = Date.now()
       const errors: { student: Student; message: string }[] = []
 
       for (const student of selectedStudents) {
         const meritEntry = {
-          merit_id: `MERIT-${batchId}-${student.id}`,
           timestamp: now,
           date_of_event: eventDate || new Date().toISOString().split('T')[0],
           student_name: student.name,

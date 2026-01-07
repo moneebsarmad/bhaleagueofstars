@@ -179,13 +179,14 @@ export default function AddPointsPage() {
 
         const { error } = await supabase.from('merit_log').insert([meritEntry])
         if (error) {
-          errors.push({ student, message: error.message })
+          const detail = error.details ? ` (${error.details})` : ''
+          errors.push({ student, message: `${error.message}${detail}` })
         }
       }
 
       if (errors.length > 0) {
         console.error('Error adding merit:', errors)
-        alert(`Failed to add points for ${errors.length} student${errors.length === 1 ? '' : 's'}. Please try again.`)
+        alert(`Failed to add points for ${errors.length} student${errors.length === 1 ? '' : 's'}.\n${errors[0].student.name}: ${errors[0].message}`)
         return
       }
 

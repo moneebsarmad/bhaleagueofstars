@@ -58,27 +58,27 @@ const houseConfig: Record<string, Omit<House, "rank" | "points" | "name">> =
 const fallbackHouses: House[] = [
     {
       rank: 1,
-      name: "House of Abu Bakr",
+      name: "House of Abū Bakr",
       points: 4985,
-      ...houseConfig["House of Abu Bakr"],
+      ...houseConfig["House of Abū Bakr"],
     },
     {
       rank: 2,
-      name: "House of 'Umar",
+      name: "House of ʿUmar",
       points: 4175,
-      ...houseConfig["House of 'Umar"],
+      ...houseConfig["House of ʿUmar"],
     },
     {
       rank: 3,
-      name: "House of 'A'ishah",
+      name: "House of ʿĀʾishah",
       points: 3995,
-      ...houseConfig["House of 'A'ishah"],
+      ...houseConfig["House of ʿĀʾishah"],
     },
     {
       rank: 4,
-      name: "House of Khadijah",
+      name: "House of Khadījah",
       points: 3480,
-      ...houseConfig["House of Khadijah"],
+      ...houseConfig["House of Khadījah"],
     },
   ];
 
@@ -105,26 +105,31 @@ export default function Home() {
           return;
         }
 
-        const mapped =
-          data?.map((row: Record<string, unknown>, index: number) => {
-            const houseNameRaw = row.house_name ?? row.house ?? row.name ?? "";
-            const houseName = canonicalHouseName(String(houseNameRaw ?? ""));
-            const config = houseConfig[houseName];
-            if (!config) {
-              return null;
-            }
-            const pointsValue =
-              Number(row.total_points ?? row.points ?? 0) || 0;
-            return {
-              rank: index + 1,
-              name: houseName,
-              points: pointsValue,
-              ...config,
-            };
-          }) ?? [];
+        const pointsByHouse = new Map<string, number>();
 
-        const valid = mapped.filter(Boolean) as House[];
-        setHouses(valid.length > 0 ? valid : fallbackHouses);
+        (data ?? []).forEach((row: Record<string, unknown>) => {
+          const houseNameRaw = row.house_name ?? row.house ?? row.name ?? "";
+          const houseName = canonicalHouseName(String(houseNameRaw ?? ""));
+          if (!houseConfig[houseName]) {
+            return;
+          }
+          const pointsValue = Number(row.total_points ?? row.points ?? 0) || 0;
+          pointsByHouse.set(houseName, (pointsByHouse.get(houseName) || 0) + pointsValue);
+        });
+
+        const nextHouses = schoolConfig.houses
+          .map((house) => ({
+            name: house.name,
+            points: pointsByHouse.get(house.name) || 0,
+            ...houseConfig[house.name],
+          }))
+          .sort((a, b) => b.points - a.points)
+          .map((house, index) => ({
+            ...house,
+            rank: index + 1,
+          }));
+
+        setHouses(nextHouses.length > 0 ? nextHouses : fallbackHouses);
       } catch (err) {
         console.error("Error fetching houses:", err);
         setHouses(fallbackHouses);

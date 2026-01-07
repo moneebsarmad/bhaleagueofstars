@@ -175,8 +175,8 @@ const bhaConfig: SchoolConfig = {
 // =============================================================================
 
 // Use environment variable to select configuration
-// Set NEXT_PUBLIC_SCHOOL_CONFIG=bha for BHA, or leave empty for demo
-const configName = process.env.NEXT_PUBLIC_SCHOOL_CONFIG || 'demo'
+// Set NEXT_PUBLIC_SCHOOL_CONFIG=demo to use demo assets locally.
+const configName = process.env.NEXT_PUBLIC_SCHOOL_CONFIG || 'bha'
 
 export const schoolConfig: SchoolConfig = configName === 'bha' ? bhaConfig : demoConfig
 

@@ -531,27 +531,35 @@ export default function AddPointsPage() {
 
       {/* Submit Button */}
       {selectedStudents.length > 0 && selectedCategory && (
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-[#c9a227] to-[#9a7b1a] text-white py-4 px-6 rounded-xl font-medium hover:from-[#9a7b1a] hover:to-[#7a5f14] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
-        >
-          {isSubmitting ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Submitting...</span>
-            </>
-          ) : (
-            <>
-              <span>
-                Award {selectedCategory.points} points to {selectedStudents.length} student{selectedStudents.length === 1 ? '' : 's'}
-              </span>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </>
+        <div>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-[#c9a227] to-[#9a7b1a] text-white py-4 px-6 rounded-xl font-medium hover:from-[#9a7b1a] hover:to-[#7a5f14] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Submitting...</span>
+              </>
+            ) : (
+              <>
+                <span>
+                  Award {selectedCategory.points} points to {selectedStudents.length} student{selectedStudents.length === 1 ? '' : 's'}
+                </span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </>
+            )}
+          </button>
+          {isSubmitting && (
+            <p className="mt-3 text-sm text-[#1a1a2e]/60 text-center">Submitting points...</p>
           )}
-        </button>
+          {showSuccess && !isSubmitting && (
+            <p className="mt-3 text-sm text-[#055437] text-center font-medium">Points submitted!</p>
+          )}
+        </div>
       )}
     </div>
   )

@@ -168,6 +168,10 @@ export default function AddPointsPage() {
 
   const handleSubmit = async () => {
     if (selectedStudents.length === 0 || !selectedCategory) return
+    if (!staffName || (user?.email && staffName.toLowerCase() === user.email.toLowerCase())) {
+      showToast('Your staff name is not set. Please contact an admin.', 'error', 5000)
+      return
+    }
 
     setIsSubmitting(true)
     showToast('Submitting points...', 'info', 4000)

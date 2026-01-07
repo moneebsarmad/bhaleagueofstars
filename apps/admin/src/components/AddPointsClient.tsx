@@ -213,6 +213,10 @@ export default function AddPointsClient() {
 
   const handleSubmit = async () => {
     if (selectedStudents.length === 0 || !selectedCategory || !selectedSubcategory) return
+    if (!adminName || adminName.includes('@')) {
+      showToast('Your staff name is not set. Please contact an admin.', 'error', 5000)
+      return
+    }
 
     setIsSubmitting(true)
     showToast('Submitting points...', 'info', 4000)

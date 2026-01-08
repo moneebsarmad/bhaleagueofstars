@@ -583,6 +583,89 @@ export default function ImplementationHealthPage() {
 
   const actionsById = useMemo(() => new Map(actions.map((action) => [action.id, action])), [actions])
 
+  const gradeInsights = useMemo(() => {
+    const studentMap = new Map<string, { students: Set<string>; points: number }>()
+    studentRows.forEach((student) => {
+      const grade = student.grade ? `Grade ${student.grade}` : 'Unknown'
+      if (!studentMap.has(grade)) studentMap.set(grade, { students: new Set(), points: 0 })
+      if (student.student_name) studentMap.get(grade)?.students.add(student.student_name)
+    })
+    filteredEntries.forEach((entry) => {
+      const grade = entry.grade ? `Grade ${entry.grade}` : 'Unknown'
+      if (!studentMap.has(grade)) studentMap.set(grade, { students: new Set(), points: 0 })
+      studentMap.get(grade)!.points += Number(entry.points || 0)
+    })
+    const rows = Array.from(studentMap.entries()).map(([grade, data]) => {
+      const count = data.students.size || 1
+      return { grade, perStudent: data.points / count }
+    }).sort((a, b) => b.perStudent - a.perStudent)
+    return {
+      strongest: rows[0] || null,
+      weakest: rows[rows.length - 1] || null,
+      rows,
+    }
+  }, [filteredEntries, studentRows])
+
+  const subcategoryTrends = useMemo(() => {
+    const currentMap = new Map<string, number>()
+    const prevMap = new Map<string, number>()
+    filteredEntries.forEach((entry) => {
+      const key = entry.subcategory || 'Unknown'
+      currentMap.set(key, (currentMap.get(key) || 0) + 1)
+    })
+    previousRangeEntries.forEach((entry) => {
+      const key = entry.subcategory || 'Unknown'
+      prevMap.set(key, (prevMap.get(key) || 0) + 1)
+    })
+    const rows = Array.from(new Set([...currentMap.keys(), ...prevMap.keys()])).map((key) => {
+      const current = currentMap.get(key) || 0
+      const previous = prevMap.get(key) || 0
+      const delta = current - previous
+      const pct = previous > 0 ? delta / previous : current > 0 ? 1 : 0
+      return { key, current, previous, delta, pct }
+    }).filter((row) => row.current + row.previous >= 10)
+      .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    return rows.slice(0, 6)
+  }, [filteredEntries, previousRangeEntries])
+
+  const timeBuckets = useMemo(() => {
+    const dayMap = new Map<string, number>()
+    filteredEntries.forEach((entry) => {
+      const date = entry.date_of_event ? new Date(entry.date_of_event) : null
+      if (!date) return
+      const label = date.toLocaleDateString('en-US', { weekday: 'short' })
+      dayMap.set(label, (dayMap.get(label) || 0) + 1)
+    })
+    return Array.from(dayMap.entries())
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count)
+  }, [filteredEntries])
+
+  const staffNotesCompliance = useMemo(() => {
+    const map = new Map<string, { required: number; completed: number }>()
+    filteredEntries.forEach((entry) => {
+      const staff = entry.staff_name || 'Unknown'
+      const category = (entry.r || '').toLowerCase()
+      const sub = (entry.subcategory || '').toLowerCase()
+      const points = Number(entry.points || 0)
+      const requires = category.includes('other') || sub.includes('other') || points >= 10
+      if (!map.has(staff)) map.set(staff, { required: 0, completed: 0 })
+      if (requires) {
+        map.get(staff)!.required += 1
+        if (entry.notes && entry.notes.trim().length > 0) {
+          map.get(staff)!.completed += 1
+        }
+      }
+    })
+    return Array.from(map.entries())
+      .map(([staff, data]) => ({
+        staff,
+        compliance: data.required === 0 ? 1 : data.completed / data.required,
+      }))
+      .sort((a, b) => a.compliance - b.compliance)
+      .slice(0, 5)
+  }, [filteredEntries])
+
   const handleDecisionCreate = async () => {
     if (!decisionForm.owner) return
     await supabase.from('decision_log').insert([
@@ -923,6 +1006,41 @@ export default function ImplementationHealthPage() {
             <button onClick={handleDecisionCreate} className="px-4 py-2 rounded-lg bg-[#1a1a2e] text-white text-sm">
               Save Decision
             </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10">
+        <h2 className="text-lg font-semibold text-[#1a1a2e] mb-4">5 Questions</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 text-sm">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/40">Q1 Strong/Weak</p>
+            <p className="font-semibold text-[#1a1a2e] mt-2">Strong: {gradeInsights.strongest?.grade || '—'}</p>
+            <p className="text-[#1a1a2e]/60">Weak: {gradeInsights.weakest?.grade || '—'}</p>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/40">Q2 Trending</p>
+            {subcategoryTrends.slice(0, 3).map((row) => (
+              <p key={row.key} className="text-[#1a1a2e]/70">{row.key}: {row.delta >= 0 ? '+' : ''}{row.delta}</p>
+            ))}
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/40">Q3 Time/Day</p>
+            {timeBuckets.slice(0, 3).map((row) => (
+              <p key={row.label} className="text-[#1a1a2e]/70">{row.label}: {row.count}</p>
+            ))}
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/40">Q4 Staff Gaps</p>
+            {staffNotesCompliance.map((row) => (
+              <p key={row.staff} className="text-[#1a1a2e]/70">{row.staff}: {(row.compliance * 100).toFixed(0)}%</p>
+            ))}
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-[#1a1a2e]/40">Q5 Next Week</p>
+            {triggers.slice(0, 2).map((trigger) => (
+              <p key={trigger.id} className="text-[#1a1a2e]/70">{trigger.name}</p>
+            ))}
           </div>
         </div>
       </div>

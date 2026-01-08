@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import CrestLoader from '@/components/CrestLoader'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 type MeritEntry = {
   staff_name: string | null
@@ -139,9 +140,9 @@ function computeRag(value: number, green: number, yellow: number, higherIsBetter
 
 export default function ImplementationHealthPage() {
   const [loading, setLoading] = useState(true)
-  const [preset, setPreset] = useState('last14')
-  const [excludeWeekends, setExcludeWeekends] = useState(true)
-  const [filters, setFilters] = useState({
+  const [preset, setPreset] = useSessionStorageState('admin:implementation-health:preset', 'last14')
+  const [excludeWeekends, setExcludeWeekends] = useSessionStorageState('admin:implementation-health:excludeWeekends', true)
+  const [filters, setFilters] = useSessionStorageState('admin:implementation-health:filters', {
     house: '',
     grade: '',
     section: '',
@@ -156,7 +157,7 @@ export default function ImplementationHealthPage() {
   const [decisions, setDecisions] = useState<DecisionRow[]>([])
   const [actions, setActions] = useState<ActionMenu[]>([])
   const [baseline, setBaseline] = useState<{ start: string; end: string } | null>(null)
-  const [decisionForm, setDecisionForm] = useState({
+  const [decisionForm, setDecisionForm] = useSessionStorageState('admin:implementation-health:decisionForm', {
     triggerId: '',
     summary: '',
     owner: '',

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
 import { schoolConfig } from '@/lib/school.config'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 interface Student {
   name: string
@@ -107,6 +108,17 @@ const quarterOptions = [
   { id: 'q1', label: 'Q1 (Jan 6 – Mar 6)' },
   { id: 'q2', label: 'Q2 (Mar 9 – May 21)' },
 ] as const
+const defaultQuarter = (() => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const q1Start = new Date(year, 0, 6)
+  const q1End = new Date(year, 2, 6, 23, 59, 59, 999)
+  const q2Start = new Date(year, 2, 9)
+  const q2End = new Date(year, 4, 21, 23, 59, 59, 999)
+  if (today >= q1Start && today <= q1End) return 'q1'
+  if (today >= q2Start && today <= q2End) return 'q2'
+  return 'q2'
+})()
 
 // Get house logos from config
 const houseLogos: Record<string, string> = schoolConfig.houses.reduce((acc, house) => {
@@ -125,18 +137,14 @@ export default function RewardsPage() {
   const [houseMvpLeaders, setHouseMvpLeaders] = useState<HouseMvpEntry[]>([])
   const [gradeChampionLeaders, setGradeChampionLeaders] = useState<GradeChampionEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedTab, setSelectedTab] = useState<'hall-of-fame' | 'badges' | 'monthly' | 'approaching'>('hall-of-fame')
-  const [selectedQuarter, setSelectedQuarter] = useState<'q1' | 'q2'>(() => {
-    const today = new Date()
-    const year = today.getFullYear()
-    const q1Start = new Date(year, 0, 6)
-    const q1End = new Date(year, 2, 6, 23, 59, 59, 999)
-    const q2Start = new Date(year, 2, 9)
-    const q2End = new Date(year, 4, 21, 23, 59, 59, 999)
-    if (today >= q1Start && today <= q1End) return 'q1'
-    if (today >= q2Start && today <= q2End) return 'q2'
-    return 'q2'
-  })
+  const [selectedTab, setSelectedTab] = useSessionStorageState<'hall-of-fame' | 'badges' | 'monthly' | 'approaching'>(
+    'admin:rewards:selectedTab',
+    'hall-of-fame'
+  )
+  const [selectedQuarter, setSelectedQuarter] = useSessionStorageState<'q1' | 'q2'>(
+    'admin:rewards:selectedQuarter',
+    defaultQuarter
+  )
 
   useEffect(() => {
     fetchData()

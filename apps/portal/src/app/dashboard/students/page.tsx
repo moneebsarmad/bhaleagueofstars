@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import CrestLoader from '../../../components/CrestLoader'
 import { getHouseColors, canonicalHouseName } from '@/lib/school.config'
+import { useSessionStorageState } from '../../../hooks/useSessionStorageState'
 
 interface Student {
   id: string
@@ -43,12 +44,12 @@ function getInitials(name: string): string {
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [meritEntries, setMeritEntries] = useState<MeritEntry[]>([])
-  const [searchText, setSearchText] = useState('')
-  const [selectedGrade, setSelectedGrade] = useState<string | null>(null)
-  const [selectedSection, setSelectedSection] = useState<string | null>(null)
-  const [selectedHouse, setSelectedHouse] = useState<string | null>(null)
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [selectedStaff, setSelectedStaff] = useState<string | null>(null)
+  const [searchText, setSearchText] = useSessionStorageState('portal:students:searchText', '')
+  const [selectedGrade, setSelectedGrade] = useSessionStorageState<string | null>('portal:students:selectedGrade', null)
+  const [selectedSection, setSelectedSection] = useSessionStorageState<string | null>('portal:students:selectedSection', null)
+  const [selectedHouse, setSelectedHouse] = useSessionStorageState<string | null>('portal:students:selectedHouse', null)
+  const [selectedStudent, setSelectedStudent] = useSessionStorageState<Student | null>('portal:students:selectedStudent', null)
+  const [selectedStaff, setSelectedStaff] = useSessionStorageState<string | null>('portal:students:selectedStaff', null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {

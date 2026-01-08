@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 type UploadRecord = {
   upload_id: string
@@ -25,7 +26,7 @@ f2a6b2e0-0000-0000-0000-000000000002,Adam Bashar,7,B,demerit,2025-01-09,10:30,Sa
 
 export default function BehaviourIntelligencePage() {
   const [file, setFile] = useState<File | null>(null)
-  const [sourceSystem, setSourceSystem] = useState('Manual Upload')
+  const [sourceSystem, setSourceSystem] = useSessionStorageState('admin:behaviour:sourceSystem', 'Manual Upload')
   const [uploading, setUploading] = useState(false)
   const [uploadResponse, setUploadResponse] = useState<UploadResponse | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)

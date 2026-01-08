@@ -22,6 +22,42 @@ interface Category {
 }
 
 const houseColors = getHouseColors()
+const DRAFT_STORAGE_KEY = 'portal:add-points:draft'
+
+function readDraft(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = window.localStorage.getItem(DRAFT_STORAGE_KEY)
+    if (stored) return stored
+    const legacy = window.sessionStorage.getItem(DRAFT_STORAGE_KEY)
+    if (legacy) {
+      window.localStorage.setItem(DRAFT_STORAGE_KEY, legacy)
+      window.sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+    }
+    return legacy
+  } catch {
+    return null
+  }
+}
+
+function writeDraft(value: string) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(DRAFT_STORAGE_KEY, value)
+  } catch {
+    // Ignore storage errors (quota, private mode)
+  }
+}
+
+function clearDraft() {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(DRAFT_STORAGE_KEY)
+    window.sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+  } catch {
+    // Ignore storage errors (quota, private mode)
+  }
+}
 
 function getHouseColor(house: string): string {
   const canonical = canonicalHouseName(house)
@@ -52,6 +88,7 @@ export default function AddPointsPage() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const draftCategoryIdRef = useRef<string | null>(null)
 
   // Bulk selection filters
   const [filterGrade, setFilterGrade] = useState<string>('')
@@ -63,22 +100,116 @@ export default function AddPointsPage() {
     fetchStaffName()
   }, [user])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const saved = readDraft()
+    if (!saved) return
+    try {
+      const draft = JSON.parse(saved) as {
+        selectedStudents?: Student[]
+        selectedR?: string | null
+        selectedCategoryId?: string | null
+        notes?: string
+        eventDate?: string
+        searchText?: string
+        filterGrade?: string
+        filterSection?: string
+        filterHouse?: string
+      }
+
+      if (Array.isArray(draft.selectedStudents)) {
+        setSelectedStudents(draft.selectedStudents)
+      }
+      setSelectedR(draft.selectedR ?? null)
+      setNotes(draft.notes ?? '')
+      setEventDate(draft.eventDate ?? new Date().toISOString().split('T')[0])
+      setSearchText(draft.searchText ?? '')
+      setFilterGrade(draft.filterGrade ?? '')
+      setFilterSection(draft.filterSection ?? '')
+      setFilterHouse(draft.filterHouse ?? '')
+      if (draft.selectedCategoryId) {
+        draftCategoryIdRef.current = draft.selectedCategoryId
+      }
+    } catch {
+      window.sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!draftCategoryIdRef.current) return
+    const match = categories.find((category) => category.id === draftCategoryIdRef.current)
+    if (!match) return
+    setSelectedCategory(match)
+    if (!selectedR && match.r) {
+      setSelectedR(match.r)
+    }
+    draftCategoryIdRef.current = null
+  }, [categories, selectedR])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const draft = {
+      selectedStudents,
+      selectedR,
+      selectedCategoryId: selectedCategory?.id ?? null,
+      notes,
+      eventDate,
+      searchText,
+      filterGrade,
+      filterSection,
+      filterHouse,
+    }
+    writeDraft(JSON.stringify(draft))
+  }, [
+    selectedStudents,
+    selectedR,
+    selectedCategory,
+    notes,
+    eventDate,
+    searchText,
+    filterGrade,
+    filterSection,
+    filterHouse,
+  ])
+
   const fetchStaffName = async () => {
     if (!user?.email) return
     try {
       const { data } = await supabase
         .from('staff')
         .select('staff_name')
-        .eq('email', user.email)
+        .ilike('email', user.email)
         .maybeSingle()
 
-      if (data?.staff_name) {
-        setStaffName(data.staff_name)
-      } else {
-        setStaffName(user.email || 'Staff')
+      const staffValue = String(data?.staff_name ?? '').trim()
+      if (staffValue) {
+        setStaffName(staffValue)
+        return
       }
+
+      if (user.id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, name, staff_name')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        const profileValue = String(profile?.full_name ?? profile?.name ?? profile?.staff_name ?? '').trim()
+        if (profileValue) {
+          setStaffName(profileValue)
+          return
+        }
+      }
+
+      const metadataValue = String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? '').trim()
+      if (metadataValue) {
+        setStaffName(metadataValue)
+        return
+      }
+
+      setStaffName('')
     } catch {
-      setStaffName(user?.email || 'Staff')
+      setStaffName('')
     }
   }
 
@@ -168,7 +299,7 @@ export default function AddPointsPage() {
 
   const handleSubmit = async () => {
     if (selectedStudents.length === 0 || !selectedCategory) return
-    if (!staffName || (user?.email && staffName.toLowerCase() === user.email.toLowerCase())) {
+    if (!staffName || staffName.includes('@')) {
       showToast('Your staff name is not set. Please contact an admin.', 'error', 5000)
       return
     }
@@ -232,6 +363,7 @@ export default function AddPointsPage() {
     setNotes('')
     setEventDate(new Date().toISOString().split('T')[0])
     setSearchText('')
+    clearDraft()
   }
 
   const handleAddStudent = (student: Student) => {

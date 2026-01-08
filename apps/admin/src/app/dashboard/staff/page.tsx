@@ -6,6 +6,7 @@ import { Tables } from '@/lib/supabase/tables'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import CrestLoader from '@/components/CrestLoader'
 import { getHouseNames } from '@/lib/school.config'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 interface StaffMember {
   rank: number
@@ -91,10 +92,10 @@ export default function StaffPage() {
   const [diamondFinderRows, setDiamondFinderRows] = useState<DiamondFinderRow[]>([])
   const [houseChampionRows, setHouseChampionRows] = useState<HouseChampionRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedMonth, setSelectedMonth] = useState(() => {
+  const [selectedMonth, setSelectedMonth] = useSessionStorageState('admin:staff:selectedMonth', (() => {
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  })
+  })())
 
   useEffect(() => {
     fetchData()
@@ -471,7 +472,7 @@ export default function StaffPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-              Staff Engagement
+              Staff Engagement & Support
             </h1>
             <div className="flex items-center gap-3">
               <div className="h-1 w-16 bg-gradient-to-r from-[#c9a227] to-[#e8d48b] rounded-full"></div>
@@ -658,7 +659,7 @@ export default function StaffPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-                Detailed Staff Engagement
+                Detailed Staff Engagement & Support
               </h3>
               <p className="text-xs text-[#1a1a2e]/40 mt-1">Complete performance breakdown for all staff members</p>
             </div>

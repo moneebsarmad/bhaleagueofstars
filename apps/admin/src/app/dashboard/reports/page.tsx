@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import { schoolConfig } from '@/lib/school.config'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 type ReportTemplate = {
   id: string
@@ -74,14 +75,17 @@ const templates: ReportTemplate[] = [
 
 export default function ReportsPage() {
   const [isGenerating, setIsGenerating] = useState<string | null>(null)
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [startDate, setStartDate] = useSessionStorageState('admin:reports:startDate', '')
+  const [endDate, setEndDate] = useSessionStorageState('admin:reports:endDate', '')
   const [students, setStudents] = useState<{ name: string; grade: number; section: string; house: string }[]>([])
-  const [studentSearch, setStudentSearch] = useState('')
-  const [selectedStudent, setSelectedStudent] = useState<{ name: string; grade: number; section: string; house: string } | null>(null)
-  const [selectedHouse, setSelectedHouse] = useState('')
-  const [selectedGrade, setSelectedGrade] = useState('')
-  const [selectedSection, setSelectedSection] = useState('')
+  const [studentSearch, setStudentSearch] = useSessionStorageState('admin:reports:studentSearch', '')
+  const [selectedStudent, setSelectedStudent] = useSessionStorageState<{ name: string; grade: number; section: string; house: string } | null>(
+    'admin:reports:selectedStudent',
+    null
+  )
+  const [selectedHouse, setSelectedHouse] = useSessionStorageState('admin:reports:selectedHouse', '')
+  const [selectedGrade, setSelectedGrade] = useSessionStorageState('admin:reports:selectedGrade', '')
+  const [selectedSection, setSelectedSection] = useSessionStorageState('admin:reports:selectedSection', '')
 
   const fetchStudents = async () => {
     const { data } = await supabase.from(Tables.students).select('*')

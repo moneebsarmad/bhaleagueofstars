@@ -30,6 +30,42 @@ interface MeritSubcategory {
 }
 
 const houseColors = getHouseColors()
+const DRAFT_STORAGE_KEY = 'admin:add-points:draft'
+
+function readDraft(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = window.localStorage.getItem(DRAFT_STORAGE_KEY)
+    if (stored) return stored
+    const legacy = window.sessionStorage.getItem(DRAFT_STORAGE_KEY)
+    if (legacy) {
+      window.localStorage.setItem(DRAFT_STORAGE_KEY, legacy)
+      window.sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+    }
+    return legacy
+  } catch {
+    return null
+  }
+}
+
+function writeDraft(value: string) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(DRAFT_STORAGE_KEY, value)
+  } catch {
+    // Ignore storage errors (quota, private mode)
+  }
+}
+
+function clearDraft() {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(DRAFT_STORAGE_KEY)
+    window.sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+  } catch {
+    // Ignore storage errors (quota, private mode)
+  }
+}
 
 const meritCategories: MeritCategory[] = [
   {
@@ -43,6 +79,7 @@ const meritCategories: MeritCategory[] = [
       { id: 'r3', name: 'Inclusion', description: 'Inviting others to sit, play, or join activities', points: 10 },
       { id: 'r4', name: 'Conflict Resolution', description: 'Walking away from fights, making peace', points: 20 },
       { id: 'r5', name: 'Standing Up for Others', description: 'Defending against bullying, encouraging kindness', points: 50 },
+      { id: 'r6', name: 'Other (please specify)', description: 'Add the details in the notes field', points: 10 },
     ],
   },
   {
@@ -55,6 +92,7 @@ const meritCategories: MeritCategory[] = [
       { id: 's2', name: 'Cleanliness & Care', description: 'Keeping class, performing wuḍūʾ correctly, lockers, and campus clean', points: 10 },
       { id: 's3', name: 'Proactive Help', description: 'Helping teachers, assisting with school tasks without prompting', points: 10 },
       { id: 's4', name: 'Self-Discipline', description: 'Following instructions the first time, staying calm under pressure', points: 20 },
+      { id: 's5', name: 'Other (please specify)', description: 'Add the details in the notes field', points: 10 },
     ],
   },
   {
@@ -67,6 +105,7 @@ const meritCategories: MeritCategory[] = [
       { id: 'g2', name: 'Avoiding Harm', description: 'Not mocking, gossiping, or backbiting', points: 20 },
       { id: 'g3', name: 'Generosity of Spirit', description: 'Sharing, giving freely, thinking of others first', points: 20 },
       { id: 'g4', name: 'Controlling the Nafs', description: 'Resisting temptation, managing anger, overcoming selfishness', points: 20 },
+      { id: 'g5', name: 'Other (please specify)', description: 'Add the details in the notes field', points: 10 },
     ],
   },
 ]
@@ -85,6 +124,8 @@ export default function AddPointsClient() {
   const [adminName, setAdminName] = useState('')
   const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const draftCategoryIdRef = useRef<string | null>(null)
+  const draftSubcategoryIdRef = useRef<string | null>(null)
 
   // Bulk selection filters
   const [filterGrade, setFilterGrade] = useState<string>('')
@@ -95,6 +136,84 @@ export default function AddPointsClient() {
     fetchStudents()
     fetchAdminName()
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const saved = readDraft()
+    if (!saved) return
+    try {
+      const draft = JSON.parse(saved) as {
+        selectedStudents?: Student[]
+        selectedCategoryId?: string | null
+        selectedSubcategoryId?: string | null
+        notes?: string
+        eventDate?: string
+        searchText?: string
+        filterGrade?: string
+        filterSection?: string
+        filterHouse?: string
+      }
+
+      if (Array.isArray(draft.selectedStudents)) {
+        setSelectedStudents(draft.selectedStudents)
+      }
+      setNotes(draft.notes ?? '')
+      setEventDate(draft.eventDate ?? new Date().toISOString().split('T')[0])
+      setSearchText(draft.searchText ?? '')
+      setFilterGrade(draft.filterGrade ?? '')
+      setFilterSection(draft.filterSection ?? '')
+      setFilterHouse(draft.filterHouse ?? '')
+      if (draft.selectedCategoryId) {
+        draftCategoryIdRef.current = draft.selectedCategoryId
+      }
+      if (draft.selectedSubcategoryId) {
+        draftSubcategoryIdRef.current = draft.selectedSubcategoryId
+      }
+    } catch {
+      window.sessionStorage.removeItem(DRAFT_STORAGE_KEY)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!draftCategoryIdRef.current) return
+    const category = meritCategories.find((entry) => entry.id === draftCategoryIdRef.current)
+    if (!category) return
+    setSelectedCategory(category)
+    if (draftSubcategoryIdRef.current) {
+      const subcategory = category.subcategories.find((entry) => entry.id === draftSubcategoryIdRef.current)
+      if (subcategory) {
+        setSelectedSubcategory(subcategory)
+      }
+    }
+    draftCategoryIdRef.current = null
+    draftSubcategoryIdRef.current = null
+  }, [selectedCategory])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const draft = {
+      selectedStudents,
+      selectedCategoryId: selectedCategory?.id ?? null,
+      selectedSubcategoryId: selectedSubcategory?.id ?? null,
+      notes,
+      eventDate,
+      searchText,
+      filterGrade,
+      filterSection,
+      filterHouse,
+    }
+    writeDraft(JSON.stringify(draft))
+  }, [
+    selectedStudents,
+    selectedCategory,
+    selectedSubcategory,
+    notes,
+    eventDate,
+    searchText,
+    filterGrade,
+    filterSection,
+    filterHouse,
+  ])
 
   useEffect(() => {
     const channel = supabase
@@ -277,6 +396,7 @@ export default function AddPointsClient() {
     setNotes('')
     setEventDate(new Date().toISOString().split('T')[0])
     setSearchText('')
+    clearDraft()
   }
 
   const handleAddStudent = (student: Student) => {

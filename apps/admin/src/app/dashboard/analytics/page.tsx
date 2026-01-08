@@ -8,6 +8,7 @@ import type { BarProps } from 'recharts'
 import CrestLoader from '@/components/CrestLoader'
 import { useSearchParams } from 'next/navigation'
 import { getHouseColors } from '@/lib/school.config'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 interface MeritEntry {
   studentName: string
@@ -37,6 +38,16 @@ const houseColors = getHouseColors()
 const categoryColors = [
   '#2f0a61', '#055437', '#000068', '#910000', '#c9a227', '#1a1a2e', '#4a1a8a', '#0a7a50'
 ]
+const emptyFilters: Filters = {
+  house: '',
+  grade: '',
+  section: '',
+  staff: '',
+  category: '',
+  subcategory: '',
+  startDate: '',
+  endDate: '',
+}
 
 export default function AnalyticsPage() {
   const [allEntries, setAllEntries] = useState<MeritEntry[]>([])
@@ -51,17 +62,8 @@ export default function AnalyticsPage() {
   })
   const searchParams = useSearchParams()
   const paramsApplied = useRef(false)
-  const [filters, setFilters] = useState<Filters>({
-    house: '',
-    grade: '',
-    section: '',
-    staff: '',
-    category: '',
-    subcategory: '',
-    startDate: '',
-    endDate: '',
-  })
-  const [appliedFilters, setAppliedFilters] = useState<Filters>(filters)
+  const [filters, setFilters] = useSessionStorageState<Filters>('admin:analytics:filters', emptyFilters)
+  const [appliedFilters, setAppliedFilters] = useSessionStorageState<Filters>('admin:analytics:appliedFilters', emptyFilters)
 
   const getThreeRCategory = (value: string) => {
     const raw = (value || '').toLowerCase()
@@ -262,16 +264,6 @@ export default function AnalyticsPage() {
   }
 
   const clearFilters = () => {
-    const emptyFilters: Filters = {
-      house: '',
-      grade: '',
-      section: '',
-      staff: '',
-      category: '',
-      subcategory: '',
-      startDate: '',
-      endDate: '',
-    }
     setFilters(emptyFilters)
     setAppliedFilters(emptyFilters)
   }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../providers'
 import { supabase } from '../../../lib/supabaseClient'
 import CrestLoader from '../../../components/CrestLoader'
+import { useSessionStorageState } from '../../../hooks/useSessionStorageState'
 
 type Role = 'student' | 'parent' | 'staff'
 
@@ -79,7 +80,7 @@ export default function SettingsPage() {
   const [role, setRole] = useState<Role | null>(null)
   const [dbRole, setDbRole] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [toggles, setToggles] = useState<Record<string, boolean>>({})
+  const [toggles, setToggles] = useSessionStorageState<Record<string, boolean>>('portal:settings:toggles', {})
   const [saving, setSaving] = useState(false)
   const [resetting, setResetting] = useState(false)
 

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 type Student = {
   name: string
@@ -31,13 +32,13 @@ type MeritEntry = {
 }
 
 export default function SearchPage() {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useSessionStorageState('admin:search:query', '')
   const [students, setStudents] = useState<Student[]>([])
   const [staff, setStaff] = useState<Staff[]>([])
   const [entries, setEntries] = useState<MeritEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedStudentKey, setSelectedStudentKey] = useState<string | null>(null)
-  const [selectedStaffName, setSelectedStaffName] = useState<string | null>(null)
+  const [selectedStudentKey, setSelectedStudentKey] = useSessionStorageState<string | null>('admin:search:selectedStudentKey', null)
+  const [selectedStaffName, setSelectedStaffName] = useSessionStorageState<string | null>('admin:search:selectedStaffName', null)
 
   useEffect(() => {
     const fetchData = async () => {

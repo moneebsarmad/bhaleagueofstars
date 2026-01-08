@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
 import { getHouseColors } from '@/lib/school.config'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 interface Student {
   id: string
@@ -33,10 +34,10 @@ const houseColors = getHouseColors()
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [meritEntries, setMeritEntries] = useState<MeritEntry[]>([])
-  const [searchText, setSearchText] = useState('')
-  const [selectedGrade, setSelectedGrade] = useState<string | null>(null)
-  const [selectedHouse, setSelectedHouse] = useState<string | null>(null)
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const [searchText, setSearchText] = useSessionStorageState('admin:students:searchText', '')
+  const [selectedGrade, setSelectedGrade] = useSessionStorageState<string | null>('admin:students:selectedGrade', null)
+  const [selectedHouse, setSelectedHouse] = useSessionStorageState<string | null>('admin:students:selectedHouse', null)
+  const [selectedStudent, setSelectedStudent] = useSessionStorageState<Student | null>('admin:students:selectedStudent', null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {

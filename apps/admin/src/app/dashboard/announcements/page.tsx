@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import CrestLoader from '@/components/CrestLoader'
 import { getHouseNames } from '@/lib/school.config'
+import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 type Announcement = {
   id: string
@@ -21,14 +22,14 @@ type Announcement = {
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-  const [pinned, setPinned] = useState(false)
-  const [publishAt, setPublishAt] = useState('')
-  const [expiresAt, setExpiresAt] = useState('')
-  const [roles, setRoles] = useState<string[]>(['admin'])
-  const [houses, setHouses] = useState<string[]>([])
-  const [grades, setGrades] = useState<number[]>([])
+  const [title, setTitle] = useSessionStorageState('admin:announcements:title', '')
+  const [body, setBody] = useSessionStorageState('admin:announcements:body', '')
+  const [pinned, setPinned] = useSessionStorageState('admin:announcements:pinned', false)
+  const [publishAt, setPublishAt] = useSessionStorageState('admin:announcements:publishAt', '')
+  const [expiresAt, setExpiresAt] = useSessionStorageState('admin:announcements:expiresAt', '')
+  const [roles, setRoles] = useSessionStorageState<string[]>('admin:announcements:roles', ['admin'])
+  const [houses, setHouses] = useSessionStorageState<string[]>('admin:announcements:houses', [])
+  const [grades, setGrades] = useSessionStorageState<number[]>('admin:announcements:grades', [])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLive, setIsLive] = useState(false)

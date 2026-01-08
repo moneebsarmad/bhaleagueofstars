@@ -93,7 +93,7 @@ export default function DashboardLayout({
       const { data, error } = await supabase
         .from('staff')
         .select('staff_name')
-        .eq('email', user.email)
+        .ilike('email', user.email)
         .maybeSingle()
 
       if (error) {

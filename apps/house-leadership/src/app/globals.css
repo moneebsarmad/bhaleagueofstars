@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --background: #faf9f7;
+  --foreground: #1a1a2e;
+  --gold: #c9a227;
+  --gold-light: #e8d48b;
+  --gold-dark: #9a7b1a;
+  --charcoal: #1a1a2e;
+
+  --house-abu-bakr: #2f0a61;
+  --house-khadijah: #055437;
+  --house-umar: #000068;
+  --house-aishah: #910000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-playfair);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), "Cormorant Garamond", Georgia, serif;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-playfair), "Playfair Display", Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.pattern-bg {
+  background-color: #faf9f7;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(201, 162, 39, 0.08), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(47, 10, 97, 0.08), transparent 40%);
+}
+
+.gold-rule {
+  height: 3px;
+  width: 72px;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%);
+  border-radius: 999px;
+}
+
+.card {
+  background: white;
+  border: 1px solid rgba(201, 162, 39, 0.16);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+}

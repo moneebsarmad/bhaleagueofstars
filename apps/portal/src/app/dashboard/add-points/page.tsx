@@ -187,12 +187,19 @@ export default function AddPointsPage() {
   ])
 
   const fetchStaffName = async () => {
-    if (!user?.email) return
     try {
+      const { data: authData } = await supabase.auth.getUser()
+      const authUser = authData.user ?? user
+      const authEmail = authUser?.email ?? user?.email ?? ''
+      if (!authEmail) {
+        setStaffName('')
+        return
+      }
+
       const { data } = await supabase
         .from('staff')
         .select('staff_name')
-        .ilike('email', user.email)
+        .ilike('email', authEmail)
         .maybeSingle()
 
       const staffValue = String(data?.staff_name ?? '').trim()
@@ -201,11 +208,11 @@ export default function AddPointsPage() {
         return
       }
 
-      if (user.id) {
+      if (authUser?.id) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name, name, staff_name')
-          .eq('id', user.id)
+          .eq('id', authUser.id)
           .maybeSingle()
 
         const profileValue = String(profile?.full_name ?? profile?.name ?? profile?.staff_name ?? '').trim()
@@ -215,13 +222,13 @@ export default function AddPointsPage() {
         }
       }
 
-      const metadataValue = String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? '').trim()
+      const metadataValue = String(authUser?.user_metadata?.full_name ?? authUser?.user_metadata?.name ?? '').trim()
       if (metadataValue) {
         setStaffName(metadataValue)
         return
       }
 
-      const derived = user.email ? formatStaffNameFromEmail(user.email) : ''
+      const derived = formatStaffNameFromEmail(authEmail)
       setStaffName(derived)
     } catch {
       setStaffName('')
@@ -314,7 +321,8 @@ export default function AddPointsPage() {
 
   const handleSubmit = async () => {
     if (selectedStudents.length === 0 || !selectedCategory) return
-    if (!staffName) {
+    const resolvedStaffName = staffName || formatStaffNameFromEmail(user?.email ?? '')
+    if (!resolvedStaffName) {
       showToast('Your staff name is not set. Please contact an admin.', 'error', 5000)
       return
     }
@@ -337,7 +345,7 @@ export default function AddPointsPage() {
           subcategory: selectedCategory.subcategory,
           points: selectedCategory.points,
           notes: notes,
-          staff_name: staffName,
+          staff_name: resolvedStaffName,
         }
 
         const { error } = await supabase.from('merit_log').insert([meritEntry])

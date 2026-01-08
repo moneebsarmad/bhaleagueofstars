@@ -321,7 +321,14 @@ export default function AddPointsPage() {
 
   const handleSubmit = async () => {
     if (selectedStudents.length === 0 || !selectedCategory) return
-    const resolvedStaffName = staffName || formatStaffNameFromEmail(user?.email ?? '')
+    const { data: authData } = await supabase.auth.getUser()
+    const authUser = authData.user ?? user
+    const authEmail = authUser?.email ?? user?.email ?? ''
+    const authMetadataName = String(authUser?.user_metadata?.full_name ?? authUser?.user_metadata?.name ?? '').trim()
+    const resolvedStaffName =
+      staffName ||
+      authMetadataName ||
+      formatStaffNameFromEmail(authEmail)
     if (!resolvedStaffName) {
       showToast('Your staff name is not set. Please contact an admin.', 'error', 5000)
       return

@@ -90,6 +90,20 @@ export default function AddPointsPage() {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const draftCategoryIdRef = useRef<string | null>(null)
 
+  const formatStaffNameFromEmail = (email: string) => {
+    const localPart = email.split('@')[0] || ''
+    const cleaned = localPart
+      .replace(/[._-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+    if (!cleaned) return ''
+    return cleaned
+      .split(' ')
+      .map((part) => part ? part[0].toUpperCase() + part.slice(1).toLowerCase() : '')
+      .join(' ')
+      .trim()
+  }
+
   // Bulk selection filters
   const [filterGrade, setFilterGrade] = useState<string>('')
   const [filterSection, setFilterSection] = useState<string>('')
@@ -207,7 +221,8 @@ export default function AddPointsPage() {
         return
       }
 
-      setStaffName('')
+      const derived = user.email ? formatStaffNameFromEmail(user.email) : ''
+      setStaffName(derived)
     } catch {
       setStaffName('')
     }
@@ -299,7 +314,7 @@ export default function AddPointsPage() {
 
   const handleSubmit = async () => {
     if (selectedStudents.length === 0 || !selectedCategory) return
-    if (!staffName || staffName.includes('@')) {
+    if (!staffName) {
       showToast('Your staff name is not set. Please contact an admin.', 'error', 5000)
       return
     }

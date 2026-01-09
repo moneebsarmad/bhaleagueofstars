@@ -54,6 +54,11 @@ interface RosterDetails {
   missing_grade_staff: Array<{ staff_name: string; email: string; last_active_date: string | null }>
 }
 
+interface CalendarRange {
+  min_date: string
+  max_date: string
+}
+
 interface MissingNotesEntry {
   staff_name: string
   student_name: string
@@ -136,13 +141,6 @@ function formatMonthLabel(monthKey: string) {
   })
 }
 
-function getMonthRange(monthKey: string) {
-  const [year, month] = monthKey.split('-').map(Number)
-  const startDate = `${monthKey}-01`
-  const endDate = new Date(year, month, 0).toISOString().split('T')[0]
-  return { startDate, endDate }
-}
-
 function getTier(consistency: number): Tier {
   if (consistency >= 80) return 'High'
   if (consistency >= 30) return 'Medium'
@@ -154,17 +152,6 @@ function formatDate(value: string | null) {
   const date = new Date(value)
   if (!Number.isFinite(date.getTime())) return '—'
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-function buildMonthOptions() {
-  const options: Array<{ key: string; label: string }> = []
-  const today = new Date()
-  for (let i = 0; i < 12; i += 1) {
-    const date = new Date(today.getFullYear(), today.getMonth() - i, 1)
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-    options.push({ key, label: formatMonthLabel(key) })
-  }
-  return options
 }
 
 export default function StaffPage() {
@@ -181,7 +168,7 @@ export default function StaffPage() {
   const [sortKey, setSortKey] = useState<SortKey>('consistency_pct')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [activeFilters, setActiveFilters] = useState<string[]>([])
-  const [availableMonths, setAvailableMonths] = useState<string[]>([])
+  const [calendarRange, setCalendarRange] = useState<CalendarRange | null>(null)
 
   const [houseSpiritRows, setHouseSpiritRows] = useState<HouseSpiritRow[]>([])
   const [allStarRows, setAllStarRows] = useState<AllStarRow[]>([])
@@ -189,64 +176,78 @@ export default function StaffPage() {
   const [diamondFinderRows, setDiamondFinderRows] = useState<DiamondFinderRow[]>([])
   const [houseChampionRows, setHouseChampionRows] = useState<HouseChampionRow[]>([])
 
-  const [selectedMonth, setSelectedMonth] = useSessionStorageState('admin:staff:selectedMonth', (() => {
-    const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  })())
+  const [dateRange, setDateRange] = useSessionStorageState('admin:staff:dateRange', {
+    startDate: '',
+    endDate: '',
+  })
   const [filters, setFilters] = useSessionStorageState('admin:staff:filters', {
     house: '',
     grade: '',
   })
 
-  const monthOptions = useMemo(() => {
-    if (availableMonths.length === 0) {
-      const fallback = buildMonthOptions()
-      if (!fallback.find((option) => option.key === selectedMonth)) {
-        fallback.unshift({ key: selectedMonth, label: formatMonthLabel(selectedMonth) })
-      }
-      return fallback
-    }
-    const options = availableMonths.map((key) => ({ key, label: formatMonthLabel(key) }))
-    if (!options.find((option) => option.key === selectedMonth)) {
-      options.unshift({ key: selectedMonth, label: formatMonthLabel(selectedMonth) })
-    }
-    return options
-  }, [availableMonths, selectedMonth])
-
-  const { startDate, endDate } = useMemo(() => getMonthRange(selectedMonth), [selectedMonth])
-  const selectedMonthLabel = useMemo(() => formatMonthLabel(selectedMonth), [selectedMonth])
+  const today = useMemo(() => new Date().toISOString().split('T')[0], [])
+  const startDate = dateRange.startDate || calendarRange?.min_date || ''
+  const maxCalendarEnd = calendarRange?.max_date && calendarRange.max_date < today ? calendarRange.max_date : today
+  const endDate = dateRange.endDate || maxCalendarEnd || ''
+  const rangeLabel = startDate && endDate ? `${startDate} → ${endDate}` : '—'
+  const isSingleMonthRange = Boolean(startDate && endDate && startDate.slice(0, 7) === endDate.slice(0, 7))
+  const awardsMonthKey = isSingleMonthRange ? startDate.slice(0, 7) : ''
+  const awardsMonthLabel = isSingleMonthRange ? formatMonthLabel(awardsMonthKey) : 'Custom range'
 
   useEffect(() => {
-    fetchEngagementMetrics()
-  }, [startDate, endDate, filters.house, filters.grade])
-
-  useEffect(() => {
-    fetchAvailableMonths()
+    fetchCalendarRange()
   }, [])
+
+  useEffect(() => {
+    if (!calendarRange) return
+    if (dateRange.startDate && dateRange.endDate) return
+    const fallbackStart = calendarRange.min_date || today
+    const fallbackEnd = calendarRange.max_date && calendarRange.max_date < today ? calendarRange.max_date : today
+    if (!fallbackStart || !fallbackEnd) return
+    setDateRange({ startDate: fallbackStart, endDate: fallbackEnd })
+  }, [calendarRange, dateRange.endDate, dateRange.startDate, setDateRange, today])
 
   useEffect(() => {
     const channel = supabase
       .channel('staff-engagement-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: Tables.staff }, () => {
         fetchEngagementMetrics()
-        fetchMonthlyAwardViews()
+        if (awardsMonthKey) {
+          fetchMonthlyAwardViews(awardsMonthKey)
+        }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: Tables.meritLog }, () => {
         fetchEngagementMetrics()
-        fetchMonthlyAwardViews()
+        if (awardsMonthKey) {
+          fetchMonthlyAwardViews(awardsMonthKey)
+        }
       })
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [startDate, endDate])
+  }, [startDate, endDate, awardsMonthKey])
 
   useEffect(() => {
-    fetchMonthlyAwardViews()
-  }, [selectedMonth])
+    if (!startDate || !endDate) return
+    fetchEngagementMetrics()
+  }, [startDate, endDate, filters.house, filters.grade])
+
+  useEffect(() => {
+    if (!isSingleMonthRange) {
+      setHouseSpiritRows([])
+      setAllStarRows([])
+      setSteadyHandRows([])
+      setDiamondFinderRows([])
+      setHouseChampionRows([])
+      return
+    }
+    fetchMonthlyAwardViews(awardsMonthKey)
+  }, [awardsMonthKey, isSingleMonthRange])
 
   const fetchEngagementMetrics = async () => {
+    if (!startDate || !endDate) return
     setIsLoading(true)
     try {
       const params = new URLSearchParams({ startDate, endDate })
@@ -271,24 +272,26 @@ export default function StaffPage() {
     }
   }
 
-  const fetchAvailableMonths = async () => {
+  const fetchCalendarRange = async () => {
     try {
-      const response = await fetch('/api/staff/engagement?detail=months')
+      const response = await fetch('/api/staff/engagement?detail=calendar-range')
       const data = await response.json()
       if (!response.ok) {
-        console.error('Failed to load months:', data?.error || response.statusText)
+        console.error('Failed to load calendar range:', data?.error || response.statusText)
         return
       }
-      if (Array.isArray(data.months)) {
-        setAvailableMonths(data.months)
-      }
+      setCalendarRange({
+        min_date: data.min_date || '',
+        max_date: data.max_date || '',
+      })
     } catch (error) {
-      console.error('Error loading months:', error)
+      console.error('Error loading calendar range:', error)
     }
   }
 
-  const fetchMonthlyAwardViews = async () => {
-    const monthStart = `${selectedMonth}-01`
+  const fetchMonthlyAwardViews = async (monthKey: string) => {
+    if (!monthKey) return
+    const monthStart = `${monthKey}-01`
     try {
       const [
         houseSpiritRes,
@@ -512,8 +515,6 @@ export default function StaffPage() {
   }
 
   const monthlyAwards = useMemo(() => {
-    const monthLabel = formatMonthLabel(selectedMonth)
-
     const houseSpiritRow = houseSpiritRows[0] || null
     const allStarRow = allStarRows[0] || null
     const steadyHandRow = steadyHandRows[0] || null
@@ -533,7 +534,7 @@ export default function StaffPage() {
     })
 
     return {
-      monthLabel,
+      monthLabel: awardsMonthLabel,
       houseSpirit: houseSpiritRow
         ? {
           house: houseSpiritRow.house,
@@ -564,7 +565,7 @@ export default function StaffPage() {
         : null,
       houseChampions,
     }
-  }, [selectedMonth, houseSpiritRows, allStarRows, steadyHandRows, diamondFinderRows, houseChampionRows])
+  }, [awardsMonthLabel, houseSpiritRows, allStarRows, steadyHandRows, diamondFinderRows, houseChampionRows])
 
   const possibleSchoolDays = globalMetrics?.possible_school_days ?? 0
   const gradeOptions = globalMetrics?.available_grades ?? []
@@ -589,16 +590,24 @@ export default function StaffPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs tracking-widest text-[#1a1a2e]/40">Month</span>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-4 py-2.5 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white"
-            >
-              {monthOptions.map((option) => (
-                <option key={option.key} value={option.key}>{option.label}</option>
-              ))}
-            </select>
+            <span className="text-xs tracking-widest text-[#1a1a2e]/40">Date range</span>
+            <input
+              type="date"
+              value={startDate}
+              min={calendarRange?.min_date || undefined}
+              max={endDate || maxCalendarEnd || undefined}
+              onChange={(e) => setDateRange((prev) => ({ ...prev, startDate: e.target.value }))}
+              className="px-3 py-2.5 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white text-sm"
+            />
+            <span className="text-xs text-[#1a1a2e]/40">→</span>
+            <input
+              type="date"
+              value={endDate}
+              min={startDate || calendarRange?.min_date || undefined}
+              max={maxCalendarEnd || undefined}
+              onChange={(e) => setDateRange((prev) => ({ ...prev, endDate: e.target.value }))}
+              className="px-3 py-2.5 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none bg-white text-sm"
+            />
             <select
               value={filters.house}
               onChange={(e) => setFilters((prev) => ({ ...prev, house: e.target.value }))}
@@ -655,32 +664,6 @@ export default function StaffPage() {
           </div>
         </div>
 
-        <div className="regal-card rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-            Roster Hygiene
-          </h3>
-          <p className="text-xs text-[#1a1a2e]/40 mb-4">Data quality flags that need attention</p>
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="rounded-xl bg-[#f5f3ef] border border-[#c9a227]/10 px-4 py-3">
-              <p className="text-xs text-[#1a1a2e]/50">Unknown staff entries</p>
-              <p className="text-lg font-bold text-[#1a1a2e]">{globalMetrics?.roster_hygiene_counts.unknown_staff_entries ?? 0}</p>
-            </div>
-            <div className="rounded-xl bg-[#f5f3ef] border border-[#c9a227]/10 px-4 py-3">
-              <p className="text-xs text-[#1a1a2e]/50">Missing house</p>
-              <p className="text-lg font-bold text-[#1a1a2e]">{globalMetrics?.roster_hygiene_counts.missing_house_staff_count ?? 0}</p>
-            </div>
-            <div className="rounded-xl bg-[#f5f3ef] border border-[#c9a227]/10 px-4 py-3">
-              <p className="text-xs text-[#1a1a2e]/50">Missing grade</p>
-              <p className="text-lg font-bold text-[#1a1a2e]">{globalMetrics?.roster_hygiene_counts.missing_grade_staff_count ?? 0}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleOpenRosterModal}
-            className="text-sm font-semibold text-[#c9a227] hover:text-[#9a7b1a] transition-colors"
-          >
-            View details
-          </button>
-        </div>
       </div>
 
       {/* Charts Section */}
@@ -759,6 +742,12 @@ export default function StaffPage() {
             Based on merit entries submitted this month
           </div>
         </div>
+
+        {!isSingleMonthRange && (
+          <div className="mb-6 rounded-xl border border-[#c9a227]/20 bg-[#f5f3ef] px-4 py-3 text-sm text-[#1a1a2e]/70">
+            Monthly awards require a single-month range. Adjust the dates to a single month to view awards.
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="p-5 rounded-xl bg-[#f5f3ef] border border-[#c9a227]/20">
@@ -852,9 +841,9 @@ export default function StaffPage() {
               </h3>
               <p className="text-xs text-[#1a1a2e]/40 mt-1">Engagement signals and support flags for each staff member</p>
             </div>
-            <span className="text-xs font-semibold tracking-wider bg-[#c9a227]/15 text-[#9a7b1a] px-3 py-1 rounded-full">
-              {selectedMonthLabel}
-            </span>
+          <span className="text-xs font-semibold tracking-wider bg-[#c9a227]/15 text-[#9a7b1a] px-3 py-1 rounded-full">
+            {rangeLabel}
+          </span>
           </div>
           <div className="flex flex-wrap items-center gap-2 mt-4">
             {filterChips.map((chip) => (

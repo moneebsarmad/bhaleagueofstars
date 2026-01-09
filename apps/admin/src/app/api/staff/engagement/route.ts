@@ -172,6 +172,32 @@ export async function GET(request: Request) {
     })
   }
 
+  if (detail === 'calendar-range') {
+    const [minRes, maxRes] = await Promise.all([
+      supabase
+        .from('school_calendar')
+        .select('school_date')
+        .eq('is_school_day', true)
+        .order('school_date', { ascending: true })
+        .limit(1),
+      supabase
+        .from('school_calendar')
+        .select('school_date')
+        .eq('is_school_day', true)
+        .order('school_date', { ascending: false })
+        .limit(1),
+    ])
+
+    if (minRes.error || maxRes.error) {
+      return NextResponse.json({ error: minRes.error?.message || maxRes.error?.message || 'Failed to load calendar range.' }, { status: 500 })
+    }
+
+    const minDate = minRes.data?.[0]?.school_date ? String(minRes.data[0].school_date) : ''
+    const maxDate = maxRes.data?.[0]?.school_date ? String(maxRes.data[0].school_date) : ''
+
+    return NextResponse.json({ min_date: minDate, max_date: maxDate })
+  }
+
   if (detail === 'missing-notes') {
     let notesQuery = supabase
       .from('merit_log')

@@ -95,8 +95,10 @@ const ACTION_IDS_BY_TRIGGER: Record<string, string[]> = {
   recognition_missing: ['AM12'],
 }
 
-function toDateString(date: Date) {
-  return date.toISOString().split('T')[0]
+function toLocalDateString(date: Date) {
+  const local = new Date(date)
+  local.setMinutes(local.getMinutes() - local.getTimezoneOffset())
+  return local.toISOString().split('T')[0]
 }
 
 function addDays(date: Date, days: number) {
@@ -180,7 +182,7 @@ export default function ImplementationHealthPage() {
       }
     }
     if (effectiveStart > end) return 1
-    const days = getSchoolDays(toDateString(effectiveStart), toDateString(end), {
+    const days = getSchoolDays(toLocalDateString(effectiveStart), toLocalDateString(end), {
       excludeWeekends,
       calendarDates: calendarDates.length > 0 ? calendarDates : undefined,
     })
@@ -190,8 +192,8 @@ export default function ImplementationHealthPage() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
-      const startDate = toDateString(addDays(dateRange.start, -31))
-      const endDate = toDateString(dateRange.end)
+      const startDate = toLocalDateString(addDays(dateRange.start, -31))
+      const endDate = toLocalDateString(dateRange.end)
 
       const [entriesRes, staffRes, studentRes, eventsRes, decisionsRes, actionsRes, baselineRes] = await Promise.all([
         supabase
@@ -204,7 +206,7 @@ export default function ImplementationHealthPage() {
         supabase
           .from('implementation_events')
           .select('event_type, event_date, cycle_id')
-          .gte('event_date', toDateString(addDays(today, -70))),
+          .gte('event_date', toLocalDateString(addDays(today, -70))),
         supabase
           .from('decision_log')
           .select('*')
@@ -736,14 +738,14 @@ export default function ImplementationHealthPage() {
     await supabase.from('implementation_events').insert([
       {
         event_type: eventType,
-        event_date: toDateString(today),
+        event_date: toLocalDateString(today),
         cycle_id: currentCycleId,
       },
     ])
     const { data } = await supabase
       .from('implementation_events')
       .select('event_type, event_date, cycle_id')
-      .gte('event_date', toDateString(addDays(today, -70)))
+      .gte('event_date', toLocalDateString(addDays(today, -70)))
     setEvents((data || []) as ImplementationEvent[])
   }
 
@@ -816,7 +818,7 @@ export default function ImplementationHealthPage() {
               ? 'Strong'
               : 'Watch'}
           </p>
-          <p className="text-sm text-[#1a1a2e]/50 mt-1">Updated {toDateString(today)}</p>
+          <p className="text-sm text-[#1a1a2e]/50 mt-1">Updated {toLocalDateString(today)}</p>
           <div className="flex flex-wrap gap-2 mt-4">
             {outcomePill('A', adoptionRag)}
             {outcomePill('B', teacherLotteryRag)}

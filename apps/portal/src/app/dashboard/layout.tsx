@@ -88,12 +88,13 @@ export default function DashboardLayout({
   }, [user])
 
   useEffect(() => {
-    if (!user?.email) return
+    const email = user?.email ?? ''
+    if (!email) return
     const loadStaffName = async () => {
       const { data, error } = await supabase
         .from('staff')
         .select('staff_name')
-        .ilike('email', user.email)
+        .ilike('email', email)
         .maybeSingle()
 
       if (error) {

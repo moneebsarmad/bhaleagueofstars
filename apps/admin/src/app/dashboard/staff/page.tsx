@@ -651,39 +651,7 @@ export default function StaffPage() {
         </div>
       </div>
 
-      {/* Global Governance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="regal-card rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-            Inflation Index
-          </h3>
-          <p className="text-xs text-[#1a1a2e]/40 mb-4">Logging volume vs baseline</p>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-3xl font-bold text-[#1a1a2e]">
-                {globalMetrics?.inflation_index !== null && globalMetrics?.inflation_index !== undefined
-                  ? `${globalMetrics.inflation_index.toFixed(2)}x`
-                  : '—'}
-              </p>
-              <p className="text-sm text-[#1a1a2e]/50 mt-1">{globalMetrics?.inflation_label || 'Not enough data'}</p>
-            </div>
-            <div className="text-xs text-[#1a1a2e]/40 text-right">
-              {globalMetrics?.baseline_range ? (
-                <>
-                  <p>Baseline</p>
-                  <p>{globalMetrics.baseline_range.start} → {globalMetrics.baseline_range.end}</p>
-                  <p className="mt-1">
-                    {globalMetrics.baseline_source === 'fallback' ? 'Fallback baseline' : 'Configured baseline'}
-                  </p>
-                </>
-              ) : (
-                <p>Baseline not set</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-      </div>
+      {/* Global Governance removed */}
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

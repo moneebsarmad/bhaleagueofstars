@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
-import { getHouseColors } from '@/lib/school.config'
+import { canonicalHouseName, getHouseColors } from '@/lib/school.config'
 import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 interface Student {
@@ -54,7 +54,7 @@ export default function StudentsPage() {
         name: s.student_name || '',
         grade: s.grade || 0,
         section: s.section || '',
-        house: s.house || '',
+        house: canonicalHouseName(s.house || ''),
         gender: s.gender || '',
         points: 0,
       }))
@@ -108,7 +108,7 @@ export default function StudentsPage() {
     .filter((s) => {
       if (searchText && !s.name.toLowerCase().includes(searchText.toLowerCase())) return false
       if (selectedGrade && s.grade !== parseInt(selectedGrade)) return false
-      if (selectedHouse && s.house !== selectedHouse) return false
+      if (selectedHouse && canonicalHouseName(s.house) !== selectedHouse) return false
       return true
     })
     .sort((a, b) => {

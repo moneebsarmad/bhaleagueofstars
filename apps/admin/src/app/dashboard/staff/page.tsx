@@ -154,6 +154,12 @@ function formatDate(value: string | null) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+function getDateDaysAgo(dateString: string, days: number) {
+  const date = new Date(`${dateString}T00:00:00Z`)
+  date.setUTCDate(date.getUTCDate() - days)
+  return date.toISOString().split('T')[0]
+}
+
 export default function StaffPage() {
   const [staffMetrics, setStaffMetrics] = useState<StaffEngagementRow[]>([])
   const [globalMetrics, setGlobalMetrics] = useState<GlobalMetrics | null>(null)
@@ -247,7 +253,10 @@ export default function StaffPage() {
   }, [awardsMonthKey, isSingleMonthRange])
 
   const fetchEngagementMetrics = async () => {
-    if (!startDate || !endDate) return
+    if (!startDate || !endDate) {
+      setIsLoading(false)
+      return
+    }
     setIsLoading(true)
     try {
       const params = new URLSearchParams({ startDate, endDate })
@@ -278,6 +287,11 @@ export default function StaffPage() {
       const data = await response.json()
       if (!response.ok) {
         console.error('Failed to load calendar range:', data?.error || response.statusText)
+        if (!dateRange.startDate && !dateRange.endDate) {
+          const fallbackEnd = today
+          const fallbackStart = getDateDaysAgo(fallbackEnd, 30)
+          setDateRange({ startDate: fallbackStart, endDate: fallbackEnd })
+        }
         return
       }
       setCalendarRange({
@@ -286,6 +300,11 @@ export default function StaffPage() {
       })
     } catch (error) {
       console.error('Error loading calendar range:', error)
+      if (!dateRange.startDate && !dateRange.endDate) {
+        const fallbackEnd = today
+        const fallbackStart = getDateDaysAgo(fallbackEnd, 30)
+        setDateRange({ startDate: fallbackStart, endDate: fallbackEnd })
+      }
     }
   }
 

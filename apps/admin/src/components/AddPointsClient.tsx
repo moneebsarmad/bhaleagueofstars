@@ -296,7 +296,9 @@ export default function AddPointsClient() {
       .filter((s) => !filterGrade || s.grade === Number(filterGrade))
       .map((s) => s.section)
   )].filter(Boolean).sort()
-  const availableHouses = [...new Set(students.map((s) => s.house))].filter(Boolean).sort()
+  const availableHouses = [...new Set(students.map((s) => canonicalHouseName(s.house)))]
+    .filter(Boolean)
+    .sort()
 
   // Get students matching bulk filters
   const bulkFilteredStudents = students.filter((s) => {

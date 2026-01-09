@@ -129,6 +129,12 @@ function computeRag(value: number, green: number, yellow: number, higherIsBetter
   return 'Red'
 }
 
+function getEntryDateString(entry: MeritEntry) {
+  if (entry.date_of_event) return entry.date_of_event
+  if (entry.timestamp) return toLocalDateString(new Date(entry.timestamp))
+  return ''
+}
+
 export default function ImplementationHealthPage() {
   const [loading, setLoading] = useState(true)
   const [preset, setPreset] = useSessionStorageState('admin:implementation-health:preset', 'last14')
@@ -173,6 +179,11 @@ export default function ImplementationHealthPage() {
     return { start, end }
   }, [preset])
 
+  const getSchoolDayOptions = () => ({
+    excludeWeekends,
+    calendarDates: calendarDates.length > 0 ? calendarDates : undefined,
+  })
+
   const getSchoolDayCount = (start: Date, end: Date, clampToSemesterStart = true) => {
     let effectiveStart = new Date(start)
     if (clampToSemesterStart) {
@@ -182,10 +193,7 @@ export default function ImplementationHealthPage() {
       }
     }
     if (effectiveStart > end) return 1
-    const days = getSchoolDays(toLocalDateString(effectiveStart), toLocalDateString(end), {
-      excludeWeekends,
-      calendarDates: calendarDates.length > 0 ? calendarDates : undefined,
-    })
+    const days = getSchoolDays(toLocalDateString(effectiveStart), toLocalDateString(end), getSchoolDayOptions())
     return Math.max(1, days.length)
   }
 
@@ -277,13 +285,36 @@ export default function ImplementationHealthPage() {
     })
   }, [entries, dateRange, filters])
 
+  const currentSchoolDayDates = useMemo(() => {
+    const semesterStart = new Date(`${WINTER_SEMESTER_START}T00:00:00Z`)
+    const effectiveStart = dateRange.start < semesterStart ? semesterStart : dateRange.start
+    return getSchoolDays(
+      toLocalDateString(effectiveStart),
+      toLocalDateString(dateRange.end),
+      getSchoolDayOptions()
+    )
+  }, [dateRange, calendarDates, excludeWeekends])
+
+  const previousSchoolDayDates = useMemo(() => {
+    if (currentSchoolDayDates.length === 0) return []
+    const allSchoolDays = getSchoolDays(
+      WINTER_SEMESTER_START,
+      toLocalDateString(dateRange.end),
+      getSchoolDayOptions()
+    )
+    const firstCurrent = currentSchoolDayDates[0]
+    const firstIndex = allSchoolDays.indexOf(firstCurrent)
+    if (firstIndex <= 0) return []
+    const startIndex = Math.max(0, firstIndex - currentSchoolDayDates.length)
+    return allSchoolDays.slice(startIndex, firstIndex)
+  }, [currentSchoolDayDates, dateRange, calendarDates, excludeWeekends])
+
   const previousRangeEntries = useMemo(() => {
-    const periodDays = Math.max(1, Math.round((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24)) + 1)
-    const prevEnd = addDays(dateRange.start, -1)
-    const prevStart = addDays(prevEnd, -(periodDays - 1))
+    if (previousSchoolDayDates.length === 0) return []
+    const previousSet = new Set(previousSchoolDayDates)
     return entries.filter((entry) => {
-      const date = entry.date_of_event ? new Date(entry.date_of_event) : entry.timestamp ? new Date(entry.timestamp) : null
-      if (!date || date < prevStart || date > prevEnd) return false
+      const entryDate = getEntryDateString(entry)
+      if (!entryDate || !previousSet.has(entryDate)) return false
       if (filters.house && entry.house !== filters.house) return false
       if (filters.grade && String(entry.grade ?? '') !== filters.grade) return false
       if (filters.section && entry.section !== filters.section) return false
@@ -292,7 +323,7 @@ export default function ImplementationHealthPage() {
       if (filters.subcategory && (entry.subcategory || '') !== filters.subcategory) return false
       return true
     })
-  }, [entries, dateRange, filters])
+  }, [entries, filters, previousSchoolDayDates])
 
   const eligibleStaff = useMemo(() => {
     const names = staffRows.map((row) => row.staff_name).filter(Boolean) as string[]
@@ -326,11 +357,7 @@ export default function ImplementationHealthPage() {
   }, [previousRangeEntries])
 
   const previousEntries = previousRangeEntries.length
-  const prevSchoolDays = getSchoolDayCount(
-    addDays(dateRange.start, -(Math.round((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24)) + 1)),
-    addDays(dateRange.start, -1),
-    true
-  )
+  const prevSchoolDays = Math.max(1, previousSchoolDayDates.length)
   const prevEntriesPerActiveLogger =
     previousActiveLoggers > 0 ? previousEntries / (previousActiveLoggers * prevSchoolDays) : 0
 

@@ -305,7 +305,7 @@ export default function AddPointsClient() {
     if (selectedStudentIds.has(s.id)) return false
     if (filterGrade && s.grade !== Number(filterGrade)) return false
     if (filterSection && s.section !== filterSection) return false
-    if (filterHouse && s.house !== filterHouse) return false
+    if (filterHouse && canonicalHouseName(s.house) !== filterHouse) return false
     return true
   })
 

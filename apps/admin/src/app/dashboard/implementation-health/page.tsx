@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import CrestLoader from '@/components/CrestLoader'
 import { useSessionStorageState } from '@/hooks/useSessionStorageState'
+import { getSchoolDays } from '@/lib/schoolDays'
 
 type MeritEntry = {
   staff_name: string | null
@@ -70,6 +71,7 @@ type TriggerItem = {
 
 const CYCLE_START_DATE = new Date('2025-08-19')
 const CYCLE_LENGTH_DAYS = 14
+const WINTER_SEMESTER_START = '2026-01-06'
 
 const PRESETS = [
   { id: 'last14', label: 'Last 14' },
@@ -114,19 +116,6 @@ function getCycleRange(cycleId: number) {
   return { start, end }
 }
 
-function countSchoolDays(start: Date, end: Date, excludeWeekends: boolean) {
-  let count = 0
-  const cursor = new Date(start)
-  while (cursor <= end) {
-    const day = cursor.getDay()
-    if (!excludeWeekends || (day !== 0 && day !== 6)) {
-      count += 1
-    }
-    cursor.setDate(cursor.getDate() + 1)
-  }
-  return Math.max(1, count)
-}
-
 function computeRag(value: number, green: number, yellow: number, higherIsBetter = true) {
   if (higherIsBetter) {
     if (value >= green) return 'Green'
@@ -157,6 +146,7 @@ export default function ImplementationHealthPage() {
   const [decisions, setDecisions] = useState<DecisionRow[]>([])
   const [actions, setActions] = useState<ActionMenu[]>([])
   const [baseline, setBaseline] = useState<{ start: string; end: string } | null>(null)
+  const [calendarDates, setCalendarDates] = useState<string[]>([])
   const [decisionForm, setDecisionForm] = useSessionStorageState('admin:implementation-health:decisionForm', {
     triggerId: '',
     summary: '',
@@ -180,6 +170,22 @@ export default function ImplementationHealthPage() {
     if (preset === 'ytd') start = new Date(end.getFullYear(), 0, 1)
     return { start, end }
   }, [preset])
+
+  const getSchoolDayCount = (start: Date, end: Date, clampToSemesterStart = true) => {
+    let effectiveStart = new Date(start)
+    if (clampToSemesterStart) {
+      const semesterStart = new Date(`${WINTER_SEMESTER_START}T00:00:00Z`)
+      if (effectiveStart < semesterStart) {
+        effectiveStart = semesterStart
+      }
+    }
+    if (effectiveStart > end) return 1
+    const days = getSchoolDays(toDateString(effectiveStart), toDateString(end), {
+      excludeWeekends,
+      calendarDates: calendarDates.length > 0 ? calendarDates : undefined,
+    })
+    return Math.max(1, days.length)
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -217,6 +223,36 @@ export default function ImplementationHealthPage() {
       if (baselineRes.data && baselineRes.data.length > 0) {
         const row = baselineRes.data[0]
         setBaseline({ start: row.start_date, end: row.end_date })
+      }
+      const calendarStart = (() => {
+        let start = startDate
+        if (baselineRes.data && baselineRes.data.length > 0) {
+          const row = baselineRes.data[0]
+          if (row.start_date && row.start_date < start) start = row.start_date
+        }
+        return start
+      })()
+      const calendarEnd = (() => {
+        let end = endDate
+        if (baselineRes.data && baselineRes.data.length > 0) {
+          const row = baselineRes.data[0]
+          if (row.end_date && row.end_date > end) end = row.end_date
+        }
+        return end
+      })()
+
+      const calendarRes = await supabase
+        .from('school_calendar')
+        .select('school_date, is_school_day')
+        .gte('school_date', calendarStart)
+        .lte('school_date', calendarEnd)
+        .eq('is_school_day', true)
+
+      if (calendarRes.error) {
+        console.error('Error fetching school calendar:', calendarRes.error)
+        setCalendarDates([])
+      } else {
+        setCalendarDates((calendarRes.data || []).map((row) => String(row.school_date)))
       }
       setLoading(false)
     }
@@ -272,7 +308,7 @@ export default function ImplementationHealthPage() {
   }, [filteredEntries])
 
   const activeLoggers = staffCounts.size
-  const schoolDays = countSchoolDays(dateRange.start, dateRange.end, excludeWeekends)
+  const schoolDays = getSchoolDayCount(dateRange.start, dateRange.end)
   const totalEntries = filteredEntries.length
   const activeLoggerRate = eligibleStaff.length > 0 ? activeLoggers / eligibleStaff.length : 0
   const entriesPerActiveLogger = activeLoggers > 0 ? totalEntries / (activeLoggers * schoolDays) : 0
@@ -288,10 +324,10 @@ export default function ImplementationHealthPage() {
   }, [previousRangeEntries])
 
   const previousEntries = previousRangeEntries.length
-  const prevSchoolDays = countSchoolDays(
+  const prevSchoolDays = getSchoolDayCount(
     addDays(dateRange.start, -(Math.round((dateRange.end.getTime() - dateRange.start.getTime()) / (1000 * 60 * 60 * 24)) + 1)),
     addDays(dateRange.start, -1),
-    excludeWeekends
+    true
   )
   const prevEntriesPerActiveLogger =
     previousActiveLoggers > 0 ? previousEntries / (previousActiveLoggers * prevSchoolDays) : 0
@@ -381,9 +417,9 @@ export default function ImplementationHealthPage() {
       return true
     })
     const baselineStaff = new Set(baselineEntries.map((entry) => entry.staff_name).filter(Boolean))
-    const baselineSchoolDays = countSchoolDays(baselineStart, baselineEnd, excludeWeekends)
+    const baselineSchoolDays = getSchoolDayCount(baselineStart, baselineEnd, false)
     return baselineStaff.size > 0 ? baselineEntries.length / (baselineStaff.size * baselineSchoolDays) : null
-  }, [baseline, entries, excludeWeekends])
+  }, [baseline, entries, excludeWeekends, calendarDates])
 
   const inflationIndex =
     baselineRate && baselineRate > 0 ? entriesPerActiveLogger / baselineRate : 1

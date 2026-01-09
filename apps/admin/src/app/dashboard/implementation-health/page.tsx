@@ -248,7 +248,7 @@ export default function ImplementationHealthPage() {
         </style>
       </head>
       <body>
-        <h1>Implementation Health (Simplified v2)</h1>
+        <h1>Implementation Health Snapshot</h1>
         <div class="sub">Period: ${startDate} → ${endDate}</div>
         <div class="grid">
           ${['A','B','C','D'].map((key) => {
@@ -346,24 +346,49 @@ export default function ImplementationHealthPage() {
   }
 
   const outcomeCards = useMemo(() => {
-    if (!metrics) return []
+    const safeMetrics: MetricsPayload = metrics ?? {
+      metrics: {
+        outcomeA: { participationRate: null, avgActiveDays: 0 },
+        outcomeB: { huddlesCount: 0, coverageGap: null },
+        outcomeC: { otherNotesCompliance: null, rosterIssuesCount: 0 },
+        outcomeD: { decisionsCount: 0, overdueActionsCount: 0 },
+      },
+      statuses: {
+        outcomeA: { participationRate: 'Green', avgActiveDays: 'Green' },
+        outcomeB: { huddles: 'Green', coverageGap: 'Green' },
+        outcomeC: { otherNotes: 'Green', rosterIssues: 'Green' },
+        outcomeD: { decisions: 'Green', overdue: 'Green' },
+      },
+      outcomeStatus: {
+        outcomeA: 'Green',
+        outcomeB: 'Green',
+        outcomeC: 'Green',
+        outcomeD: 'Green',
+      },
+      recommendedActions: {
+        outcomeA: null,
+        outcomeB: null,
+        outcomeC: null,
+        outcomeD: null,
+      },
+    }
     return [
       {
         id: 'A',
         title: 'Outcome A — Adoption',
         question: 'Are staff participating regularly?',
-        status: metrics.outcomeStatus.outcomeA,
-        action: metrics.recommendedActions.outcomeA,
+        status: safeMetrics.outcomeStatus.outcomeA,
+        action: safeMetrics.recommendedActions.outcomeA,
         goFix: { label: 'Go Fix → Staff Engagement', href: '/dashboard/staff' },
         rows: [
           {
             label: 'Participation Rate',
-            value: formatPercent(metrics.metrics.outcomeA.participationRate),
-            visual: <ProgressBar value={(metrics.metrics.outcomeA.participationRate ?? 0) * 100} />,
+            value: formatPercent(safeMetrics.metrics.outcomeA.participationRate),
+            visual: <ProgressBar value={(safeMetrics.metrics.outcomeA.participationRate ?? 0) * 100} />,
           },
           {
             label: 'Avg Active Days',
-            value: formatNumber(metrics.metrics.outcomeA.avgActiveDays),
+            value: formatNumber(safeMetrics.metrics.outcomeA.avgActiveDays),
             visual: <span className="text-xs text-[#1a1a2e]/40">days</span>,
           },
         ],
@@ -372,19 +397,19 @@ export default function ImplementationHealthPage() {
         id: 'B',
         title: 'Outcome B — Consistency',
         question: 'Are we meeting and covering everyone?',
-        status: metrics.outcomeStatus.outcomeB,
-        action: metrics.recommendedActions.outcomeB,
+        status: safeMetrics.outcomeStatus.outcomeB,
+        action: safeMetrics.recommendedActions.outcomeB,
         goFix: { label: 'Go Fix → Staff Engagement', href: '/dashboard/staff' },
         rows: [
           {
             label: 'Huddles (Last 4)',
-            value: `${metrics.metrics.outcomeB.huddlesCount}/4`,
-            visual: <DotStrip filled={metrics.metrics.outcomeB.huddlesCount} />,
+            value: `${safeMetrics.metrics.outcomeB.huddlesCount}/4`,
+            visual: <DotStrip filled={safeMetrics.metrics.outcomeB.huddlesCount} />,
           },
           {
             label: 'Coverage Gap',
-            value: formatPercent(metrics.metrics.outcomeB.coverageGap),
-            visual: <ProgressBar value={(metrics.metrics.outcomeB.coverageGap ?? 0) * 100} />,
+            value: formatPercent(safeMetrics.metrics.outcomeB.coverageGap),
+            visual: <ProgressBar value={(safeMetrics.metrics.outcomeB.coverageGap ?? 0) * 100} />,
           },
         ],
       },
@@ -392,22 +417,22 @@ export default function ImplementationHealthPage() {
         id: 'C',
         title: 'Outcome C — Governance',
         question: 'Is data clean enough to trust?',
-        status: metrics.outcomeStatus.outcomeC,
-        action: metrics.recommendedActions.outcomeC,
+        status: safeMetrics.outcomeStatus.outcomeC,
+        action: safeMetrics.recommendedActions.outcomeC,
         goFix: { label: 'Go Fix → Roster & Notes', onClick: openRosterModal },
         rows: [
           {
             label: 'Other Notes Compliance',
-            value: formatPercent(metrics.metrics.outcomeC.otherNotesCompliance),
-            visual: <ProgressBar value={(metrics.metrics.outcomeC.otherNotesCompliance ?? 0) * 100} />,
+            value: formatPercent(safeMetrics.metrics.outcomeC.otherNotesCompliance),
+            visual: <ProgressBar value={(safeMetrics.metrics.outcomeC.otherNotesCompliance ?? 0) * 100} />,
             onClick: openOtherModal,
           },
           {
             label: 'Roster Issues',
-            value: String(metrics.metrics.outcomeC.rosterIssuesCount),
+            value: String(safeMetrics.metrics.outcomeC.rosterIssuesCount),
             visual: (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#910000]/10 text-[#910000]">
-                {metrics.metrics.outcomeC.rosterIssuesCount} issues
+                {safeMetrics.metrics.outcomeC.rosterIssuesCount} issues
               </span>
             ),
           },
@@ -417,21 +442,21 @@ export default function ImplementationHealthPage() {
         id: 'D',
         title: 'Outcome D — Insight & Action',
         question: 'Are decisions turning into action?',
-        status: metrics.outcomeStatus.outcomeD,
-        action: metrics.recommendedActions.outcomeD,
+        status: safeMetrics.outcomeStatus.outcomeD,
+        action: safeMetrics.recommendedActions.outcomeD,
         goFix: { label: 'Go Fix → Decision Log', href: '#decision-log' },
         rows: [
           {
             label: 'Decisions Logged (Last 4)',
-            value: `${metrics.metrics.outcomeD.decisionsCount}/4`,
-            visual: <DotStrip filled={metrics.metrics.outcomeD.decisionsCount} />,
+            value: `${safeMetrics.metrics.outcomeD.decisionsCount}/4`,
+            visual: <DotStrip filled={safeMetrics.metrics.outcomeD.decisionsCount} />,
           },
           {
             label: 'Overdue Actions',
-            value: String(metrics.metrics.outcomeD.overdueActionsCount),
+            value: String(safeMetrics.metrics.outcomeD.overdueActionsCount),
             visual: (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#c9a227]/15 text-[#9a7b1a]">
-                {metrics.metrics.outcomeD.overdueActionsCount} overdue
+                {safeMetrics.metrics.outcomeD.overdueActionsCount} overdue
               </span>
             ),
           },
@@ -440,17 +465,16 @@ export default function ImplementationHealthPage() {
     ]
   }, [metrics])
 
-  if (isLoading) {
-    return <div className="text-sm text-[#1a1a2e]/50">Loading implementation health...</div>
-  }
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-[#1a1a2e]" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
-          Implementation Health (Simplified v2)
+          Implementation Health Snapshot
         </h1>
         <p className="text-[#1a1a2e]/50 text-sm font-medium">Are we using it? Is it consistent? Is data clean? Are we taking action?</p>
+        {isLoading && (
+          <p className="text-xs text-[#1a1a2e]/40 mt-2">Loading metrics...</p>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c9a227]/10 flex flex-wrap items-center gap-3">

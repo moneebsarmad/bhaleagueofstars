@@ -93,8 +93,8 @@ interface GradeChampionEntry {
 // Hall of Fame tiers
 const hallOfFameTiers = [
   { name: 'Century Club', points: 100, icon: '💯', color: 'from-[#6b4a1a] to-[#b08a2e]', view: 'century_club' },
-  { name: 'Badr Club', points: 300, icon: '🌙', color: 'from-[#1f2a44] to-[#3b537a]', view: 'badr_club' },
-  { name: 'Fath Club', points: 500, icon: '🏆', color: 'from-[#23523b] to-[#3a7b59]', view: 'fath_club' },
+  { name: 'Hijrah Club', points: 300, icon: '🧭', color: 'from-[#1f2a44] to-[#3b537a]', view: 'hijrah_club' },
+  { name: 'Badr Club', points: 700, icon: '🌙', color: 'from-[#23523b] to-[#3a7b59]', view: 'badr_club' },
 ]
 
 // Quarterly badges

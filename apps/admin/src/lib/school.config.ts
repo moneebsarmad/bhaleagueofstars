@@ -143,8 +143,8 @@ const demoConfig: SchoolConfig = {
   // Club Tiers
   clubTiers: [
     { name: 'Century Club', points: 100, icon: '💯', gradientColors: 'from-[#6b4a1a] to-[#b08a2e]', viewName: 'century_club' },
-    { name: 'Badr Club', points: 300, icon: '🌙', gradientColors: 'from-[#1f2a44] to-[#3b537a]', viewName: 'badr_club' },
-    { name: 'Fath Club', points: 500, icon: '🏆', gradientColors: 'from-[#23523b] to-[#3a7b59]', viewName: 'fath_club' },
+    { name: 'Hijrah Club', points: 300, icon: '🧭', gradientColors: 'from-[#1f2a44] to-[#3b537a]', viewName: 'hijrah_club' },
+    { name: 'Badr Club', points: 700, icon: '🌙', gradientColors: 'from-[#23523b] to-[#3a7b59]', viewName: 'badr_club' },
   ],
 
   // Academic Year

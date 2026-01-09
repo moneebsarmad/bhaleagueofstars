@@ -331,7 +331,9 @@ export default function AddPointsPage() {
       staffName ||
       authMetadataName ||
       formatStaffNameFromEmail(authEmail) ||
-      idFallback
+      authEmail ||
+      idFallback ||
+      'Staff Member'
     if (!resolvedStaffName) {
       showToast('Your staff name is not set. Please contact an admin.', 'error', 5000)
       return

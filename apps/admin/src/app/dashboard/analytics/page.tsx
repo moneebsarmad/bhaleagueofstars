@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import type { BarProps } from 'recharts'
 import CrestLoader from '@/components/CrestLoader'
 import { useSearchParams } from 'next/navigation'
-import { getHouseColors } from '@/lib/school.config'
+import { canonicalHouseName, getHouseColors, getHouseNames } from '@/lib/school.config'
 import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 interface MeritEntry {
@@ -34,6 +34,7 @@ interface Filters {
 }
 
 const houseColors = getHouseColors()
+const HOUSE_NAMES = new Set(getHouseNames())
 
 const categoryColors = [
   '#2f0a61', '#055437', '#000068', '#910000', '#c9a227', '#1a1a2e', '#4a1a8a', '#0a7a50'
@@ -71,6 +72,18 @@ export default function AnalyticsPage() {
     if (raw.includes('responsibility')) return 'Responsibility'
     if (raw.includes('righteousness')) return 'Righteousness'
     return ''
+  }
+
+  const normalizeHouse = (value: string) => {
+    const raw = String(value ?? '')
+    const canonical = canonicalHouseName(raw).trim().normalize('NFC')
+    if (HOUSE_NAMES.has(canonical)) return canonical
+    const stripped = raw
+      .normalize('NFKD')
+      .replace(/\p{Diacritic}/gu, '')
+      .replace(/['`ʿʾ]/g, "'")
+      .trim()
+    return canonicalHouseName(stripped).trim().normalize('NFC')
   }
 
   // Extract unique values for filter dropdowns
@@ -163,7 +176,7 @@ export default function AnalyticsPage() {
           studentName: String(m.student_name ?? ''),
           grade: Number(m.grade ?? 0),
           section: String(m.section ?? ''),
-          house: String(m.house ?? ''),
+          house: normalizeHouse(m.house ?? ''),
           points: Number(m.points ?? 0),
           staffName: String(m.staff_name ?? ''),
           category: getThreeRCategory(String(m.r ?? '')),

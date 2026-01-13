@@ -1,8 +1,18 @@
+@import "@fontsource/cormorant-garamond/400.css";
+@import "@fontsource/cormorant-garamond/500.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/cormorant-garamond/700.css";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
 @import "tailwindcss";
 
 :root {
   --background: #faf9f7;
   --foreground: #1a1a2e;
+  --font-body: "Cormorant Garamond", "Garamond", "Palatino Linotype", "Book Antiqua", serif;
+  --font-playfair: "Playfair Display", "Baskerville", "Garamond", "Palatino", serif;
 
   /* Regal Color Palette */
   --royal-purple: #2f0a61;

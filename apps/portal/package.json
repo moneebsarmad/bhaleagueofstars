@@ -9,17 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
     "@tailwindcss/postcss": "^4.1.18",
-    "next": "^16.1.0",
+    "next": "16.1.0",
+    "pdf-parse": "^1.1.1",
     "postcss": "^8.5.6",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "recharts": "^3.6.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
-    "@types/node": "25.0.3",
-    "@types/react": "19.2.7",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "typescript": "5.9.3"
   }
 }

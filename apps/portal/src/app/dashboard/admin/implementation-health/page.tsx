@@ -379,7 +379,7 @@ export default function ImplementationHealthPage() {
         question: 'Are staff participating regularly?',
         status: safeMetrics.outcomeStatus.outcomeA,
         action: safeMetrics.recommendedActions.outcomeA,
-        goFix: { label: 'Go Fix → Staff Engagement', href: '/admin/dashboard/staff' },
+        goFix: { label: 'Go Fix → Staff Engagement', href: '/dashboard/admin/staff' },
         rows: [
           {
             label: 'Participation Rate',
@@ -399,7 +399,7 @@ export default function ImplementationHealthPage() {
         question: 'Are we meeting and covering everyone?',
         status: safeMetrics.outcomeStatus.outcomeB,
         action: safeMetrics.recommendedActions.outcomeB,
-        goFix: { label: 'Go Fix → Staff Engagement', href: '/admin/dashboard/staff' },
+        goFix: { label: 'Go Fix → Staff Engagement', href: '/dashboard/admin/staff' },
         rows: [
           {
             label: 'Huddles (Last 4)',

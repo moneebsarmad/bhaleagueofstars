@@ -40,7 +40,7 @@ const staffNavItems: NavItem[] = [
 const adminNavItem: NavItem = {
   id: 'admin',
   name: 'Admin',
-  href: '/admin/dashboard',
+  href: '/dashboard/admin',
   icon: 'M12 6a3 3 0 100 6 3 3 0 000-6zM4 20v-1a4 4 0 014-4h8a4 4 0 014 4v1H4z',
 }
 

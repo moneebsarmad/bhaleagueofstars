@@ -158,7 +158,7 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="ml-72">
         {/* Header */}
-        <DashboardHeader userName={displayName} role={role} />
+        <DashboardHeader userName={displayName} role={role} isAdmin={isAdmin} />
 
         {/* Page Content */}
         <main className="p-8">

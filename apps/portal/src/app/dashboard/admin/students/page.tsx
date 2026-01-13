@@ -290,14 +290,14 @@ export default function StudentsPage() {
                   </p>
                   <p className="text-gray-500">
                     <Link
-                      href={`/admin/dashboard/analytics?grade=${encodeURIComponent(String(selectedStudent.grade))}&section=${encodeURIComponent(selectedStudent.section)}`}
+                      href={`/dashboard/admin/analytics?grade=${encodeURIComponent(String(selectedStudent.grade))}&section=${encodeURIComponent(selectedStudent.section)}`}
                       className="hover:text-[#2f0a61] transition-colors"
                     >
                       Grade {selectedStudent.grade}{selectedStudent.section}
                     </Link>
                     <span className="text-gray-400"> • </span>
                     <Link
-                      href={`/admin/dashboard/analytics?house=${encodeURIComponent(selectedStudent.house)}`}
+                      href={`/dashboard/admin/analytics?house=${encodeURIComponent(selectedStudent.house)}`}
                       className="hover:text-[#2f0a61] transition-colors"
                     >
                       {selectedStudent.house}
@@ -357,7 +357,7 @@ export default function StudentsPage() {
                       <div>
                         <p className="text-sm font-medium text-gray-900">{merit.subcategory || merit.r?.split(' – ')[0]}</p>
                         <Link
-                          href={`/admin/dashboard/analytics?staff=${encodeURIComponent(merit.staffName)}`}
+                          href={`/dashboard/admin/analytics?staff=${encodeURIComponent(merit.staffName)}`}
                           className="text-xs text-gray-500 hover:text-[#2f0a61] transition-colors"
                         >
                           {merit.staffName}

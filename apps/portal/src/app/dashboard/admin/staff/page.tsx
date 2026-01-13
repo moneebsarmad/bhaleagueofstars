@@ -896,7 +896,7 @@ export default function StaffPage() {
                   const notesCompliance = member.required_notes_entries > 0
                     ? `${member.notes_compliance_pct ?? 0}%`
                     : '—'
-                  const analyticsHref = `/admin/dashboard/analytics?staff=${encodeURIComponent(member.staff_name)}&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`
+                  const analyticsHref = `/dashboard/admin/analytics?staff=${encodeURIComponent(member.staff_name)}&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`
                   const housePoints = member.house_points || {}
                   const totalHousePoints = houses.reduce((sum, house) => {
                     return sum + Math.max(0, Number(housePoints[house] || 0))

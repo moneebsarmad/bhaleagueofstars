@@ -126,7 +126,7 @@ export default function AnnouncementsPopup() {
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-          <Link href="/admin/dashboard/announcements" className="text-sm font-semibold text-[#2f0a61] hover:text-[#1a0536]">
+          <Link href="/dashboard/admin/announcements" className="text-sm font-semibold text-[#2f0a61] hover:text-[#1a0536]">
             View all announcements →
           </Link>
           <button

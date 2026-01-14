@@ -8,6 +8,7 @@ import Sidebar from '../../components/Sidebar'
 import DashboardHeader from '../../components/DashboardHeader'
 import CrestLoader from '../../components/CrestLoader'
 import AnnouncementsPopup from '@/components/admin/AnnouncementsPopup'
+import MobileNav from '@/components/MobileNav'
 
 type Role = 'student' | 'parent' | 'staff'
 
@@ -61,6 +62,7 @@ export default function DashboardLayout({
   const [profileLoading, setProfileLoading] = useState(true)
   const [staffName, setStaffName] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -154,16 +156,30 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#faf9f7] pattern-overlay">
-      <Sidebar role={role} portalLabel={portalLabel(role)} showAdmin={isAdmin} />
+      <div className="hidden md:block">
+        <Sidebar role={role} portalLabel={portalLabel(role)} showAdmin={isAdmin} />
+      </div>
+      <MobileNav
+        open={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+        role={role}
+        portalLabel={portalLabel(role)}
+        showAdmin={isAdmin}
+      />
       {role === 'staff' && isAdmin ? <AnnouncementsPopup /> : null}
 
       {/* Main Content */}
-      <div className="ml-72">
+      <div className="md:ml-72">
         {/* Header */}
-        <DashboardHeader userName={displayName} role={role} />
+        <DashboardHeader
+          userName={displayName}
+          role={role}
+          showMenuButton
+          onMenuClick={() => setMobileNavOpen(true)}
+        />
 
         {/* Page Content */}
-        <main className="p-8">
+        <main className="p-4 md:p-8">
           {children}
         </main>
       </div>

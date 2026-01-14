@@ -6,6 +6,8 @@ import { useAuth } from '../app/providers'
 type DashboardHeaderProps = {
   userName: string
   role: 'student' | 'parent' | 'staff'
+  onMenuClick?: () => void
+  showMenuButton?: boolean
 }
 
 function roleLabel(role: 'student' | 'parent' | 'staff') {
@@ -31,7 +33,12 @@ function initials(name: string) {
     .slice(0, 2)
 }
 
-export default function DashboardHeader({ userName, role }: DashboardHeaderProps) {
+export default function DashboardHeader({
+  userName,
+  role,
+  onMenuClick,
+  showMenuButton = false,
+}: DashboardHeaderProps) {
   const router = useRouter()
   const { signOut } = useAuth()
 
@@ -43,8 +50,20 @@ export default function DashboardHeader({ userName, role }: DashboardHeaderProps
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-[#c9a227]/10 sticky top-0 z-10" style={{ fontFamily: 'var(--font-body), Cormorant Garamond, Georgia, serif' }}>
-      <div className="px-8 py-4 flex items-center justify-between">
+      <div className="px-4 md:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          {showMenuButton ? (
+            <button
+              type="button"
+              onClick={onMenuClick}
+              className="md:hidden p-2 rounded-xl border border-[#1a1a2e]/10 text-[#1a1a2e]/70 hover:text-[#1a1a2e] hover:border-[#c9a227]/50 transition-colors"
+              aria-label="Open navigation menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          ) : null}
           <div className="w-2 h-2 rounded-full bg-[#c9a227]"></div>
           <span className="text-sm text-[#1a1a2e]/50 font-medium">
             {new Date().toLocaleDateString('en-US', {

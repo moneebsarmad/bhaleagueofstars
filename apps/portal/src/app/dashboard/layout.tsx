@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../providers'
 import { supabase } from '../../lib/supabaseClient'
-import { Tables } from '@/lib/supabase/tables'
 import Sidebar from '../../components/Sidebar'
 import DashboardHeader from '../../components/DashboardHeader'
 import CrestLoader from '../../components/CrestLoader'
@@ -13,6 +12,7 @@ type Role = 'student' | 'parent' | 'staff'
 
 // RBAC roles that map to 'staff' portal access
 const STAFF_ROLES = ['staff', 'super_admin', 'admin', 'house_mentor', 'teacher', 'support_staff']
+const ADMIN_ROLES = ['super_admin', 'admin']
 
 function mapRoleToPortalRole(dbRole: string | null): Role | null {
   if (!dbRole) return null
@@ -80,21 +80,11 @@ export default function DashboardLayout({
 
       if (error) {
         setRole(null)
+        setIsAdmin(false)
       } else {
         const dbRole = data?.role ?? null
         setRole(mapRoleToPortalRole(dbRole))
-      }
-
-      const { data: adminData, error: adminError } = await supabase
-        .from(Tables.admins)
-        .select('id')
-        .eq('auth_user_id', user.id)
-        .maybeSingle()
-
-      if (adminError) {
-        setIsAdmin(false)
-      } else {
-        setIsAdmin(Boolean(adminData))
+        setIsAdmin(dbRole ? ADMIN_ROLES.includes(dbRole) : false)
       }
       setProfileLoading(false)
     }

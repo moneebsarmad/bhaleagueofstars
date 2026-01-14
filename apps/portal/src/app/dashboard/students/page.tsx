@@ -156,9 +156,9 @@ export default function StudentsPage() {
   }
 
   return (
-    <div className="flex gap-6">
+    <div className="flex flex-col lg:flex-row gap-6">
       {/* Student List */}
-      <div className={`${selectedStudent ? 'w-1/2' : 'w-full'} transition-all duration-300`}>
+      <div className={`${selectedStudent ? 'lg:w-1/2' : 'lg:w-full'} w-full transition-all duration-300`}>
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
@@ -286,7 +286,7 @@ export default function StudentsPage() {
 
       {/* Student Detail Panel */}
       {selectedStudent && (
-        <div className="w-1/2 sticky top-24 h-fit">
+        <div className="w-full lg:w-1/2 lg:sticky lg:top-24 h-fit">
           <div className="bg-white rounded-2xl shadow-sm border border-[#c9a227]/10 overflow-hidden">
             {/* Header */}
             <div className="p-6 border-b border-[#1a1a2e]/5">

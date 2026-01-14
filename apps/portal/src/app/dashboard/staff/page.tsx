@@ -852,7 +852,8 @@ export default function StaffPage() {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full regal-table">
+          <div className="overflow-x-auto">
+            <table className="min-w-[720px] w-full regal-table">
             <thead>
               <tr>
                 <th className="text-left py-4 px-4">Staff Member</th>
@@ -1017,7 +1018,8 @@ export default function StaffPage() {
                 })
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
 

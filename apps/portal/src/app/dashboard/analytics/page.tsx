@@ -406,12 +406,12 @@ export default function AnalyticsPage() {
     )
   }
 
-  const renderTopLabel = (props: { x?: number | string; y?: number | string; width?: number | string; value?: number }) => {
+  const renderTopLabel = (props: any) => {
     const toNumber = (input?: number | string) => (typeof input === 'number' ? input : Number(input || 0))
     const x = toNumber(props?.x)
     const y = toNumber(props?.y)
     const width = toNumber(props?.width)
-    const value = typeof props?.value === 'number' ? props.value : 0
+    const value = Number(props?.value ?? 0)
     return (
       <text x={x + width / 2} y={y - 8} textAnchor="middle" fill="#8a7a55" fontSize={11} fontWeight={600}>
         {value.toLocaleString()}

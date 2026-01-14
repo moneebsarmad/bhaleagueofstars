@@ -441,7 +441,7 @@ export async function POST(request: Request) {
       // Build ParsedEvent for stateless analysis (no storage of raw events)
       parsedEvents.push({
         student_id: studentId,
-        student_name: studentName || undefined,
+        student_name: studentNameRaw || undefined,
         grade: grade ?? undefined,
         section: section || undefined,
         event_type: eventType as 'merit' | 'demerit',

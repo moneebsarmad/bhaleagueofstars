@@ -281,13 +281,14 @@ export default function ImplementationHealthPage() {
                 ['Overdue Actions', String(metrics.metrics.outcomeD.overdueActionsCount)],
               ],
             }[key]
+            const safeRows = rows ?? []
             return `
               <div class="card">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                   <strong>${title}</strong>
                   <span class="pill" style="background:${status === 'Green' ? 'rgba(5,84,55,0.1)' : status === 'Yellow' ? 'rgba(201,162,39,0.15)' : 'rgba(145,0,0,0.1)'}; color:${status === 'Green' ? '#055437' : status === 'Yellow' ? '#9a7b1a' : '#910000'};">${status}</span>
                 </div>
-                ${rows.map((row) => `
+                ${safeRows.map((row) => `
                   <div class="metric">
                     <div class="label">${row[0]}</div>
                     <div class="value">${row[1]}</div>

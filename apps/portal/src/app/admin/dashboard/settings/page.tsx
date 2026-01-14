@@ -146,7 +146,7 @@ export default function SettingsPage() {
     setResetting(true)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: `${window.location.origin}/update-password`,
+        redirectTo: `${window.location.origin}/admin/update-password`,
       })
       if (error) {
         alert('Error sending reset email: ' + error.message)

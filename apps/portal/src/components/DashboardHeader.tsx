@@ -6,13 +6,9 @@ import { useAuth } from '../app/providers'
 type DashboardHeaderProps = {
   userName: string
   role: 'student' | 'parent' | 'staff'
-  isAdmin?: boolean
 }
 
-function roleLabel(role: 'student' | 'parent' | 'staff', isAdmin?: boolean) {
-  if (isAdmin) {
-    return 'Admin'
-  }
+function roleLabel(role: 'student' | 'parent' | 'staff') {
   switch (role) {
     case 'student':
       return 'Student'
@@ -35,7 +31,7 @@ function initials(name: string) {
     .slice(0, 2)
 }
 
-export default function DashboardHeader({ userName, role, isAdmin }: DashboardHeaderProps) {
+export default function DashboardHeader({ userName, role }: DashboardHeaderProps) {
   const router = useRouter()
   const { signOut } = useAuth()
 
@@ -67,7 +63,7 @@ export default function DashboardHeader({ userName, role, isAdmin }: DashboardHe
             </div>
             <div>
               <p className="text-sm font-semibold text-[#1a1a2e]">{userName}</p>
-              <p className="text-xs text-[#1a1a2e]/40">{roleLabel(role, isAdmin)}</p>
+              <p className="text-xs text-[#1a1a2e]/40">{roleLabel(role)}</p>
             </div>
           </div>
           <div className="w-px h-8 bg-[#1a1a2e]/10"></div>

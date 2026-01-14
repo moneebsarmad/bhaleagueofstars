@@ -129,12 +129,6 @@ export default function Home() {
             </button>
           </form>
 
-          <div className="auth-forgot">
-            <button type="button" onClick={() => router.push("/reset-password")}>
-              Forgot password?
-            </button>
-          </div>
-
           <div className="auth-footer">
             <span className="auth-dot"></span>
             {schoolConfig.schoolName}

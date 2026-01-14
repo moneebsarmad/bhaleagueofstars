@@ -7,11 +7,13 @@ import { supabase } from '../../lib/supabaseClient'
 import Sidebar from '../../components/Sidebar'
 import DashboardHeader from '../../components/DashboardHeader'
 import CrestLoader from '../../components/CrestLoader'
+import AnnouncementsPopup from '@/components/admin/AnnouncementsPopup'
 
 type Role = 'student' | 'parent' | 'staff'
 
 // RBAC roles that map to 'staff' portal access
 const STAFF_ROLES = ['staff', 'super_admin', 'admin', 'house_mentor', 'teacher', 'support_staff']
+const ADMIN_ROLES = ['super_admin', 'admin']
 
 function mapRoleToPortalRole(dbRole: string | null): Role | null {
   if (!dbRole) return null
@@ -58,6 +60,7 @@ export default function DashboardLayout({
   const [role, setRole] = useState<Role | null>(null)
   const [profileLoading, setProfileLoading] = useState(true)
   const [staffName, setStaffName] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -78,8 +81,11 @@ export default function DashboardLayout({
 
       if (error) {
         setRole(null)
+        setIsAdmin(false)
       } else {
-        setRole(mapRoleToPortalRole(data?.role ?? null))
+        const dbRole = data?.role ?? null
+        setRole(mapRoleToPortalRole(dbRole))
+        setIsAdmin(dbRole ? ADMIN_ROLES.includes(dbRole) : false)
       }
       setProfileLoading(false)
     }
@@ -148,7 +154,8 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#faf9f7] pattern-overlay">
-      <Sidebar role={role} portalLabel={portalLabel(role)} />
+      <Sidebar role={role} portalLabel={portalLabel(role)} showAdmin={isAdmin} />
+      {role === 'staff' && isAdmin ? <AnnouncementsPopup /> : null}
 
       {/* Main Content */}
       <div className="ml-72">

@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import CrestLoader from '@/components/CrestLoader'
+import { AccessDenied, RequireRole } from '@/components/PermissionGate'
+import { ROLES } from '@/lib/permissions'
 import { getHouseNames } from '@/lib/school.config'
 import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
@@ -135,7 +137,8 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div>
+    <RequireRole roles={ROLES.SUPER_ADMIN} fallback={<AccessDenied message="Super admin access required." />}>
+      <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Announcements
@@ -349,6 +352,7 @@ export default function AnnouncementsPage() {
           ))
         )}
       </div>
-    </div>
+      </div>
+    </RequireRole>
   )
 }

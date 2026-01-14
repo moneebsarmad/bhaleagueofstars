@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
+import { AccessDenied, RequireStaff } from '@/components/PermissionGate'
 import { useSessionStorageState } from '@/hooks/useSessionStorageState'
 
 type Student = {
@@ -146,7 +147,8 @@ export default function SearchPage() {
   }
 
   return (
-    <div>
+    <RequireStaff fallback={<AccessDenied message="Staff access required." />}>
+      <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2" style={{ fontFamily: 'var(--font-playfair), Georgia, serif' }}>
           Student & Staff Search
@@ -273,6 +275,7 @@ export default function SearchPage() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </RequireStaff>
   )
 }

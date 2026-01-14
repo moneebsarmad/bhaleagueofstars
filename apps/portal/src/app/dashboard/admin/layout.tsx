@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../providers'
 import { supabase } from '@/lib/supabaseClient'
-import { Tables } from '@/lib/supabase/tables'
 import CrestLoader from '@/components/CrestLoader'
 
 export default function AdminLayout({
@@ -16,6 +15,7 @@ export default function AdminLayout({
   const { user, loading } = useAuth()
   const [checking, setChecking] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const adminRoles = ['admin', 'super_admin']
 
   useEffect(() => {
     if (loading) return
@@ -26,13 +26,9 @@ export default function AdminLayout({
     }
 
     const checkAdmin = async () => {
-      const { data, error } = await supabase
-        .from(Tables.admins)
-        .select('id')
-        .eq('auth_user_id', user.id)
-        .maybeSingle()
+      const { data, error } = await supabase.rpc('get_user_role', { user_id: user.id })
 
-      if (error || !data) {
+      if (error || !data || !adminRoles.includes(String(data))) {
         setIsAdmin(false)
         setChecking(false)
         router.replace('/dashboard')

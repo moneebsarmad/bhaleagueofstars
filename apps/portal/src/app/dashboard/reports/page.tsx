@@ -545,7 +545,7 @@ export default function ReportsPage() {
         const housePoints: Record<string, number> = {}
 
         filtered.forEach((m) => {
-          const student = m.student_name || ''
+          const student = String(m.student_name ?? '').trim()
           if (student) {
             const key = `${student}|${m.grade || ''}|${m.section || ''}`
             if (!studentPoints[key]) {

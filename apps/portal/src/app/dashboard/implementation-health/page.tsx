@@ -388,11 +388,13 @@ export default function ImplementationHealthPage() {
             label: 'Participation Rate',
             value: formatPercent(safeMetrics.metrics.outcomeA.participationRate),
             visual: <ProgressBar value={(safeMetrics.metrics.outcomeA.participationRate ?? 0) * 100} />,
+            onClick: undefined,
           },
           {
             label: 'Avg Active Days',
             value: formatNumber(safeMetrics.metrics.outcomeA.avgActiveDays),
             visual: <span className="text-xs text-[#1a1a2e]/40">days</span>,
+            onClick: undefined,
           },
         ],
       },
@@ -408,11 +410,13 @@ export default function ImplementationHealthPage() {
             label: 'Huddles (Last 4)',
             value: `${safeMetrics.metrics.outcomeB.huddlesCount}/4`,
             visual: <DotStrip filled={safeMetrics.metrics.outcomeB.huddlesCount} />,
+            onClick: undefined,
           },
           {
             label: 'Coverage Gap',
             value: formatPercent(safeMetrics.metrics.outcomeB.coverageGap),
             visual: <ProgressBar value={(safeMetrics.metrics.outcomeB.coverageGap ?? 0) * 100} />,
+            onClick: undefined,
           },
         ],
       },
@@ -438,6 +442,7 @@ export default function ImplementationHealthPage() {
                 {safeMetrics.metrics.outcomeC.rosterIssuesCount} issues
               </span>
             ),
+            onClick: undefined,
           },
         ],
       },
@@ -453,6 +458,7 @@ export default function ImplementationHealthPage() {
             label: 'Decisions Logged (Last 4)',
             value: `${safeMetrics.metrics.outcomeD.decisionsCount}/4`,
             visual: <DotStrip filled={safeMetrics.metrics.outcomeD.decisionsCount} />,
+            onClick: undefined,
           },
           {
             label: 'Overdue Actions',
@@ -462,6 +468,7 @@ export default function ImplementationHealthPage() {
                 {safeMetrics.metrics.outcomeD.overdueActionsCount} overdue
               </span>
             ),
+            onClick: undefined,
           },
         ],
       },

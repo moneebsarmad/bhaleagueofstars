@@ -262,7 +262,7 @@ export default function ImplementationHealthPage() {
               B: 'Outcome B — Consistency',
               C: 'Outcome C — Governance',
               D: 'Outcome D — Insight & Action'
-            }[key]
+            }[key] || []
             const rows = {
               A: [
                 ['Participation Rate', formatPercent(metrics.metrics.outcomeA.participationRate)],

@@ -1,3 +1,9 @@
+## Deprecated
+
+The unified portal app (`apps/portal`) now contains all admin functionality. This legacy app is kept only for reference and should not be deployed.
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

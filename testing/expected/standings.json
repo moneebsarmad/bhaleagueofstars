@@ -1,0 +1,24 @@
+{
+  "tieBreaking": "Sort by points desc, then student_name asc, then house asc.",
+  "houseStandings": [
+    { "house": "House of Abu Bakr", "total_points": 70 },
+    { "house": "House of Umar", "total_points": 45 },
+    { "house": "House of Khadijah", "total_points": 15 },
+    { "house": "House of Aishah", "total_points": 0 }
+  ],
+  "topStudentsPerHouse": [
+    { "house": "House of Abu Bakr", "student_name": "Ali Hassan", "total_points": 20 },
+    { "house": "House of Abu Bakr", "student_name": "Fatima Noor", "total_points": 20 },
+    { "house": "House of Umar", "student_name": "Umar Khalid", "total_points": 40 },
+    { "house": "House of Khadijah", "student_name": "Khadija Saleh", "total_points": 15 }
+  ],
+  "adminOverview": {
+    "total_points": 130,
+    "houses": [
+      { "house": "House of Abu Bakr", "points": 70 },
+      { "house": "House of Umar", "points": 45 },
+      { "house": "House of Khadijah", "points": 15 },
+      { "house": "House of Aishah", "points": 0 }
+    ]
+  }
+}

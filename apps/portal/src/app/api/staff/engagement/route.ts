@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { requireRole, RoleSets } from '@/lib/apiAuth'
 import { getSchoolDays } from '@/lib/schoolDays'
 import { canonicalHouseName } from '@/lib/school.config'
 
@@ -130,11 +131,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing date range.' }, { status: 400 })
   }
 
-  const supabase = await createSupabaseServerClient()
-  const { data: authData } = await supabase.auth.getUser()
-  if (!authData.user) {
-    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
+  const auth = await requireRole(RoleSets.admin)
+  if (auth.error || !auth.supabase) {
+    return auth.error
   }
+  const supabase = auth.supabase
 
   if (detail === 'months') {
     const monthSet = new Set<string>()

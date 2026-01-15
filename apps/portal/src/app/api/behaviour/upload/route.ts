@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 export const runtime = 'nodejs'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { requireRole, RoleSets } from '@/lib/apiAuth'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { analyzeAndStoreInsights, type ParsedEvent } from '@/backend/services/behaviourAnalyzer'
 
@@ -275,13 +275,11 @@ const normaliseSeverity = (value?: string) => {
 
 export async function POST(request: Request) {
   try {
-    // Authentication check
-    const authClient = await createSupabaseServerClient()
-    const { data: authData } = await authClient.auth.getUser()
-    if (!authData?.user?.id) {
-      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 })
+    const auth = await requireRole(RoleSets.superAdmin)
+    if (auth.error || !auth.user) {
+      return auth.error
     }
-    const uploadedBy = authData.user.id
+    const uploadedBy = auth.user.id
 
     const supabaseAdmin = getSupabaseAdmin()
     const formData = await request.formData()

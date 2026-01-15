@@ -89,7 +89,6 @@ export default function AddPointsPage() {
   const [houseCompetitionHouse, setHouseCompetitionHouse] = useState('')
   const [houseCompetitionNotes, setHouseCompetitionNotes] = useState('')
   const [eventDate, setEventDate] = useState(() => new Date().toISOString().split('T')[0])
-  const [staffName, setStaffName] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -97,20 +96,6 @@ export default function AddPointsPage() {
   const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const draftCategoryIdRef = useRef<string | null>(null)
-
-  const formatStaffNameFromEmail = (email: string) => {
-    const localPart = email.split('@')[0] || ''
-    const cleaned = localPart
-      .replace(/[._-]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-    if (!cleaned) return ''
-    return cleaned
-      .split(' ')
-      .map((part) => part ? part[0].toUpperCase() + part.slice(1).toLowerCase() : '')
-      .join(' ')
-      .trim()
-  }
 
   // Bulk selection filters
   const [filterGrade, setFilterGrade] = useState<string>('')
@@ -126,7 +111,6 @@ export default function AddPointsPage() {
 
   useEffect(() => {
     fetchData()
-    fetchStaffName()
   }, [user])
 
   useEffect(() => {
@@ -212,56 +196,6 @@ export default function AddPointsPage() {
     filterSection,
     filterHouse,
   ])
-
-  const fetchStaffName = async () => {
-    try {
-      const { data: authData } = await supabase.auth.getUser()
-      const authUser = authData.user ?? user
-      const authEmail = authUser?.email ?? user?.email ?? ''
-      if (!authEmail) {
-        const fallbackId = authUser?.id ? `Staff ${authUser.id.slice(0, 8)}` : ''
-        setStaffName(fallbackId)
-        return
-      }
-
-      const { data } = await supabase
-        .from('staff')
-        .select('staff_name')
-        .ilike('email', authEmail)
-        .maybeSingle()
-
-      const staffValue = String(data?.staff_name ?? '').trim()
-      if (staffValue) {
-        setStaffName(staffValue)
-        return
-      }
-
-      if (authUser?.id) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, name, staff_name')
-          .eq('id', authUser.id)
-          .maybeSingle()
-
-        const profileValue = String(profile?.full_name ?? profile?.name ?? profile?.staff_name ?? '').trim()
-        if (profileValue) {
-          setStaffName(profileValue)
-          return
-        }
-      }
-
-      const metadataValue = String(authUser?.user_metadata?.full_name ?? authUser?.user_metadata?.name ?? '').trim()
-      if (metadataValue) {
-        setStaffName(metadataValue)
-        return
-      }
-
-      const derived = formatStaffNameFromEmail(authEmail)
-      setStaffName(derived)
-    } catch {
-      setStaffName('')
-    }
-  }
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -349,27 +283,9 @@ export default function AddPointsPage() {
 
   const handleSubmit = async () => {
     if (!isHouseCompetition && (selectedStudents.length === 0 || !selectedCategory)) return
-    const { data: authData } = await supabase.auth.getUser()
-    const authUser = authData.user ?? user
-    const authEmail = authUser?.email ?? user?.email ?? ''
-    const authMetadataName = String(authUser?.user_metadata?.full_name ?? authUser?.user_metadata?.name ?? '').trim()
-    const idFallback = authUser?.id ? `Staff ${authUser.id.slice(0, 8)}` : ''
-    const resolvedStaffName =
-      staffName ||
-      authMetadataName ||
-      formatStaffNameFromEmail(authEmail) ||
-      authEmail ||
-      idFallback ||
-      'Staff Member'
-    if (!resolvedStaffName) {
-      showToast('Your staff name is not set. Please contact an admin.', 'error', 5000)
-      return
-    }
-
     setIsSubmitting(true)
     showToast('Submitting points...', 'info', 4000)
     try {
-      const now = new Date().toISOString()
       if (isHouseCompetition) {
         if (!isSuperAdmin) {
           showToast('Only super admins can award house competition points.', 'error', 5000)
@@ -382,24 +298,21 @@ export default function AddPointsPage() {
           return
         }
 
-        const meritEntry = {
-          timestamp: now,
-          date_of_event: eventDate || new Date().toISOString().split('T')[0],
-          student_name: '',
-          grade: null,
-          section: null,
-          house: canonicalHouseName(houseCompetitionHouse)?.trim() || houseCompetitionHouse?.trim(),
-          r: HOUSE_COMPETITION_R,
-          subcategory: HOUSE_COMPETITION_R,
-          points: parsedPoints,
-          notes: houseCompetitionNotes,
-          staff_name: resolvedStaffName,
-        }
+        const response = await fetch('/api/points/award', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: 'house_competition',
+            house: canonicalHouseName(houseCompetitionHouse)?.trim() || houseCompetitionHouse?.trim(),
+            points: parsedPoints,
+            notes: houseCompetitionNotes,
+            eventDate,
+          }),
+        })
 
-        const { error } = await supabase.from('merit_log').insert([meritEntry])
-        if (error) {
-          const detail = error.details ? ` (${error.details})` : ''
-          showToast(`Failed to add house points${detail}`, 'error', 5000)
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}))
+          showToast(payload.error || 'Failed to add house points.', 'error', 5000)
           return
         }
 
@@ -413,37 +326,26 @@ export default function AddPointsPage() {
         return
       }
 
-      const errors: { student: Student; message: string }[] = []
+      const response = await fetch('/api/points/award', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'students',
+          categoryId: selectedCategory?.id,
+          students: selectedStudents.map((student) => ({
+            name: student.name,
+            grade: student.grade,
+            section: student.section,
+            house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
+          })),
+          notes,
+          eventDate,
+        }),
+      })
 
-      for (const student of selectedStudents) {
-        const meritEntry = {
-          timestamp: now,
-          date_of_event: eventDate || new Date().toISOString().split('T')[0],
-          student_name: student.name,
-          grade: student.grade,
-          section: student.section,
-          house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
-          r: selectedR,
-          subcategory: selectedCategory?.subcategory,
-          points: selectedCategory?.points,
-          notes: notes,
-          staff_name: resolvedStaffName,
-        }
-
-        const { error } = await supabase.from('merit_log').insert([meritEntry])
-        if (error) {
-          const detail = error.details ? ` (${error.details})` : ''
-          errors.push({ student, message: `${error.message}${detail}` })
-        }
-      }
-
-      if (errors.length > 0) {
-        console.error('Error adding merit:', errors)
-        showToast(
-          `Failed for ${errors.length} student${errors.length === 1 ? '' : 's'} — ${errors[0].student.name}: ${errors[0].message}`,
-          'error',
-          5000
-        )
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        showToast(payload.error || 'Failed to add points.', 'error', 5000)
         return
       }
 

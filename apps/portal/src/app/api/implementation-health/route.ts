@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { requireRole, RoleSets } from '@/lib/apiAuth'
 
 const MIN_NOTES_CHARS = 10
 const CYCLE_LENGTH_DAYS = 14
@@ -90,11 +90,11 @@ export async function GET(request: Request) {
   const section = searchParams.get('section') || ''
   const staff = searchParams.get('staff') || ''
 
-  const supabase = await createSupabaseServerClient()
-  const { data: authData } = await supabase.auth.getUser()
-  if (!authData.user) {
-    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
+  const auth = await requireRole(RoleSets.superAdmin)
+  if (auth.error || !auth.supabase) {
+    return auth.error
   }
+  const supabase = auth.supabase
 
   if (actionMenu) {
     const { data, error } = await supabase
@@ -329,11 +329,11 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient()
-  const { data: authData } = await supabase.auth.getUser()
-  if (!authData.user) {
-    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
+  const auth = await requireRole(RoleSets.superAdmin)
+  if (auth.error || !auth.supabase) {
+    return auth.error
   }
+  const supabase = auth.supabase
 
   const body = await request.json()
   const type = body?.type

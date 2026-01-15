@@ -758,7 +758,7 @@ export default function ReportsPage() {
             const entryMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
             if (entryMonth !== monthKey) return
           }
-          const staff = normalizeStaff(m.staff_name || '')
+          const staff = normalizeStaff(String(m.staff_name ?? ''))
           if (!staff) return
           if (!(staff in staffPoints)) {
             staffPoints[staff] = 0

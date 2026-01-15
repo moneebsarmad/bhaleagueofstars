@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import { useAuth } from '../../providers'
 import CrestLoader from '../../../components/CrestLoader'
-import { getHouseColors, canonicalHouseName } from '@/lib/school.config'
+import { getHouseColors, canonicalHouseName, getHouseNames } from '@/lib/school.config'
+import { useUserRole } from '../../../hooks/usePermissions'
 
 interface Student {
   id: string
@@ -23,6 +24,7 @@ interface Category {
 
 const houseColors = getHouseColors()
 const DRAFT_STORAGE_KEY = 'portal:add-points:draft'
+const HOUSE_COMPETITION_R = 'House Competition'
 
 function readDraft(): string | null {
   if (typeof window === 'undefined') return null
@@ -74,6 +76,8 @@ function getInitials(name: string): string {
 
 export default function AddPointsPage() {
   const { user } = useAuth()
+  const { role } = useUserRole()
+  const isSuperAdmin = role === 'super_admin'
   const [students, setStudents] = useState<Student[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [searchText, setSearchText] = useState('')
@@ -81,11 +85,15 @@ export default function AddPointsPage() {
   const [selectedR, setSelectedR] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [notes, setNotes] = useState('')
+  const [houseCompetitionPoints, setHouseCompetitionPoints] = useState('')
+  const [houseCompetitionHouse, setHouseCompetitionHouse] = useState('')
+  const [houseCompetitionNotes, setHouseCompetitionNotes] = useState('')
   const [eventDate, setEventDate] = useState(() => new Date().toISOString().split('T')[0])
   const [staffName, setStaffName] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
   const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const draftCategoryIdRef = useRef<string | null>(null)
@@ -108,6 +116,13 @@ export default function AddPointsPage() {
   const [filterGrade, setFilterGrade] = useState<string>('')
   const [filterSection, setFilterSection] = useState<string>('')
   const [filterHouse, setFilterHouse] = useState<string>('')
+  const houseOptions = getHouseNames()
+  const isHouseCompetition = selectedR === HOUSE_COMPETITION_R
+  const canSubmitHouseCompetition =
+    isHouseCompetition &&
+    isSuperAdmin &&
+    Boolean(houseCompetitionHouse) &&
+    Number(houseCompetitionPoints) > 0
 
   useEffect(() => {
     fetchData()
@@ -124,6 +139,9 @@ export default function AddPointsPage() {
         selectedR?: string | null
         selectedCategoryId?: string | null
         notes?: string
+        houseCompetitionPoints?: string
+        houseCompetitionHouse?: string
+        houseCompetitionNotes?: string
         eventDate?: string
         searchText?: string
         filterGrade?: string
@@ -136,6 +154,9 @@ export default function AddPointsPage() {
       }
       setSelectedR(draft.selectedR ?? null)
       setNotes(draft.notes ?? '')
+      setHouseCompetitionPoints(draft.houseCompetitionPoints ?? '')
+      setHouseCompetitionHouse(draft.houseCompetitionHouse ?? '')
+      setHouseCompetitionNotes(draft.houseCompetitionNotes ?? '')
       setEventDate(draft.eventDate ?? new Date().toISOString().split('T')[0])
       setSearchText(draft.searchText ?? '')
       setFilterGrade(draft.filterGrade ?? '')
@@ -167,6 +188,9 @@ export default function AddPointsPage() {
       selectedR,
       selectedCategoryId: selectedCategory?.id ?? null,
       notes,
+      houseCompetitionPoints,
+      houseCompetitionHouse,
+      houseCompetitionNotes,
       eventDate,
       searchText,
       filterGrade,
@@ -179,6 +203,9 @@ export default function AddPointsPage() {
     selectedR,
     selectedCategory,
     notes,
+    houseCompetitionPoints,
+    houseCompetitionHouse,
+    houseCompetitionNotes,
     eventDate,
     searchText,
     filterGrade,
@@ -321,7 +348,7 @@ export default function AddPointsPage() {
   }
 
   const handleSubmit = async () => {
-    if (selectedStudents.length === 0 || !selectedCategory) return
+    if (!isHouseCompetition && (selectedStudents.length === 0 || !selectedCategory)) return
     const { data: authData } = await supabase.auth.getUser()
     const authUser = authData.user ?? user
     const authEmail = authUser?.email ?? user?.email ?? ''
@@ -343,6 +370,49 @@ export default function AddPointsPage() {
     showToast('Submitting points...', 'info', 4000)
     try {
       const now = new Date().toISOString()
+      if (isHouseCompetition) {
+        if (!isSuperAdmin) {
+          showToast('Only super admins can award house competition points.', 'error', 5000)
+          return
+        }
+
+        const parsedPoints = Number(houseCompetitionPoints)
+        if (!houseCompetitionHouse || !Number.isFinite(parsedPoints) || parsedPoints <= 0) {
+          showToast('Enter points and select a house.', 'error', 5000)
+          return
+        }
+
+        const meritEntry = {
+          timestamp: now,
+          date_of_event: eventDate || new Date().toISOString().split('T')[0],
+          student_name: '',
+          grade: null,
+          section: null,
+          house: canonicalHouseName(houseCompetitionHouse)?.trim() || houseCompetitionHouse?.trim(),
+          r: HOUSE_COMPETITION_R,
+          subcategory: HOUSE_COMPETITION_R,
+          points: parsedPoints,
+          notes: houseCompetitionNotes,
+          staff_name: resolvedStaffName,
+        }
+
+        const { error } = await supabase.from('merit_log').insert([meritEntry])
+        if (error) {
+          const detail = error.details ? ` (${error.details})` : ''
+          showToast(`Failed to add house points${detail}`, 'error', 5000)
+          return
+        }
+
+        setSuccessMessage(`Points awarded to ${canonicalHouseName(houseCompetitionHouse) || 'selected house'}!`)
+        setShowSuccess(true)
+        showToast('Points submitted!', 'success')
+        setTimeout(() => {
+          setShowSuccess(false)
+          resetForm()
+        }, 2000)
+        return
+      }
+
       const errors: { student: Student; message: string }[] = []
 
       for (const student of selectedStudents) {
@@ -354,8 +424,8 @@ export default function AddPointsPage() {
           section: student.section,
           house: canonicalHouseName(student.house)?.trim() || student.house?.trim(),
           r: selectedR,
-          subcategory: selectedCategory.subcategory,
-          points: selectedCategory.points,
+          subcategory: selectedCategory?.subcategory,
+          points: selectedCategory?.points,
           notes: notes,
           staff_name: resolvedStaffName,
         }
@@ -377,6 +447,9 @@ export default function AddPointsPage() {
         return
       }
 
+      setSuccessMessage(
+        `Points awarded to ${selectedStudents.length || 'selected'} student${selectedStudents.length === 1 ? '' : 's'}!`
+      )
       setShowSuccess(true)
       showToast('Points submitted!', 'success')
       setTimeout(() => {
@@ -396,6 +469,9 @@ export default function AddPointsPage() {
     setSelectedR(null)
     setSelectedCategory(null)
     setNotes('')
+    setHouseCompetitionPoints('')
+    setHouseCompetitionHouse('')
+    setHouseCompetitionNotes('')
     setEventDate(new Date().toISOString().split('T')[0])
     setSearchText('')
     clearDraft()
@@ -439,7 +515,7 @@ export default function AddPointsPage() {
             </svg>
           </div>
           <span className="font-medium">
-            Points awarded to {selectedStudents.length || 'selected'} student{selectedStudents.length === 1 ? '' : 's'}!
+            {successMessage || 'Points submitted!'}
           </span>
         </div>
       )}
@@ -658,11 +734,38 @@ export default function AddPointsPage() {
               </button>
             )
           })}
+          {isSuperAdmin && (
+            <button
+              onClick={() => {
+                setSelectedR(HOUSE_COMPETITION_R)
+                setSelectedCategory(null)
+                setSelectedStudents([])
+              }}
+              className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
+                selectedR === HOUSE_COMPETITION_R
+                  ? 'border-[#c9a227] bg-[#c9a227]/5'
+                  : 'border-[#1a1a2e]/10 hover:border-[#c9a227]/30'
+              }`}
+            >
+              <span className="text-2xl">🏆</span>
+              <div className="text-left flex-1">
+                <p className="font-medium text-[#1a1a2e]">House Competition</p>
+                <p className="text-xs text-[#1a1a2e]/50">Award points to a full house</p>
+              </div>
+              {selectedR === HOUSE_COMPETITION_R && (
+                <div className="w-6 h-6 rounded-full bg-[#c9a227] flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Step 3: Select Reason */}
-      {selectedR && (
+      {selectedR && !isHouseCompetition && (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
           <div className="flex items-center gap-3 mb-5">
             <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">3</span>
@@ -697,8 +800,56 @@ export default function AddPointsPage() {
         </div>
       )}
 
+      {isHouseCompetition && (
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">3</span>
+            <h2 className="text-lg font-semibold text-[#1a1a2e]">House Competition Details</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-[#1a1a2e]/70 mb-2">Points</label>
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={houseCompetitionPoints}
+                onChange={(e) => setHouseCompetitionPoints(e.target.value)}
+                placeholder="Enter points"
+                className="w-full px-4 py-3 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#1a1a2e]/70 mb-2">House</label>
+              <select
+                value={houseCompetitionHouse}
+                onChange={(e) => setHouseCompetitionHouse(e.target.value)}
+                className="w-full px-4 py-3 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none transition-all bg-white"
+              >
+                <option value="">Select house</option>
+                {houseOptions.map((house) => (
+                  <option key={house} value={house}>{house}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#1a1a2e]/70 mb-2">Competition Note</label>
+            <textarea
+              placeholder="Describe the competition..."
+              value={houseCompetitionNotes}
+              onChange={(e) => setHouseCompetitionNotes(e.target.value)}
+              className="w-full px-4 py-3 border border-[#1a1a2e]/10 rounded-xl focus:ring-2 focus:ring-[#c9a227]/30 focus:border-[#c9a227] outline-none resize-none transition-all"
+              rows={3}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Step 4: Date of Event */}
-      {selectedCategory && (
+      {(selectedCategory || isHouseCompetition) && (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
           <div className="flex items-center gap-3 mb-5">
             <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">4</span>
@@ -715,7 +866,7 @@ export default function AddPointsPage() {
       )}
 
       {/* Step 5: Notes */}
-      {selectedCategory && (
+      {selectedCategory && !isHouseCompetition && (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c9a227]/10 mb-6">
           <div className="flex items-center gap-3 mb-5">
             <span className="w-8 h-8 bg-gradient-to-br from-[#c9a227] to-[#9a7b1a] text-white rounded-full flex items-center justify-center font-bold text-sm">5</span>
@@ -733,10 +884,10 @@ export default function AddPointsPage() {
       )}
 
       {/* Submit Button */}
-      {selectedStudents.length > 0 && selectedCategory && (
+      {((selectedStudents.length > 0 && selectedCategory) || canSubmitHouseCompetition) && (
         <button
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || (isHouseCompetition && !canSubmitHouseCompetition)}
           className="w-full bg-gradient-to-r from-[#c9a227] to-[#9a7b1a] text-white py-4 px-6 rounded-xl font-medium hover:from-[#9a7b1a] hover:to-[#7a5f14] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
         >
           {isSubmitting ? (
@@ -747,7 +898,10 @@ export default function AddPointsPage() {
           ) : (
             <>
               <span>
-                Award {selectedCategory.points} points to {selectedStudents.length} student{selectedStudents.length === 1 ? '' : 's'}
+                {isHouseCompetition
+                  ? `Award ${houseCompetitionPoints || 0} points to ${canonicalHouseName(houseCompetitionHouse) || 'house'}`
+                  : `Award ${selectedCategory?.points} points to ${selectedStudents.length} student${selectedStudents.length === 1 ? '' : 's'}`
+                }
               </span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

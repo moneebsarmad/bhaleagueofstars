@@ -7,7 +7,6 @@ import { supabase } from '../../lib/supabaseClient'
 import Sidebar from '../../components/Sidebar'
 import DashboardHeader from '../../components/DashboardHeader'
 import CrestLoader from '../../components/CrestLoader'
-import AnnouncementsPopup from '@/components/admin/AnnouncementsPopup'
 import MobileNav from '@/components/MobileNav'
 
 type Role = 'student' | 'parent' | 'staff'
@@ -166,7 +165,6 @@ export default function DashboardLayout({
         portalLabel={portalLabel(role)}
         showAdmin={isAdmin}
       />
-      {role === 'staff' && isAdmin ? <AnnouncementsPopup /> : null}
 
       {/* Main Content */}
       <div className="md:ml-72">

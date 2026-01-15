@@ -1,6 +1,5 @@
 import Sidebar from '@/components/Sidebar'
 import DashboardHeader from '@/components/DashboardHeader'
-import AnnouncementsPopup from '@/components/AnnouncementsPopup'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { Tables } from '@/lib/supabase/tables'
 import { redirect } from 'next/navigation'
@@ -32,7 +31,6 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-[#faf9f7] pattern-overlay">
       <Sidebar />
-      <AnnouncementsPopup />
 
       {/* Main Content */}
       <div className="ml-72">

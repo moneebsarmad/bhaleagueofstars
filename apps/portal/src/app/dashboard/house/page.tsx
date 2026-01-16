@@ -22,19 +22,20 @@ const houseConfig = getHouseConfigRecord()
 
 export default function MyHousePage() {
   const { user } = useAuth()
+  const userId = user?.id ?? null
   const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [standings, setStandings] = useState<HouseStanding[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!user) return
+    if (!userId) return
 
     const loadData = async () => {
       setLoading(true)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle()
 
       const name = String(data?.student_name ?? data?.full_name ?? data?.name ?? '').trim()
@@ -58,7 +59,7 @@ export default function MyHousePage() {
     }
 
     loadData()
-  }, [user])
+  }, [userId])
 
   const canonical = profile ? canonicalHouseName(profile.house) : ''
   const houseInfo = houseConfig[canonical]

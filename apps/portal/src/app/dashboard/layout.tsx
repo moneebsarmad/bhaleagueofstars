@@ -69,15 +69,17 @@ export default function DashboardLayout({
     }
   }, [loading, user, router])
 
+  const userId = user?.id ?? null
+
   useEffect(() => {
-    if (!user) return
+    if (!userId) return
 
     const loadProfile = async () => {
       setProfileLoading(true)
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle()
 
       if (error) {
@@ -92,7 +94,7 @@ export default function DashboardLayout({
     }
 
     loadProfile()
-  }, [user])
+  }, [userId])
 
   useEffect(() => {
     const email = user?.email ?? ''
@@ -113,7 +115,7 @@ export default function DashboardLayout({
     }
 
     loadStaffName()
-  }, [user])
+  }, [user?.email])
 
   if (loading) {
     return (

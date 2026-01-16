@@ -77,6 +77,7 @@ function ToggleRow({
 
 export default function SettingsPage() {
   const { user } = useAuth()
+  const userId = user?.id ?? null
   const [role, setRole] = useState<Role | null>(null)
   const [dbRole, setDbRole] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -85,7 +86,7 @@ export default function SettingsPage() {
   const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
-    if (!user) return
+    if (!userId) return
 
     const loadData = async () => {
       setLoading(true)
@@ -94,7 +95,7 @@ export default function SettingsPage() {
       const { data: profileData } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle()
 
       if (profileData?.role) {
@@ -106,7 +107,7 @@ export default function SettingsPage() {
       const { data: settingsData } = await supabase
         .from('user_settings')
         .select('settings')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle()
 
       if (settingsData?.settings) {
@@ -117,7 +118,7 @@ export default function SettingsPage() {
     }
 
     loadData()
-  }, [user])
+  }, [userId])
 
   const sections = useMemo<SettingsSection[]>(() => {
     if (!role) return []

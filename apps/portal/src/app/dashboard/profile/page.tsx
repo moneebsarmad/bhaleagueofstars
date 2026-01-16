@@ -38,19 +38,20 @@ function getInitials(name: string): string {
 
 export default function MyPointsPage() {
   const { user } = useAuth()
+  const userId = user?.id ?? null
   const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [merits, setMerits] = useState<MeritEntry[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!user) return
+    if (!userId) return
 
     const loadProfile = async () => {
       setLoading(true)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle()
 
       if (error || !data) {
@@ -97,7 +98,7 @@ export default function MyPointsPage() {
     }
 
     loadProfile()
-  }, [user])
+  }, [userId])
 
   const totalPoints = useMemo(
     () => merits.reduce((sum, entry) => sum + entry.points, 0),

@@ -291,12 +291,13 @@ function AdminOverviewDashboard() {
 
 function StaffLeaderboardDashboard() {
   const { user } = useAuth()
+  const userId = user?.id ?? null
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [dataLoading, setDataLoading] = useState(true)
   const [dataError, setDataError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!user) return
+    if (!userId) return
 
     const loadData = async () => {
       setDataLoading(true)
@@ -321,7 +322,7 @@ function StaffLeaderboardDashboard() {
     }
 
     loadData()
-  }, [user])
+  }, [userId])
 
   const houses: HouseData[] = useMemo(() => {
     const totalPoints = leaderboard.reduce((sum, item) => sum + (item.totalPoints ?? 0), 0)

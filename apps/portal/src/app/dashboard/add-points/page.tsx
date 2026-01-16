@@ -76,6 +76,7 @@ function getInitials(name: string): string {
 
 export default function AddPointsPage() {
   const { user } = useAuth()
+  const userId = user?.id ?? null
   const { role } = useUserRole()
   const isSuperAdmin = role === 'super_admin'
   const [students, setStudents] = useState<Student[]>([])
@@ -110,8 +111,9 @@ export default function AddPointsPage() {
     Number(houseCompetitionPoints) > 0
 
   useEffect(() => {
+    if (!userId) return
     fetchData()
-  }, [user])
+  }, [userId])
 
   useEffect(() => {
     if (typeof window === 'undefined') return

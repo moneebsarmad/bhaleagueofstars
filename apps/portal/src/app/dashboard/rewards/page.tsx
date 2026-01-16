@@ -166,6 +166,21 @@ function buildStudentKeyNoSection(name: string, grade: number): string {
   return `${normalizeValue(name)}|${grade}`
 }
 
+function getRowValue(row: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    if (key in row) return row[key]
+  }
+  const normalizedKeys = Object.keys(row).reduce<Record<string, string>>((acc, key) => {
+    acc[key.toLowerCase()] = key
+    return acc
+  }, {})
+  for (const key of keys) {
+    const normalized = normalizedKeys[key.toLowerCase()]
+    if (normalized) return row[normalized]
+  }
+  return undefined
+}
+
 export default function RewardsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [meritEntries, setMeritEntries] = useState<MeritEntry[]>([])
@@ -509,11 +524,16 @@ export default function RewardsPage() {
         return
       }
 
-      const entries: HouseMvpEntry[] = (data || []).map((row: Record<string, unknown>) => ({
-        house: String(row.house ?? ''),
-        studentName: String(row.student_name ?? row.studentName ?? ''),
-        points: Number(row.total_points ?? row.points ?? 0),
-      }))
+      const entries: HouseMvpEntry[] = (data || []).map((row: Record<string, unknown>) => {
+        const houseRaw = getRowValue(row, ['house', 'house_name', 'houseName'])
+        const studentRaw = getRowValue(row, ['student_name', 'student', 'name', 'full_name', 'studentName'])
+        const pointsRaw = getRowValue(row, ['total_points', 'points', 'total', 'totalPoints'])
+        return {
+          house: String(houseRaw ?? ''),
+          studentName: String(studentRaw ?? ''),
+          points: Number(pointsRaw ?? 0),
+        }
+      })
       setHouseMvpLeaders(entries)
     } catch (error) {
       console.error('Error fetching house MVPs:', error)

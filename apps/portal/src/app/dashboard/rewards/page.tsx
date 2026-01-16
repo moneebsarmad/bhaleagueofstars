@@ -43,6 +43,7 @@ interface BadgeLeader {
   gender: string
   studentName: string
   grade: number
+  section?: string
   totalPoints: number
 }
 
@@ -134,6 +135,35 @@ function getWeekKey(date: Date): string {
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
   const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`
+}
+
+function getMonthKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+function getQuarterRange(quarter: 'q1' | 'q2', year = new Date().getFullYear()) {
+  if (quarter === 'q1') {
+    return {
+      start: new Date(year, 0, 6),
+      end: new Date(year, 2, 6, 23, 59, 59, 999),
+    }
+  }
+  return {
+    start: new Date(year, 2, 9),
+    end: new Date(year, 4, 21, 23, 59, 59, 999),
+  }
+}
+
+function normalizeValue(value: string): string {
+  return value.trim().toLowerCase()
+}
+
+function buildStudentKey(name: string, grade: number, section: string): string {
+  return `${normalizeValue(name)}|${grade}|${normalizeValue(section || '')}`
+}
+
+function buildStudentKeyNoSection(name: string, grade: number): string {
+  return `${normalizeValue(name)}|${grade}`
 }
 
 export default function RewardsPage() {
@@ -356,7 +386,6 @@ export default function RewardsPage() {
       const { data, error } = await supabase
         .from('quarterly_badge_leaderboard')
         .select('*')
-        .eq('quarter', selectedQuarter)
         .eq('rank', 1)
 
       if (error) {
@@ -365,14 +394,24 @@ export default function RewardsPage() {
         return
       }
 
-      const leaders: BadgeLeader[] = (data || []).map((row: Record<string, unknown>) => ({
-        quarter: String(row.quarter ?? ''),
-        category: String(row.category ?? ''),
-        gender: String(row.gender ?? ''),
-        studentName: String(row.student_name ?? row.studentName ?? ''),
-        grade: Number(row.grade ?? 0),
-        totalPoints: Number(row.total_points ?? row.totalPoints ?? 0),
-      }))
+      const normalizeQuarter = (value: string) => {
+        const raw = value.toLowerCase().replace(/\s+/g, '')
+        if (raw.startsWith('q1')) return 'q1'
+        if (raw.startsWith('q2')) return 'q2'
+        return raw
+      }
+
+      const leaders: BadgeLeader[] = (data || [])
+        .map((row: Record<string, unknown>) => ({
+          quarter: String(row.quarter ?? ''),
+          category: String(row.category ?? ''),
+          gender: String(row.gender ?? ''),
+          studentName: String(row.student_name ?? row.studentName ?? ''),
+          grade: Number(row.grade ?? 0),
+          section: String(row.section ?? ''),
+          totalPoints: Number(row.total_points ?? row.totalPoints ?? 0),
+        }))
+        .filter((row) => normalizeQuarter(row.quarter) === selectedQuarter)
 
       setBadgeLeaders(leaders)
     } catch (error) {
@@ -512,22 +551,92 @@ export default function RewardsPage() {
   const studentHouseMap = useMemo(() => {
     const map = new Map<string, string>()
     students.forEach((s) => {
-      const key = `${s.name.toLowerCase()}|${s.grade}|${s.section.toLowerCase()}`
+      const key = buildStudentKey(s.name, s.grade, s.section)
       map.set(key, s.house)
     })
     return map
   }, [students])
 
+  const studentMetaMap = useMemo(() => {
+    const map = new Map<string, { gender: string; house: string }>()
+    students.forEach((student) => {
+      const key = buildStudentKey(student.name, student.grade, student.section)
+      map.set(key, { gender: student.gender || '', house: student.house || '' })
+      const noSectionKey = buildStudentKeyNoSection(student.name, student.grade)
+      if (!map.has(noSectionKey)) {
+        map.set(noSectionKey, { gender: student.gender || '', house: student.house || '' })
+      }
+    })
+    return map
+  }, [students])
+
+  const resolveStudentMeta = (name: string, grade: number, section: string) => {
+    const key = buildStudentKey(name, grade, section)
+    const fallbackKey = buildStudentKeyNoSection(name, grade)
+    return studentMetaMap.get(key) || studentMetaMap.get(fallbackKey)
+  }
+
+  const fallbackBadgeLeaders = useMemo(() => {
+    if (!meritEntries.length) return [] as BadgeLeader[]
+    const { start, end } = getQuarterRange(selectedQuarter)
+    const totals = new Map<string, BadgeLeader>()
+
+    meritEntries.forEach((entry) => {
+      if (!entry.category) return
+      if (!entry.timestamp) return
+      const date = new Date(entry.timestamp)
+      if (Number.isNaN(date.getTime())) return
+      if (date < start || date > end) return
+
+      const key = `${entry.category}|${buildStudentKey(entry.studentName, entry.grade, entry.section)}`
+      const meta = resolveStudentMeta(entry.studentName, entry.grade, entry.section)
+      const current = totals.get(key)
+      if (!current) {
+        totals.set(key, {
+          quarter: selectedQuarter,
+          category: entry.category,
+          gender: meta?.gender || '',
+          studentName: entry.studentName,
+          grade: entry.grade,
+          section: entry.section,
+          totalPoints: entry.points,
+        })
+      } else {
+        current.totalPoints += entry.points
+      }
+    })
+
+    return [...totals.values()]
+  }, [meritEntries, selectedQuarter, studentMetaMap])
+
+  const resolvedBadgeLeaders = useMemo(() => {
+    const source = badgeLeaders.length ? badgeLeaders : fallbackBadgeLeaders
+    return source.map((leader) => {
+      const meta = resolveStudentMeta(leader.studentName, leader.grade, leader.section || '')
+      return {
+        ...leader,
+        gender: leader.gender || meta?.gender || '',
+      }
+    })
+  }, [badgeLeaders, fallbackBadgeLeaders, studentMetaMap])
+
   // Hall of Fame - students who reached milestones
   const hallOfFame = useMemo(() => {
     return hallOfFameTiers.map((tier) => {
       const entries = (hallOfFameEntries[tier.view] || []).slice().sort((a, b) => b.totalPoints - a.totalPoints)
-      const males = entries.filter((s) => s.gender?.toLowerCase() === 'm' || s.gender?.toLowerCase() === 'male')
-      const females = entries.filter((s) => s.gender?.toLowerCase() === 'f' || s.gender?.toLowerCase() === 'female')
+      const resolvedEntries = entries.map((entry) => {
+        const meta = resolveStudentMeta(entry.name, entry.grade, entry.section)
+        return {
+          ...entry,
+          gender: entry.gender || meta?.gender || '',
+        }
+      })
+      const males = resolvedEntries.filter((s) => s.gender?.toLowerCase() === 'm' || s.gender?.toLowerCase() === 'male')
+      const females = resolvedEntries.filter((s) => s.gender?.toLowerCase() === 'f' || s.gender?.toLowerCase() === 'female')
 
-      return { ...tier, males, females, total: entries.length }
+      return { ...tier, males, females, total: resolvedEntries.length }
     })
-  }, [hallOfFameEntries])
+  }, [hallOfFameEntries, studentMetaMap])
 
   // Quarterly Badges - top in each category
   const badgeWinners = useMemo(() => {
@@ -543,7 +652,7 @@ export default function RewardsPage() {
     }
 
     return quarterlyBadges.map((badge) => {
-      const categoryLeaders = badgeLeaders.filter((leader) => leader.category === badge.category)
+      const categoryLeaders = resolvedBadgeLeaders.filter((leader) => leader.category === badge.category)
       const topMale = categoryLeaders.find((leader) => ['m', 'male'].includes(leader.gender.toLowerCase()))
       const topFemale = categoryLeaders.find((leader) => ['f', 'female'].includes(leader.gender.toLowerCase()))
 
@@ -553,25 +662,72 @@ export default function RewardsPage() {
         topFemale: toEntry(topFemale),
       }
     })
-  }, [badgeLeaders])
+  }, [resolvedBadgeLeaders])
+
+  const fallbackConsistencyLeaders = useMemo(() => {
+    if (!students.length) return [] as ConsistencyEntry[]
+    const weekKeys = []
+    const date = new Date()
+    for (let i = 0; i < 3; i += 1) {
+      weekKeys.push(getWeekKey(date))
+      date.setDate(date.getDate() - 7)
+    }
+
+    return students
+      .filter((student) => weekKeys.every((key) => (student.weeklyPoints[key] || 0) >= 20))
+      .map((student) => ({
+        studentName: student.name,
+        grade: student.grade,
+        section: student.section,
+      }))
+  }, [students])
 
   // Consistency Crown - 20+ points in each of the past 3 consecutive weeks
   const consistencyCrown = useMemo(() => {
-    return consistencyLeaders.map((entry) => {
-      const key = `${entry.studentName.toLowerCase()}|${entry.grade}|${entry.section.toLowerCase()}`
+    const source = consistencyLeaders.length ? consistencyLeaders : fallbackConsistencyLeaders
+    return source.map((entry) => {
+      const key = buildStudentKey(entry.studentName, entry.grade, entry.section)
       return {
         name: entry.studentName,
         grade: entry.grade,
         house: studentHouseMap.get(key) || '',
       }
     })
-  }, [consistencyLeaders, studentHouseMap])
+  }, [consistencyLeaders, fallbackConsistencyLeaders, studentHouseMap])
+
+  const fallbackRisingStars = useMemo(() => {
+    if (!students.length) return [] as RisingStarEntry[]
+    const now = new Date()
+    const currentKey = getMonthKey(now)
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const lastKey = getMonthKey(lastMonth)
+    const entries: RisingStarEntry[] = []
+
+    students.forEach((student) => {
+      const lastPoints = student.monthlyPoints[lastKey] || 0
+      const currentPoints = student.monthlyPoints[currentKey] || 0
+      const diff = currentPoints - lastPoints
+      if (lastPoints < 30 || diff < 20) return
+      const percentIncrease = (diff / lastPoints) * 100
+      entries.push({
+        studentName: student.name,
+        grade: student.grade,
+        section: student.section,
+        lastMonthPts: lastPoints,
+        currentMonthPts: currentPoints,
+        percentIncrease,
+      })
+    })
+
+    return entries
+  }, [students])
 
   // Rising Star - highest % increase month-over-month
   const risingStars = useMemo(() => {
-    return risingStarLeaders
+    const source = risingStarLeaders.length ? risingStarLeaders : fallbackRisingStars
+    return source
       .map((entry) => {
-        const key = `${entry.studentName.toLowerCase()}|${entry.grade}|${entry.section.toLowerCase()}`
+        const key = buildStudentKey(entry.studentName, entry.grade, entry.section)
         return {
           name: entry.studentName,
           grade: entry.grade,
@@ -582,12 +738,46 @@ export default function RewardsPage() {
         }
       })
       .sort((a, b) => b.percentIncrease - a.percentIncrease)
-  }, [risingStarLeaders, studentHouseMap])
+  }, [risingStarLeaders, fallbackRisingStars, studentHouseMap])
+
+  const fallbackHouseMvps = useMemo(() => {
+    if (!meritEntries.length) return [] as HouseMvpEntry[]
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+    const totals = new Map<string, HouseMvpEntry>()
+
+    meritEntries.forEach((entry) => {
+      if (!entry.house) return
+      if (!entry.timestamp) return
+      const date = new Date(entry.timestamp)
+      if (Number.isNaN(date.getTime())) return
+      if (date < monthStart || date > monthEnd) return
+
+      const key = `${entry.house}|${buildStudentKey(entry.studentName, entry.grade, entry.section)}`
+      const current = totals.get(key)
+      if (!current) {
+        totals.set(key, { house: entry.house, studentName: entry.studentName, points: entry.points })
+      } else {
+        current.points += entry.points
+      }
+    })
+
+    const byHouse = new Map<string, HouseMvpEntry>()
+    totals.forEach((entry) => {
+      const current = byHouse.get(entry.house)
+      if (!current || entry.points > current.points) {
+        byHouse.set(entry.house, entry)
+      }
+    })
+    return [...byHouse.values()]
+  }, [meritEntries])
 
   // House MVPs - top student per house this month
   const houseMVPs = useMemo(() => {
     const houses = ['House of Abū Bakr', 'House of Khadījah', 'House of ʿUmar', 'House of ʿĀʾishah']
-    const leaderMap = new Map(houseMvpLeaders.map((entry) => [entry.house, entry]))
+    const source = houseMvpLeaders.length ? houseMvpLeaders : fallbackHouseMvps
+    const leaderMap = new Map(source.map((entry) => [entry.house, entry]))
     return houses.map((house) => {
       const leader = leaderMap.get(house) || null
       return {
@@ -596,12 +786,46 @@ export default function RewardsPage() {
         points: leader?.points || 0,
       }
     })
-  }, [houseMvpLeaders])
+  }, [houseMvpLeaders, fallbackHouseMvps])
+
+  const fallbackGradeChampions = useMemo(() => {
+    if (!meritEntries.length) return [] as GradeChampionEntry[]
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+    const totals = new Map<string, GradeChampionEntry>()
+
+    meritEntries.forEach((entry) => {
+      if (!entry.grade || !entry.section) return
+      if (!entry.timestamp) return
+      const date = new Date(entry.timestamp)
+      if (Number.isNaN(date.getTime())) return
+      if (date < monthStart || date > monthEnd) return
+
+      const key = `${entry.grade}|${entry.section}`
+      const current = totals.get(key)
+      if (!current) {
+        totals.set(key, { grade: entry.grade, section: entry.section, points: entry.points })
+      } else {
+        current.points += entry.points
+      }
+    })
+
+    const byGrade = new Map<number, GradeChampionEntry>()
+    totals.forEach((entry) => {
+      const current = byGrade.get(entry.grade)
+      if (!current || entry.points > current.points) {
+        byGrade.set(entry.grade, entry)
+      }
+    })
+    return [...byGrade.values()]
+  }, [meritEntries])
 
   // Grade Champions - top section per grade this month
   const gradeChampions = useMemo(() => {
     const grades = [6, 7, 8, 9, 10, 11, 12]
-    const leaderMap = new Map(gradeChampionLeaders.map((entry) => [entry.grade, entry]))
+    const source = gradeChampionLeaders.length ? gradeChampionLeaders : fallbackGradeChampions
+    const leaderMap = new Map(source.map((entry) => [entry.grade, entry]))
     return grades.map((grade) => {
       const leader = leaderMap.get(grade) || null
       return {
@@ -610,7 +834,7 @@ export default function RewardsPage() {
         points: leader?.points || 0,
       }
     })
-  }, [gradeChampionLeaders])
+  }, [gradeChampionLeaders, fallbackGradeChampions])
 
   // Approaching Milestones
   const approachingMilestones = useMemo(() => {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
 import CrestLoader from '../../../components/CrestLoader'
 import { getHouseColors, canonicalHouseName } from '@/lib/school.config'
@@ -42,6 +43,7 @@ function getInitials(name: string): string {
 }
 
 export default function StudentsPage() {
+  const router = useRouter()
   const [students, setStudents] = useState<Student[]>([])
   const [meritEntries, setMeritEntries] = useState<MeritEntry[]>([])
   const [searchText, setSearchText] = useSessionStorageState('portal:students:searchText', '')
@@ -51,6 +53,15 @@ export default function StudentsPage() {
   const [selectedStudent, setSelectedStudent] = useSessionStorageState<Student | null>('portal:students:selectedStudent', null)
   const [selectedStaff, setSelectedStaff] = useSessionStorageState<string | null>('portal:students:selectedStaff', null)
   const [isLoading, setIsLoading] = useState(true)
+
+  const pushAnalyticsFilters = (params: Record<string, string | null | undefined>) => {
+    const searchParams = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) searchParams.set(key, value)
+    })
+    const query = searchParams.toString()
+    router.push(`/dashboard/analytics${query ? `?${query}` : ''}`)
+  }
 
   useEffect(() => {
     fetchData()
@@ -320,8 +331,10 @@ export default function StudentsPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedGrade(String(selectedStudent.grade))
-                        setSelectedSection(selectedStudent.section || null)
+                        pushAnalyticsFilters({
+                          grade: String(selectedStudent.grade),
+                          section: selectedStudent.section || '',
+                        })
                       }}
                       className="text-[#2f0a61] underline underline-offset-2 decoration-[#c9a227] decoration-2 hover:text-[#1a1a2e] transition-colors"
                     >
@@ -330,7 +343,7 @@ export default function StudentsPage() {
                     <span className="text-[#1a1a2e]/20"> • </span>
                     <button
                       type="button"
-                      onClick={() => setSelectedHouse(canonicalHouseName(selectedStudent.house))}
+                      onClick={() => pushAnalyticsFilters({ house: canonicalHouseName(selectedStudent.house) })}
                       className="text-[#2f0a61] underline underline-offset-2 decoration-[#c9a227] decoration-2 hover:text-[#1a1a2e] transition-colors"
                     >
                       {canonicalHouseName(selectedStudent.house)}
@@ -404,7 +417,7 @@ export default function StudentsPage() {
                         </p>
                         <button
                           type="button"
-                          onClick={() => setSelectedStaff(merit.staffName)}
+                          onClick={() => pushAnalyticsFilters({ staff: merit.staffName })}
                           className="text-xs text-[#2f0a61] underline underline-offset-2 decoration-[#c9a227] decoration-2 hover:text-[#1a1a2e] transition-colors"
                         >
                           {merit.staffName}

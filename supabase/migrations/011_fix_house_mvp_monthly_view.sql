@@ -6,7 +6,7 @@ with base as (
     student_name,
     grade,
     section,
-    sum(points)::int as total_points
+    sum(points) as total_points
   from merit_log
   where student_name is not null
     and student_name <> ''
